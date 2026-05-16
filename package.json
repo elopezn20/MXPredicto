@@ -10,7 +10,9 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "seed": "tsx scripts/seed.ts",
+    "sync-results": "tsx scripts/sync-results.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -45,12 +47,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.0",
     "typescript": "^5",
     "vitest": "^4.1.6"
   }

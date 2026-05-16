@@ -4,27 +4,14 @@ _Last updated: 2026-05-16. Spec: `docs/polla-prompt.md`. Launch deadline: 2026-0
 
 ---
 
-## Phase 0 — Setup
+## Phase 0 — Setup ✅ COMPLETE (2026-05-16)
 
-### Done
-- [x] Node 24.15.0 + pnpm 11.1.2 confirmed on PATH
-- [x] Next.js 16.2.6 scaffolded (App Router, TypeScript strict, Tailwind v4, ESLint flat config)
-- [x] `docs/polla-prompt.md` moved from root
-- [x] All runtime deps installed: `@supabase/supabase-js`, `@supabase/ssr`, `next-intl`, `react-hook-form`, `zod`, `@hookform/resolvers`, `date-fns`, `date-fns-tz`, `resend`, shadcn peers (`class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, `tailwindcss-animate`)
-- [x] All dev deps installed: `vitest`, `@vitejs/plugin-react`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `prettier`, `prettier-plugin-tailwindcss`
-- [x] `pnpm-workspace.yaml` — build-script approvals for `sharp`, `unrs-resolver`, `@parcel/watcher`, `@swc/core`
-
-### Remaining (picking up here)
-- [ ] Create folder structure (`app/[locale]/...`, `lib/`, `messages/`, `supabase/`, `scripts/`, `tests/`, `public/flags/`)
-- [ ] Config files: `next.config.ts` (next-intl plugin), `tsconfig.json` (`noUncheckedIndexedAccess`), `vitest.config.ts`, `.prettierrc`, `.env.example`, `.env.local`, ESLint no-console rule
-- [ ] shadcn/ui init + install primitives (button, input, form, label, card, dialog, dropdown-menu, sonner, tabs, table, sheet)
-- [ ] i18n bootstrap: `lib/i18n/routing.ts`, `lib/i18n/request.ts`, `middleware.ts`, `messages/{es,en,ko}.json`
-- [ ] Lib stubs: `lib/utils.ts`, `lib/supabase/{client,server,middleware}.ts`, `lib/email/resend.ts`
-- [ ] Page stubs: `app/[locale]/layout.tsx` (fonts, NextIntlClientProvider), `app/[locale]/page.tsx` (smoke page), route group stubs
-- [ ] `package.json` scripts: add `format`, `test`, `test:watch`
-- [ ] README rewrite (project-specific content)
-- [ ] `git init` + first commit on `main`
-- [ ] Verification: `pnpm dev` (smoke page at /es), `pnpm test`, `pnpm lint`, `pnpm build`
+- Next.js 16.2.6 (App Router, TS strict, Tailwind v4, Turbopack), `pnpm build` ✓
+- All deps installed; shadcn/ui radix-nova + 11 primitives; next-intl v4 (es/en/ko)
+- `proxy.ts` locale routing; `app/globals.css` with §7 palette; Vitest configured
+- `pnpm test` ✓ (2/2), `pnpm lint` ✓ (0 warnings), `pnpm build` ✓, dev server ready
+- Git: 1 commit on `main` (hash `6071d55`)
+- Autonomous decisions: `tailwindcss-animate` → `tw-animate-css` (Tailwind v4 compat); `middleware.ts` → `proxy.ts` (Next.js 16 deprecation); `scripts/` excluded from tsconfig to avoid TS conflicts
 
 ---
 
