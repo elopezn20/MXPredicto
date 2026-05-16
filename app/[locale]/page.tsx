@@ -1,18 +1,10 @@
-import { useTranslations } from "next-intl";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  const t = useTranslations("app");
+interface Props {
+  params: Promise<{ locale: string }>;
+}
 
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <span className="text-5xl">⚽</span>
-        <h1 className="text-4xl font-bold tracking-tight text-primary">
-          {t("name")}
-        </h1>
-        <p className="text-lg text-muted-foreground">{t("tagline")}</p>
-      </div>
-      <p className="text-sm text-muted-foreground">{t("greeting")}</p>
-    </main>
-  );
+export default async function LocaleRootPage({ params }: Props) {
+  const { locale } = await params;
+  redirect(`/${locale}/predictions`);
 }
