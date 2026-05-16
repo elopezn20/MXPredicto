@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  /* §7 palette — FIFA World Cup 2026 identity */
+  --color-primary: #1f2a5c;
+  --color-primary-foreground: #f8f8f4;
+  --color-accent: #e63946;
+  --color-accent-foreground: #f8f8f4;
+  --color-highlight: #f4c430;
+  --color-background: #f8f8f4;
+  --color-foreground: #1a1a1a;
+  --color-muted: #e5e5e0;
+  --color-muted-foreground: #6b7280;
+  --color-border: #d1d1cc;
+  --color-input: #d1d1cc;
+  --color-ring: #1f2a5c;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f8f8f4;
+  --color-success: #22c55e;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius */
+  --radius: 0.5rem;
+}
+
+/* Dark mode overrides — minimal for now, add in Phase 7 polish */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0f1623;
+    --color-foreground: #f8f8f4;
+    --color-card: #1a2035;
+    --color-card-foreground: #f8f8f4;
+    --color-muted: #252f45;
+    --color-muted-foreground: #9ca3af;
+    --color-border: #2d3a55;
+    --color-input: #2d3a55;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "Polla Mundial 2026",
+    "tagline": "Who will win the World Cup?",
+    "greeting": "Welcome"
+  },
+  "nav": {
+    "predictions": "Predictions",
+    "scoreboard": "Scoreboard",
+    "podio": "Podium",
+    "admin": "Admin",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "No account? You need an invitation."
+  }
+}

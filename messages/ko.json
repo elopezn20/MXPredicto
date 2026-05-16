@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "폴라 문디알 2026",
+    "tagline": "월드컵 우승팀은 누구?",
+    "greeting": "환영합니다"
+  },
+  "nav": {
+    "predictions": "예측",
+    "scoreboard": "순위표",
+    "podio": "포디엄",
+    "admin": "관리자",
+    "logout": "로그아웃"
+  },
+  "auth": {
+    "login": "로그인",
+    "signup": "회원가입",
+    "email": "이메일",
+    "password": "비밀번호",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "noAccount": "계정이 없으신가요? 초대장이 필요합니다."
+  }
+}
