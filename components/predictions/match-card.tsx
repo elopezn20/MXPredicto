@@ -72,13 +72,19 @@ export function MatchCard({
   );
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
-  >("idle");
+  >(prediction !== null ? "saved" : "idle");
   const [, startTransition] = useTransition();
 
   const isDirty =
     String(homeInput) !== String(prediction?.home_score_pred ?? "") ||
     String(awayInput) !== String(prediction?.away_score_pred ?? "") ||
     penWinner !== (prediction?.penalty_winner_team_id ?? "");
+
+  const canSave = saveStatus !== "saving" && (isDirty || saveStatus === "error");
+
+  function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" && canSave) handleSave();
+  }
 
   const showPenPicker =
     isKnockout &&
@@ -146,18 +152,14 @@ export function MatchCard({
             <>
               <ScoreInput
                 value={homeInput}
-                onChange={(v) => {
-                  setHomeInput(v);
-                  setSaveStatus("idle");
-                }}
+                onChange={(v) => { setHomeInput(v); setSaveStatus("idle"); }}
+                onKeyDown={handleEnter}
               />
               <span className="text-sm font-bold text-muted-foreground">-</span>
               <ScoreInput
                 value={awayInput}
-                onChange={(v) => {
-                  setAwayInput(v);
-                  setSaveStatus("idle");
-                }}
+                onChange={(v) => { setAwayInput(v); setSaveStatus("idle"); }}
+                onKeyDown={handleEnter}
               />
             </>
           )}
@@ -245,10 +247,10 @@ export function MatchCard({
             className={cn(
               "rounded px-4 py-1 text-xs font-medium transition-colors",
               saveStatus === "saved"
-                ? "bg-green-100 text-green-700"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
                 : saveStatus === "error"
                   ? "bg-red-100 text-red-700"
-                  : "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40"
+                  : "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 dark:border dark:border-primary dark:bg-primary/20 dark:text-white dark:hover:bg-primary/30 dark:disabled:opacity-60"
             )}
           >
             {saveStatus === "saving"
@@ -268,9 +270,11 @@ export function MatchCard({
 function ScoreInput({
   value,
   onChange,
+  onKeyDown,
 }: {
   value: string | number;
   onChange: (v: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }) {
   return (
     <input
@@ -279,6 +283,7 @@ function ScoreInput({
       max={30}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
       className="h-9 w-10 rounded border border-border bg-background text-center text-sm font-bold focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
     />
   );
