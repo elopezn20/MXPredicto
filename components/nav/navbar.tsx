@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LocaleSwitcher } from "./locale-switcher";
 import { LogoutButton } from "./logout-button";
+import { ThemeToggle } from "./theme-toggle";
 
 interface NavBarProps {
   locale: string;
@@ -42,6 +43,7 @@ export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
           <span className="hidden text-sm text-white/70 sm:block">
             {displayName}
           </span>
+          <ThemeToggle />
           <LocaleSwitcher currentLocale={locale} />
           <LogoutButton locale={locale} label={t.logout} />
         </div>
