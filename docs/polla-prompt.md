@@ -84,9 +84,15 @@ Points are **additive**. Perfect prediction = 5 + 2 + 2 + 1 = 10 pts.
 | Exact goals — home team (regulation/ET) | 4 |
 | Exact goals — away team (regulation/ET) | 4 |
 | Correct goal difference AND correct winner | 2 |
-| Correct "who advances" (penalty winner if applicable) | 5 |
+| Correct "who advances" | 5 |
 
 Points additive. Perfect = 10 + 4 + 4 + 2 + 5 = 25 pts.
+
+**Important implementation notes:**
+- Goals (home and away) are evaluated **independently of the result criterion**, same as group stage. A wrong result does not zero out the individual goal scores.
+- "Correct goal difference AND correct winner" still requires the result to be correct.
+- "Who advances" depends only on which team advanced, regardless of whether it was via regulation, ET, or penalties. For draw predictions, the predicted penalty winner is compared directly against the advancing team — independently of whether the FT result criterion was met. For non-draw predictions, "who advances" is only awarded if the result criterion is also correct (the predicted advancing team is implicitly the predicted winner, and team UUIDs are not available in the scoring function to verify otherwise).
+- The final score used for all criteria is the score **after extra time** (if played), not the 90-minute score. ET goals count.
 
 #### Bonus Podio (max 90 pts total)
 
@@ -115,13 +121,13 @@ Each evaluated independently — getting the Champion right earns 50 even if Run
 
 **Knockout examples:**
 
-| Predicted | Actual (FT/ET) | Penalty winner | Advances? | Pts |
+| Predicted | Actual (FT/ET) | Advances? | Pts | Reasoning |
 |---|---|---|---|---|
-| 2-1 home | 2-1 home | n/a | Home | 25 (perfect) |
-| 1-1, home advances on pens | 1-1 | Home | Home | 25 (perfect — draw ✓, both exact ✓, diff+winner ✓, advance ✓) |
-| 1-1, home advances on pens | 1-1 | Away | Away | 20 (draw ✓ 10, home ✓ 4, away ✓ 4, diff+winner ✓ 2, advance ✗ 0) |
-| 2-1 home | 1-1, away wins pens | Away | Away | 0 (wrong result, wrong advancer) |
-| 2-1 home | 2-1 home | n/a | Home | 25 — note: when user predicts a clear winner, "who advances" auto = predicted winner |
+| 2-1 home | 2-1 home | Home | 25 | Perfect — result ✓, both exact ✓, diff+winner ✓, advance ✓ |
+| 1-1, home pen | 1-1 | Home | 25 | Perfect draw — result ✓, both exact ✓, diff+winner ✓, advance ✓ |
+| 1-1, home pen | 1-1 | Away | 20 | Draw ✓, goals ✓, diff+winner ✓, advance ✗ |
+| 2-1 home | 1-1, away wins pens | Away | 4 | Wrong result (0), home ✗ (0), away ✓ (4), diff ✗ (0), advance ✗ (0) |
+| 1-1, home pen | 2-1 home | Home | 9 | Wrong result (0), home ✗ (0), away ✓ (4), diff ✗ (0), advance ✓ (5) — pen winner = advancing team |
 
 **Rule:** If user predicts a draw in a knockout match, they MUST also select a penalty winner (this is their "who advances" pick). If user predicts a non-draw, their "who advances" auto-equals the predicted winner. UI must enforce this.
 

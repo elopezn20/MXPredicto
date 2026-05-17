@@ -19,13 +19,17 @@ function actual(
   home: number | null,
   away: number | null,
   penWinner?: string | null,
-  advancing?: string | null
+  advancing?: string | null,
+  homeTeamId?: string | null,
+  awayTeamId?: string | null,
 ) {
   return {
     home_score: home,
     away_score: away,
     penalty_winner_team_id: penWinner ?? null,
     advancing_team_id: advancing ?? null,
+    home_team_id: homeTeamId ?? null,
+    away_team_id: awayTeamId ?? null,
   };
 }
 
@@ -217,18 +221,36 @@ describe("scorePrediction — knockout stage spec examples", () => {
     expect(r.advance).toBe(0);
   });
 
-  it("2-1 home pred vs 1-1 + away pens actual → 0 (wrong result)", () => {
+  it("2-1 home pred vs 1-1 + away pens actual → 4 (away goal matches, advance wrong)", () => {
+    // result ✗ (home win vs draw), home ✗ (2≠1), away ✓ (1=1), diff ✗
+    // advance ✗: predicted home (HOME_ID), actual advancer is AWAY_ID → mismatch
     const r = scorePrediction(
       pred(2, 1),
-      actual(1, 1, AWAY_ID, AWAY_ID),
+      actual(1, 1, AWAY_ID, AWAY_ID, HOME_ID, AWAY_ID),
       "knockout"
     );
-    expect(r.total).toBe(0);
     expect(r.result).toBe(0);
     expect(r.homeGoals).toBe(0);
-    expect(r.awayGoals).toBe(0);
+    expect(r.awayGoals).toBe(4);
     expect(r.diffAndWinner).toBe(0);
     expect(r.advance).toBe(0);
+    expect(r.total).toBe(4);
+  });
+
+  it("2-1 home pred vs 1-1 + home pens actual → 9 (wrong result, away matches, advance correct)", () => {
+    // result ✗ (home win vs draw), home ✗ (2≠1), away ✓ (1=1), diff ✗
+    // advance ✓: predicted home (HOME_ID), actual advancer is HOME_ID → match
+    const r = scorePrediction(
+      pred(2, 1),
+      actual(1, 1, HOME_ID, HOME_ID, HOME_ID, AWAY_ID),
+      "knockout"
+    );
+    expect(r.result).toBe(0);
+    expect(r.homeGoals).toBe(0);
+    expect(r.awayGoals).toBe(4);
+    expect(r.diffAndWinner).toBe(0);
+    expect(r.advance).toBe(5);
+    expect(r.total).toBe(9);
   });
 });
 
@@ -302,6 +324,43 @@ describe("scorePrediction — knockout stage edge cases", () => {
       "knockout"
     );
     expect(r.total).toBe(0);
+  });
+
+  it("draw pred, wrong FT result, correct advancer → away goals + advance (9 pts)", () => {
+    // pred 1-1 + home pens, actual 2-1 home (home wins in regulation)
+    // result ✗ (draw vs home win), home ✗ (1≠2), away ✓ (1=1), diff ✗, advance ✓ (home pen = home advancer)
+    const r = scorePrediction(
+      pred(1, 1, HOME_ID),
+      actual(2, 1, null, HOME_ID),
+      "knockout"
+    );
+    expect(r.result).toBe(0);
+    expect(r.homeGoals).toBe(0);
+    expect(r.awayGoals).toBe(4);
+    expect(r.diffAndWinner).toBe(0);
+    expect(r.advance).toBe(5);
+    expect(r.total).toBe(9);
+  });
+
+  it("draw pred, wrong FT result, wrong advancer → only away goals (4 pts)", () => {
+    // pred 1-1 + home pens, actual 2-1 away (away wins in regulation)
+    // result ✗, home ✗ (1≠0... wait let's use 0-2), away ✓ (1=... no)
+    // pred 1-1 + home pens, actual 0-1 away → away ✗ (1≠1? no 1=1!) hmm
+    // pred 1-1 + home pens, actual 2-1 away (away wins) → home ✗ (1≠2? no, home=1 pred vs home=2 actual ✗), away ✓ (1=1)
+    // Wait actual(2,1) means home=2, away=1. Let's do actual(0,2) away wins.
+    // pred 1-1 home_pen, actual 0-2 away wins → home ✗(1≠0), away ✗(1≠2), advance: home_pen ≠ away_advancing → ✗
+    // Better: pred 1-1 home_pen, actual 1-2 away → home ✓(1=1), away ✗(1≠2), advance ✗ → 4 pts
+    const r = scorePrediction(
+      pred(1, 1, HOME_ID),
+      actual(1, 2, null, AWAY_ID),
+      "knockout"
+    );
+    expect(r.result).toBe(0);
+    expect(r.homeGoals).toBe(4); // 1=1
+    expect(r.awayGoals).toBe(0); // 1≠2
+    expect(r.diffAndWinner).toBe(0);
+    expect(r.advance).toBe(0); // home_pen ≠ away advancing
+    expect(r.total).toBe(4);
   });
 
   it("uses advancing_team_id preferentially over penalty_winner_team_id", () => {

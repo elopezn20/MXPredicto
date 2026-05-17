@@ -11,6 +11,8 @@ export interface ActualResult {
   away_score: number | null;
   penalty_winner_team_id?: string | null;
   advancing_team_id?: string | null;
+  home_team_id?: string | null;
+  away_team_id?: string | null;
 }
 
 export interface ScoreBreakdown {
@@ -110,22 +112,32 @@ export function scorePrediction(
     return { result, homeGoals, awayGoals, diffAndWinner, advance: 0, total };
   }
 
-  // Knockout: wrong result at FT/ET → 0 for everything
-  if (!resultCorrect) {
-    return { ...ZERO };
-  }
-
-  const result = 10;
+  // Knockout: goals are independent of the result, same as group stage.
+  // diffAndWinner still requires the result to be correct.
+  // Advance for non-draw predictions requires result correct (no team UUIDs to
+  // compare otherwise); advance for draw predictions is always independent.
+  const result = resultCorrect ? 10 : 0;
   const homeGoals = hp === ha ? 4 : 0;
   const awayGoals = ap === aa ? 4 : 0;
-  const diffAndWinner = predDiff === actualDiff ? 2 : 0;
+  const diffAndWinner = resultCorrect && predDiff === actualDiff ? 2 : 0;
 
   let advance = 0;
   if (predResult !== "draw") {
-    // Predicted a clear winner and got the result right → predicted winner = advancing team
-    advance = 5;
+    // Resolve the predicted advancing team UUID from home/away team IDs.
+    // When team IDs are available we can award advance even if the FT result
+    // criterion was wrong (e.g. predicted 2-1 home, went to pens, home advanced).
+    const predictedAdvancerId =
+      predResult === "home" ? actual.home_team_id ?? null : actual.away_team_id ?? null;
+    const actualAdvancer = actual.advancing_team_id ?? actual.penalty_winner_team_id ?? null;
+    if (predictedAdvancerId && actualAdvancer) {
+      if (predictedAdvancerId === actualAdvancer) advance = 5;
+    } else if (resultCorrect) {
+      // Fallback when team IDs are not provided.
+      advance = 5;
+    }
   } else {
-    // Both predicted and actual are draws; advancing team determined by penalty winner
+    // Predicted draw: compare penalty_winner against actual advancer regardless
+    // of whether the FT result matched.
     const actualAdvancer =
       actual.advancing_team_id ?? actual.penalty_winner_team_id ?? null;
     if (

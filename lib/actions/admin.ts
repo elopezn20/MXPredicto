@@ -93,7 +93,7 @@ export async function rescoreAll(): Promise<ActionResult<{ updated: number }>> {
   // Fetch all finished matches with their round stage
   const { data: matches, error: matchErr } = await admin
     .from("matches")
-    .select("id, home_score, away_score, penalty_winner_team_id, advancing_team_id, rounds(stage)")
+    .select("id, home_score, away_score, penalty_winner_team_id, advancing_team_id, home_team_id, away_team_id, rounds(stage)")
     .eq("status", "finished");
 
   if (matchErr) return { ok: false, error: matchErr.message };
@@ -124,6 +124,8 @@ export async function rescoreAll(): Promise<ActionResult<{ updated: number }>> {
           away_score: match.away_score,
           penalty_winner_team_id: match.penalty_winner_team_id,
           advancing_team_id: match.advancing_team_id,
+          home_team_id: match.home_team_id,
+          away_team_id: match.away_team_id,
         },
         stage
       );
