@@ -82,6 +82,59 @@
     "predictionsOf": "Predicciones de {name}",
     "backToScoreboard": "← Volver a la tabla"
   },
+  "admin": {
+    "title": "Panel de administración",
+    "tabs": {
+      "invitations": "Invitaciones",
+      "matches": "Partidos",
+      "sync": "Sincronizar",
+      "audit": "Auditoría"
+    },
+    "invitations": {
+      "inviteTitle": "Invitar usuario",
+      "emailPlaceholder": "usuario@ejemplo.com",
+      "sendInvite": "Enviar invitación",
+      "sending": "Enviando…",
+      "pending": "Invitaciones pendientes",
+      "noPending": "No hay invitaciones pendientes.",
+      "revoke": "Revocar",
+      "accepted": "Aceptada",
+      "expires": "Vence"
+    },
+    "matches": {
+      "status": "Estado",
+      "scheduled": "Programado",
+      "inProgress": "En curso",
+      "finished": "Finalizado",
+      "homeScore": "L",
+      "awayScore": "V",
+      "penaltyWinner": "Ganador penales",
+      "advancingTeam": "Clasificado",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "noTeam": "Por definir"
+    },
+    "sync": {
+      "syncTitle": "Sincronizar desde football-data.org",
+      "syncDescription": "Descarga los resultados de partidos finalizados y actualiza la base de datos.",
+      "syncButton": "Sincronizar resultados",
+      "syncing": "Sincronizando…",
+      "syncSuccess": "Sincronizado: {updated} partidos actualizados.",
+      "rescoreTitle": "Recalcular puntuaciones",
+      "rescoreDescription": "Recalcula los puntos de todas las predicciones en partidos finalizados. Idempotente.",
+      "rescoreButton": "Recalcular todo",
+      "rescoring": "Recalculando…",
+      "rescoreSuccess": "Recalculado: {updated} predicciones actualizadas."
+    },
+    "audit": {
+      "title": "Cambios recientes",
+      "changedBy": "Por",
+      "changedAt": "Cuándo",
+      "match": "Partido",
+      "empty": "Sin entradas de auditoría."
+    }
+  },
   "podio": {
     "title": "Bonus Podio",
     "description": "Elige el podio final del Mundial. Solo puedes enviarlo una vez.",

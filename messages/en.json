@@ -82,6 +82,59 @@
     "predictionsOf": "Predictions by {name}",
     "backToScoreboard": "← Back to scoreboard"
   },
+  "admin": {
+    "title": "Admin Panel",
+    "tabs": {
+      "invitations": "Invitations",
+      "matches": "Matches",
+      "sync": "Sync & Rescore",
+      "audit": "Audit Log"
+    },
+    "invitations": {
+      "inviteTitle": "Invite a user",
+      "emailPlaceholder": "user@example.com",
+      "sendInvite": "Send invite",
+      "sending": "Sending…",
+      "pending": "Pending invitations",
+      "noPending": "No pending invitations.",
+      "revoke": "Revoke",
+      "accepted": "Accepted",
+      "expires": "Expires"
+    },
+    "matches": {
+      "status": "Status",
+      "scheduled": "Scheduled",
+      "inProgress": "In progress",
+      "finished": "Finished",
+      "homeScore": "H",
+      "awayScore": "A",
+      "penaltyWinner": "Pen. winner",
+      "advancingTeam": "Advancing",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "noTeam": "TBD"
+    },
+    "sync": {
+      "syncTitle": "Sync from football-data.org",
+      "syncDescription": "Fetches finished match scores and updates the database.",
+      "syncButton": "Sync results",
+      "syncing": "Syncing…",
+      "syncSuccess": "Synced: {updated} matches updated.",
+      "rescoreTitle": "Trigger rescoring",
+      "rescoreDescription": "Recomputes points for all predictions on finished matches. Safe to run multiple times.",
+      "rescoreButton": "Rescore all",
+      "rescoring": "Rescoring…",
+      "rescoreSuccess": "Rescored: {updated} predictions updated."
+    },
+    "audit": {
+      "title": "Recent changes",
+      "changedBy": "By",
+      "changedAt": "When",
+      "match": "Match",
+      "empty": "No audit entries yet."
+    }
+  },
   "podio": {
     "title": "Bonus Podium",
     "description": "Pick the final World Cup podium. You can only submit once.",

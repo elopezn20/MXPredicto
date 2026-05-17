@@ -82,6 +82,59 @@
     "predictionsOf": "{name}의 예측",
     "backToScoreboard": "← 순위표로 돌아가기"
   },
+  "admin": {
+    "title": "관리자 패널",
+    "tabs": {
+      "invitations": "초대",
+      "matches": "경기",
+      "sync": "동기화",
+      "audit": "감사 로그"
+    },
+    "invitations": {
+      "inviteTitle": "사용자 초대",
+      "emailPlaceholder": "user@example.com",
+      "sendInvite": "초대 보내기",
+      "sending": "전송 중…",
+      "pending": "대기 중인 초대",
+      "noPending": "대기 중인 초대가 없습니다.",
+      "revoke": "취소",
+      "accepted": "수락됨",
+      "expires": "만료"
+    },
+    "matches": {
+      "status": "상태",
+      "scheduled": "예정",
+      "inProgress": "진행 중",
+      "finished": "종료",
+      "homeScore": "홈",
+      "awayScore": "원정",
+      "penaltyWinner": "승부차기 승자",
+      "advancingTeam": "진출팀",
+      "save": "저장",
+      "saving": "저장 중…",
+      "saved": "저장됨",
+      "noTeam": "미정"
+    },
+    "sync": {
+      "syncTitle": "football-data.org에서 동기화",
+      "syncDescription": "완료된 경기 결과를 가져와 데이터베이스를 업데이트합니다.",
+      "syncButton": "결과 동기화",
+      "syncing": "동기화 중…",
+      "syncSuccess": "동기화 완료: {updated}개 경기 업데이트됨.",
+      "rescoreTitle": "재채점",
+      "rescoreDescription": "완료된 경기의 모든 예측 점수를 재계산합니다. 여러 번 실행해도 안전합니다.",
+      "rescoreButton": "전체 재채점",
+      "rescoring": "재채점 중…",
+      "rescoreSuccess": "재채점 완료: {updated}개 예측 업데이트됨."
+    },
+    "audit": {
+      "title": "최근 변경사항",
+      "changedBy": "변경자",
+      "changedAt": "시간",
+      "match": "경기",
+      "empty": "감사 항목이 없습니다."
+    }
+  },
   "podio": {
     "title": "보너스 포디엄",
     "description": "월드컵 최종 포디엄을 선택하세요. 한 번만 제출할 수 있습니다.",
