@@ -28,18 +28,15 @@
   --radius: 0.5rem;
 }
 
-/* Dark mode overrides — minimal for now, add in Phase 7 polish */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0f1623;
-    --color-foreground: #f8f8f4;
-    --color-card: #1a2035;
-    --color-card-foreground: #f8f8f4;
-    --color-muted: #252f45;
-    --color-muted-foreground: #9ca3af;
-    --color-border: #2d3a55;
-    --color-input: #2d3a55;
-  }
+.dark {
+  --color-background: #0f1623;
+  --color-foreground: #f8f8f4;
+  --color-card: #1a2035;
+  --color-card-foreground: #f8f8f4;
+  --color-muted: #252f45;
+  --color-muted-foreground: #9ca3af;
+  --color-border: #2d3a55;
+  --color-input: #2d3a55;
 }
 
 body {
