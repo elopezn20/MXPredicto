@@ -132,7 +132,8 @@
       "changedBy": "변경자",
       "changedAt": "시간",
       "match": "경기",
-      "empty": "감사 항목이 없습니다."
+      "empty": "감사 항목이 없습니다.",
+      "changes": "변경 내역"
     }
   },
   "podio": {

@@ -32,13 +32,26 @@ export async function login(
   const { email, password, locale } = parsed.data;
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { ok: false, error: "error.invalidCredentials" };
   }
 
-  redirect(`/${locale}/predictions`);
+  // Redirect to the user's preferred locale if it differs from the form locale
+  let redirectLocale = locale;
+  if (authData.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("preferred_locale")
+      .eq("id", authData.user.id)
+      .single();
+    if (profile?.preferred_locale && profile.preferred_locale !== locale) {
+      redirectLocale = profile.preferred_locale;
+    }
+  }
+
+  redirect(`/${redirectLocale}/predictions`);
 }
 
 // ── Signup with invite token ──────────────────────────────────────────────────

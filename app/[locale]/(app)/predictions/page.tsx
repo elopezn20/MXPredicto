@@ -133,6 +133,7 @@ export default async function PredictionsPage({ params }: Props) {
                         : null
                     }
                     kickoffAt={match.kickoff_at}
+                    locale={locale}
                     status={match.status}
                     actualHome={match.home_score}
                     actualAway={match.away_score}

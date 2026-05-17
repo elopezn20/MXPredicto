@@ -74,7 +74,7 @@ export async function AuditSection({ entries }: Props) {
                   {t("match")}
                 </th>
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                  Changes
+                  {t("changes")}
                 </th>
               </tr>
             </thead>

@@ -211,16 +211,16 @@ export function MatchesSection({ rounds, allTeams }: Props) {
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">
-                      Match
+                      {tRounds(roundKey)}
                     </th>
                     <th className="px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">
-                      Date
+                      KO
                     </th>
                     <th className="px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">
                       {t("status")}
                     </th>
                     <th className="px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">
-                      Score
+                      {t("homeScore")}/{t("awayScore")}
                     </th>
                     {isKnockout && (
                       <th className="px-2 py-1.5 text-left text-xs font-medium text-muted-foreground">

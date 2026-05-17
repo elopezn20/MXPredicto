@@ -18,11 +18,15 @@ interface ExistingPrediction {
   points_awarded: number | null;
 }
 
+// Map next-intl locale codes to BCP 47 tags for Intl APIs
+const LOCALE_TAG: Record<string, string> = { en: "en", es: "es-CL", ko: "ko-KR" };
+
 interface MatchCardProps {
   matchId: string;
   homeTeam: Team | null;
   awayTeam: Team | null;
   kickoffAt: string;
+  locale: string;
   status: string;
   actualHome: number | null;
   actualAway: number | null;
@@ -47,6 +51,7 @@ export function MatchCard({
   homeTeam,
   awayTeam,
   kickoffAt,
+  locale,
   status,
   actualHome,
   actualAway,
@@ -96,7 +101,8 @@ export function MatchCard({
   }
 
   const kickoff = new Date(kickoffAt);
-  const kickoffStr = kickoff.toLocaleDateString(undefined, {
+  const tag = LOCALE_TAG[locale] ?? locale;
+  const kickoffStr = kickoff.toLocaleDateString(tag, {
     weekday: "short",
     month: "short",
     day: "numeric",

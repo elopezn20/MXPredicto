@@ -132,7 +132,8 @@
       "changedBy": "By",
       "changedAt": "When",
       "match": "Match",
-      "empty": "No audit entries yet."
+      "empty": "No audit entries yet.",
+      "changes": "Changes"
     }
   },
   "podio": {

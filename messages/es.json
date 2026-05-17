@@ -132,7 +132,8 @@
       "changedBy": "Por",
       "changedAt": "Cuándo",
       "match": "Partido",
-      "empty": "Sin entradas de auditoría."
+      "empty": "Sin entradas de auditoría.",
+      "changes": "Cambios"
     }
   },
   "podio": {
