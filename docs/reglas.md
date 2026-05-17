@@ -97,7 +97,7 @@ Pronóstico perfecto = **25 pts**.
 
 > **Goles independientes del resultado:** Acertar el gol del local o del visitante suma puntos aunque el resultado general esté mal.
 
-> **Quién avanza — independiente de cómo:** Este criterio solo depende de qué equipo pasó a la siguiente ronda, sin importar si fue ganando en tiempo regular, en prórroga o en penales. Si predices empate, tu penalero se compara directamente con quien avanzó, sin importar cómo avanzó. Si predices un ganador claro, el "quién avanza" se otorga automáticamente si el resultado fue correcto.
+> **Quién avanza — independiente de cómo:** Este criterio solo depende de qué equipo pasó a la siguiente ronda, sin importar si fue ganando en tiempo regular, en prórroga o en penales. Tu equipo predicho se compara directamente con quien avanzó — si coinciden, sumas los 5 puntos aunque el marcador exacto haya sido distinto.
 
 **Ejemplos:**
 
@@ -112,6 +112,7 @@ Pronóstico perfecto = **25 pts**.
 | 3–0 local | 1–0 local | Local | **19** | Res✓10, local✗0, visita✓4, dif✗0, avanza✓5 |
 | 1–0 local | 2–1 local | Local | **17** | Res✓10, local✗0, visita✗0, dif✓2, avanza✓5 |
 | 2–1 local | 1–1 + visita | Visita | **4** | Res✗0, local✗0, visita✓4, dif✗0, avanza✗0 |
+| 2–1 local | 1–1 + local | Local | **9** | Res✗0, local✗0, visita✓4, dif✗0, avanza✓5 — predijiste local ganador, local avanzó |
 | 1–1 + local | 2–1 local | Local | **9** | Res✗0, local✗0, visita✓4, dif✗0, avanza✓5 — penalero coincide con quien avanzó |
 | 1–1 + local | 1–0 local | Local | **9** | Res✗0, local✓4, visita✗0, dif✗0, avanza✓5 — penalero coincide con quien avanzó |
 | 2–1 local | 0–2 visita | Visita | **0** | Res✗0, local✗0, visita✗0, dif✗0, avanza✗0 |
