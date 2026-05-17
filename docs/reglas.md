@@ -1,6 +1,17 @@
 # Polla Mundial 2026 — Reglas del juego
 
-**App:** https://polla-mundial-2026-neon-beta.vercel.app
+---
+
+## Resumen ejecutivo
+
+| | |
+|---|---|
+| **¿Qué es?** | Una polla  de pronósticos para el Mundial FIFA 2026. |
+| **¿Cuántos partidos?** | 104 partidos + 1 Bonus Podio. |
+| **¿Cuándo pronosticar?** | Antes del pitazo inicial del primer partido de cada ronda — ahí se cierra sin excepción. La fase de grupos se divide en tres rondas. |
+| **Bonus Podio** | Predice Campeón, Subcampeón y Tercer lugar. Se puede enviar durante la fase de grupos y se cierra cuando empieza el primer partido de Dieciseisavos. |
+| **Máximo de puntos** | 10 pts por partido de grupos · 25 pts por partido de eliminatorias · 90 pts por el Podio. |
+| **¿Quién gana?** | El jugador con más puntos totales al final del torneo. |
 
 ---
 
@@ -10,7 +21,7 @@ Una polla de pronósticos para el Mundial FIFA 2026. Cada jugador predice el mar
 
 ---
 
-## Cómo entrar
+## ¿Cómo entrar?
 
 La polla es **por invitación**. Los administradores te enviarán un correo con un enlace de registro. Ese enlace te lleva a una página donde eliges tu nombre y contraseña. Una vez registrado, puedes ingresar en cualquier momento desde el link de arriba.
 
@@ -28,7 +39,7 @@ Más un **Bonus Podio** (apuesta única, ver más abajo).
 
 ---
 
-## Cómo funciona el pronóstico
+## ¿Cómo funciona el pronóstico?
 
 ### Predicciones de partido
 
@@ -38,7 +49,9 @@ Más un **Bonus Podio** (apuesta única, ver más abajo).
 
 ### Cierre de cada ronda
 
-> **La ronda se cierra en el momento exacto del pitazo inicial del primer partido de esa ronda (hora UTC).**
+> **La ronda se cierra en el momento exacto en que empieza — es decir, el pitazo inicial del primer partido de esa ronda (hora UTC).**
+
+Esto significa que el cierre es cuando la fecha *comienza*, no cuando termina. Si la Fecha 1 arranca el lunes a las 18:00 UTC, todas las predicciones de la Fecha 1 quedan bloqueadas a las 18:00 UTC del lunes, aunque los demás partidos de esa fecha se jueguen días después.
 
 Una vez cerrada, no se pueden editar ni agregar predicciones. Los partidos sin predicción valen 0 puntos. La app muestra una cuenta regresiva al próximo cierre.
 
@@ -46,8 +59,8 @@ Una vez cerrada, no se pueden editar ni agregar predicciones. Los partidos sin p
 
 - Una apuesta única e irrevocable: predices el **Campeón**, **Subcampeón** y **Tercer lugar** del Mundial.
 - Los tres equipos deben ser distintos.
-- Se puede enviar desde el inicio y **se cierra con el primer partido de Dieciseisavos**.
-- No se puede modificar después de enviar.
+- La ventana para enviarlo es **durante la fase de grupos** (puedes hacerlo desde el primer día del torneo). Una vez que empieza el primer partido de Dieciseisavos, el Bonus Podio se cierra definitivamente.
+- No se puede modificar después de enviar — ni siquiera antes del cierre.
 
 ---
 
@@ -161,11 +174,5 @@ Ese partido vale 0 puntos para ti.
 Es una apuesta única — una vez que lo envías no hay vuelta atrás. Tómate tu tiempo antes de confirmar.
 
 **¿Cómo sé cuándo cierra cada ronda?**
-La app muestra una cuenta regresiva en todo momento. El cierre es el pitazo del primer partido de cada fecha.
+La app muestra una cuenta regresiva en todo momento. El cierre ocurre cuando la ronda *empieza* — en el pitazo inicial del primer partido de cada fecha. No cuando termina la última fecha, sino cuando arranca la primera.
 
-**¿Quiénes son los administradores?**
-Los administradores ingresan los resultados, sincronizan con la fuente oficial de datos y gestionan las invitaciones.
-
----
-
-*Polla Mundial 2026 — privada, solo por invitación.*
