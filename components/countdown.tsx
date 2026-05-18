@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 function formatDuration(ms: number): string {
   if (ms <= 0) return "00:00:00";
@@ -26,6 +27,8 @@ export function Countdown({ lockTime, roundName, label }: CountdownProps) {
   const [remaining, setRemaining] = useState(
     new Date(lockTime).getTime() - Date.now()
   );
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -36,15 +39,24 @@ export function Countdown({ lockTime, roundName, label }: CountdownProps) {
 
   if (remaining <= 0) return null;
 
-  const urgent = remaining < 3_600_000; // < 1 hour
+  const urgent = remaining < 3_600_000;
+
+  const textColor = urgent
+    ? isDark ? "#FF8080" : "#E10F1E"
+    : isDark ? "#F4C430" : "#000000";
+
+  const bgColor = urgent
+    ? isDark ? "rgba(255,92,57,0.15)" : "rgba(225,15,30,0.10)"
+    : isDark ? "rgba(244,196,48,0.10)" : "rgba(244,196,48,0.15)";
+
+  const borderColor = urgent
+    ? isDark ? "rgba(255,92,57,0.30)" : "rgba(225,15,30,0.30)"
+    : isDark ? "rgba(244,196,48,0.30)" : "rgba(244,196,48,0.40)";
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium ${
-        urgent
-          ? "border-[#E10F1E]/30 bg-[#E10F1E]/10 text-[#E10F1E] dark:border-[#FF5C39]/30 dark:bg-[#FF5C39]/15 dark:text-[#FF8080]"
-          : "border-[#F4C430]/40 bg-[#F4C430]/15 text-black dark:border-[#F4C430]/30 dark:bg-[#F4C430]/10 dark:text-[#F4C430]"
-      }`}
+      className="flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium"
+      style={{ color: textColor, backgroundColor: bgColor, borderColor }}
     >
       <span className="opacity-70">{label}:</span>
       <span className="font-bold">{roundName}</span>
