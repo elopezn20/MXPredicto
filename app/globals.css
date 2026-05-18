@@ -3,8 +3,8 @@
 
 @theme {
   /* FWC26 brand palette */
-  --color-primary: #E10F1E;            /* FWC26 crimson — buttons, CTAs, points */
-  --color-primary-foreground: #FFFFFF;
+  --color-primary: #1A2855;            /* FWC26 navy — buttons, CTAs */
+  --color-primary-foreground: #F5F0E6;
   --color-navy: #1A2855;               /* FWC26 dark navy — navbar, structural */
   --color-navy-foreground: #F5F0E6;
   --color-accent: #F4C430;             /* FWC26 gold — highlights, hover */
@@ -44,8 +44,8 @@
   --color-muted-foreground: #A8B0C4;
   --color-border: #2E3D7A;
   --color-input: #2E3D7A;
-  --color-primary: #FF3D3D;
-  --color-primary-foreground: #FFFFFF;
+  --color-primary: #4A6FBE;
+  --color-primary-foreground: #F5F0E6;
   --color-ring: #FF3D3D;
   --color-accent: #F4C430;
   --color-accent-foreground: #1A2855;

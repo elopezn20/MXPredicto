@@ -247,10 +247,10 @@ export function MatchCard({
             className={cn(
               "rounded px-4 py-1 text-xs font-medium transition-colors",
               saveStatus === "saved"
-                ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                ? "bg-green-600 text-white dark:bg-green-700 dark:text-white"
                 : saveStatus === "error"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 dark:border dark:border-primary dark:bg-primary/20 dark:text-white dark:hover:bg-primary/30 dark:disabled:opacity-60"
+                  ? "bg-red-600 text-white dark:bg-red-700 dark:text-white"
+                  : "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 dark:border dark:border-primary dark:bg-primary/20 dark:text-primary-foreground dark:hover:bg-primary/30 dark:disabled:opacity-60"
             )}
           >
             {saveStatus === "saving"

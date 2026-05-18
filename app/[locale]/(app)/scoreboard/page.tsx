@@ -53,7 +53,7 @@ export default async function ScoreboardPage({ params }: Props) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-navy">{t("title")}</h1>
+      <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
 
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{t("noData")}</p>
