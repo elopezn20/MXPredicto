@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { LocaleSwitcher } from "./locale-switcher";
 import { LogoutButton } from "./logout-button";
 import { ThemeToggle } from "./theme-toggle";
@@ -21,13 +22,25 @@ interface NavBarProps {
 export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
   return (
     <nav className="bg-primary text-primary-foreground shadow-md dark:bg-card dark:text-foreground">
-      <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
+      <div className="mx-auto flex min-h-16 max-w-5xl items-center gap-3 px-4 py-3 sm:py-4">
         {/* Logo */}
         <Link
           href={`/${locale}/predictions`}
-          className="shrink-0 font-bold tracking-tight"
+          className="flex shrink-0 items-center gap-2"
         >
-          ⚽ Polla 2026
+          <span className="inline-flex items-center justify-center rounded-md bg-cream px-2 py-1.5">
+            <Image
+              src="/fwc26-emblem.png"
+              alt="FIFA World Cup 26"
+              width={56}
+              height={44}
+              priority
+              className="h-9 w-auto sm:h-11"
+            />
+          </span>
+          <span className="hidden font-bold tracking-tight sm:inline">
+            Polla 2026
+          </span>
         </Link>
 
         {/* Burger menu (mobile only) */}

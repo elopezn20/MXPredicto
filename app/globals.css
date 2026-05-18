@@ -2,27 +2,29 @@
 @import "tw-animate-css";
 
 @theme {
-  /* §7 palette — FIFA World Cup 2026 identity */
-  --color-primary: #1f2a5c;
-  --color-primary-foreground: #f8f8f4;
-  --color-accent: #e63946;
-  --color-accent-foreground: #f8f8f4;
-  --color-highlight: #f4c430;
-  --color-background: #f8f8f4;
-  --color-foreground: #1a1a1a;
-  --color-muted: #e5e5e0;
-  --color-muted-foreground: #6b7280;
-  --color-border: #d1d1cc;
-  --color-input: #d1d1cc;
-  --color-ring: #1f2a5c;
-  --color-card: #ffffff;
-  --color-card-foreground: #1a1a1a;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #f8f8f4;
-  --color-success: #22c55e;
-  --color-secondary: #e5e5e0;
-  --color-secondary-foreground: #1a1a1a;
-  --color-highlight-foreground: #1a1a1a;
+  /* FWC26 brand palette */
+  --color-primary: #1A2855;
+  --color-primary-foreground: #F5F0E6;
+  --color-accent: #E10F1E;
+  --color-accent-foreground: #FFFFFF;
+  --color-highlight: #F4C430;
+  --color-highlight-foreground: #1A2855;
+  --color-cream: #F5F0E6;
+  --color-cream-foreground: #0A0A0A;
+  --color-background: #F5F0E6;
+  --color-foreground: #0A0A0A;
+  --color-muted: #E8E0D0;
+  --color-muted-foreground: #5B6478;
+  --color-border: #D9CFBE;
+  --color-input: #D9CFBE;
+  --color-ring: #1A2855;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0A0A0A;
+  --color-destructive: #FF2D2D;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success: #1EA64F;
+  --color-secondary: #E8E0D0;
+  --color-secondary-foreground: #1A2855;
 
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -32,20 +34,28 @@
 }
 
 .dark {
-  --color-background: #0f1623;
-  --color-foreground: #f8f8f4;
-  --color-card: #1a2035;
-  --color-card-foreground: #f8f8f4;
-  --color-muted: #252f45;
-  --color-muted-foreground: #9ca3af;
-  --color-border: #2d3a55;
-  --color-input: #2d3a55;
-  --color-primary: #6b8aff;
-  --color-primary-foreground: #0f1623;
-  --color-ring: #6b8aff;
-  --color-secondary: #252f45;
-  --color-secondary-foreground: #f8f8f4;
-  --color-highlight-foreground: #f4c430;
+  --color-background: #0B1428;
+  --color-foreground: #F5F0E6;
+  --color-card: #1A2855;
+  --color-card-foreground: #F5F0E6;
+  --color-muted: #243260;
+  --color-muted-foreground: #A8B0C4;
+  --color-border: #2E3D7A;
+  --color-input: #2E3D7A;
+  --color-primary: #2E3D7A;
+  --color-primary-foreground: #0B1428;
+  --color-ring: #2E3D7A;
+  --color-accent: #FF2D2D;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #FF5C39;
+  --color-destructive-foreground: #FFFFFF;
+  --color-success: #2BB7A3;
+  --color-secondary: #243260;
+  --color-secondary-foreground: #F5F0E6;
+  --color-highlight-foreground: #1A2855;
+  /* cream is intentionally the same in dark mode — it's the emblem-pill background */
+  --color-cream: #F5F0E6;
+  --color-cream-foreground: #0A0A0A;
 }
 
 body {
