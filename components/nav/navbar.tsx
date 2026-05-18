@@ -21,7 +21,7 @@ interface NavBarProps {
 
 export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
   return (
-    <nav className="bg-primary text-primary-foreground shadow-md dark:bg-card dark:text-foreground">
+    <nav className="border-b-4 border-highlight bg-navy text-cream shadow-md dark:bg-card dark:text-foreground">
       <div className="mx-auto flex min-h-16 max-w-5xl items-center gap-3 px-4 py-3 sm:py-4">
         {/* Logo */}
         <Link

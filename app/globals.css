@@ -3,13 +3,15 @@
 
 @theme {
   /* FWC26 brand palette */
-  --color-primary: #1A2855;
-  --color-primary-foreground: #F5F0E6;
-  --color-accent: #E10F1E;
-  --color-accent-foreground: #FFFFFF;
+  --color-primary: #E10F1E;            /* FWC26 crimson — buttons, CTAs, points */
+  --color-primary-foreground: #FFFFFF;
+  --color-navy: #1A2855;               /* FWC26 dark navy — navbar, structural */
+  --color-navy-foreground: #F5F0E6;
+  --color-accent: #F4C430;             /* FWC26 gold — highlights, hover */
+  --color-accent-foreground: #1A2855;
   --color-highlight: #F4C430;
   --color-highlight-foreground: #1A2855;
-  --color-cream: #F5F0E6;
+  --color-cream: #F5F0E6;              /* FWC26 cream — always light, emblem pill */
   --color-cream-foreground: #0A0A0A;
   --color-background: #F5F0E6;
   --color-foreground: #0A0A0A;
@@ -17,17 +19,17 @@
   --color-muted-foreground: #5B6478;
   --color-border: #D9CFBE;
   --color-input: #D9CFBE;
-  --color-ring: #1A2855;
+  --color-ring: #E10F1E;
   --color-card: #FFFFFF;
   --color-card-foreground: #0A0A0A;
-  --color-destructive: #FF2D2D;
+  --color-destructive: #E10F1E;
   --color-destructive-foreground: #FFFFFF;
   --color-success: #1EA64F;
   --color-secondary: #E8E0D0;
   --color-secondary-foreground: #1A2855;
 
   /* Typography */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-noto-sans), ui-sans-serif, system-ui, sans-serif;
 
   /* Radius */
   --radius: 0.5rem;
@@ -42,20 +44,22 @@
   --color-muted-foreground: #A8B0C4;
   --color-border: #2E3D7A;
   --color-input: #2E3D7A;
-  --color-primary: #2E3D7A;
-  --color-primary-foreground: #0B1428;
-  --color-ring: #2E3D7A;
-  --color-accent: #FF2D2D;
-  --color-accent-foreground: #FFFFFF;
+  --color-primary: #FF3D3D;
+  --color-primary-foreground: #FFFFFF;
+  --color-ring: #FF3D3D;
+  --color-accent: #F4C430;
+  --color-accent-foreground: #1A2855;
   --color-destructive: #FF5C39;
   --color-destructive-foreground: #FFFFFF;
   --color-success: #2BB7A3;
   --color-secondary: #243260;
   --color-secondary-foreground: #F5F0E6;
-  --color-highlight-foreground: #1A2855;
-  /* cream is intentionally the same in dark mode — it's the emblem-pill background */
   --color-cream: #F5F0E6;
   --color-cream-foreground: #0A0A0A;
+  --color-highlight: #F4C430;
+  --color-highlight-foreground: #1A2855;
+  --color-navy: #1A2855;
+  --color-navy-foreground: #F5F0E6;
 }
 
 body {
