@@ -2,15 +2,22 @@
 
 ---
 
-## Resumen ejecutivo
+## Resumen
 
 | | |
 |---|---|
-| **¿Qué es?** | Una polla  de pronósticos para el Mundial FIFA 2026. |
-| **¿Cuántos partidos?** | 104 partidos + 1 Bonus Podio. |
-| **¿Cuándo pronosticar?** | Antes del pitazo inicial del primer partido de cada ronda — ahí se cierra sin excepción. La fase de grupos se divide en tres rondas. |
-| **Bonus Podio** | Predice Campeón, Subcampeón y Tercer lugar. Se puede enviar durante la fase de grupos y se cierra cuando empieza el primer partido de Dieciseisavos. |
-| **Máximo de puntos** | 10 pts por partido de grupos · 25 pts por partido de eliminatorias · 90 pts por el Podio. |
+| **Partidos** | 104 en total: 72 de fase de grupos (3 fechas × 24 partidos) + 32 de eliminatorias. |
+| **Qué predices** | El marcador exacto de cada partido. En eliminatorias con empate al final del tiempo reglamentario/prórroga, también debes indicar quién avanza. |
+| **Cierre de cada ronda** | Cuando la ronda *empieza* — pitazo inicial del primer partido. No se puede editar ni agregar predicciones después del cierre. |
+| **Grupos — puntos** | Máx. **10 pts**: resultado ✓ (5) · goles local exactos ✓ (2) · goles visita exactos ✓ (2) · diferencia+ganador ✓ (1). Todos los criterios son independientes entre sí. |
+| **Eliminatorias — puntos** | Máx. **25 pts**: resultado ✓ (10) · goles local exactos ✓ (4) · goles visita exactos ✓ (4) · diferencia+ganador ✓ (2) · quién avanza ✓ (5). |
+| **Goles en eliminatorias** | Los goles de prórroga cuentan en el marcador final. Los goles exactos suman puntos aunque el resultado general no esté correcto  . |
+| **Quién avanza** | Solo importa qué equipo pasó a la siguiente ronda — no importa si fue en tiempo regular, prórroga o penales. |
+| **Bonus Podio** | Predice Campeón (50 pts), Subcampeón (25 pts) y Tercer lugar (15 pts). Máx. **90 pts**. Una vez enviado, es irrevocable. |
+| **Ventana del Podio** | Se puede enviar desde el primer día del torneo. Se cierra cuando empieza el primer partido de Dieciseisavos. |
+| **Sin predicción** | Vale 0 puntos y cuenta como cero en el desempate. |
+| **Ranking** | Por puntos totales (partidos + podio). Desempate: más aciertos (≥1 pt) → menos ceros. |
+| **Visibilidad** | Tus predicciones son privadas hasta que la ronda cierra. Después todos ven los pronósticos de todos. |
 | **¿Quién gana?** | El jugador con más puntos totales al final del torneo. |
 
 ---
@@ -31,8 +38,8 @@ La polla es **por invitación**. Los administradores te enviarán un correo con 
 
 | Fase | Rondas | Partidos |
 |---|---|---|
-| Fase de grupos | Fecha 1 / Fecha 2 / Fecha 3 | 48 (16 por fecha) |
-| Eliminatorias | Dieciseisavos → Octavos → Cuartos → Semis → Final | 56 |
+| Fase de grupos | Fecha 1 / Fecha 2 / Fecha 3 | 72 (24 por fecha) |
+| Eliminatorias | Dieciseisavos → Octavos → Cuartos → Semis → Final | 32 |
 | **Total** | | **104** |
 
 Más un **Bonus Podio** (apuesta única, ver más abajo).
@@ -73,9 +80,11 @@ Una vez cerrada, no se pueden editar ni agregar predicciones. Los partidos sin p
 | Resultado correcto (quién gana o empate) | 5 |
 | Goles exactos del local | 2 |
 | Goles exactos del visitante | 2 |
-| Diferencia de goles correcta **y** resultado correcto | 1 |
+| Diferencia de goles correcta (en la dirección predicha) | 1 |
 
-Los puntos son acumulables. Pronóstico perfecto = **10 pts**.
+Los puntos son acumulables. Pronóstico perfecto = **10 pts**. Los goles exactos del local y del visitante suman aunque el resultado general esté mal.
+
+> **Sobre la diferencia de goles:** La diferencia debe coincidir en magnitud *y* dirección. Si predices 2–1 (local gana por 1), no ganas este punto si el resultado es 1–2 o 2–3, aunque la diferencia sea también de 1 — porque el ganador es distinto.
 
 **Ejemplos:**
 
@@ -86,9 +95,9 @@ Los puntos son acumulables. Pronóstico perfecto = **10 pts**.
 | 1–1 | 2–2 | **6** | Empate ✓ (5) + diferencia 0 ✓ (1); los goles no coinciden |
 | 3–1 | 2–1 | **7** | Resultado ✓ (5) + visitante exacto ✓ (2); local incorrecto, diferencia distinta |
 | 1–0 | 1–0 | **10** | Perfecto |
-| 2–1 | 2–0 | **8** | Resultado ✓ (5), local ✓ (2), visita ✗; diferencia+ganador ✓ (1) |
+| 2–1 | 2–0 | **7** | Resultado ✓ (5), local ✓ (2), visita ✗; diferencia distinta (1 ≠ 2) |
 | 0–1 | 0–2 | **7** | Resultado ✓ (5), local ✓ (2), visita ✗; diferencia distinta |
-| 1–1 | 1–0 | **0** | Predijiste empate pero ganó el local — nada puntúa |
+| 1–1 | 1–0 | **2** | Resultado ✗ (predijiste empate, ganó local); local ✓ (2); visita ✗ |
 | 2–1 | 1–2 | **0** | Resultado incorrecto — nada puntúa |
 | 0–0 | 0–0 | **10** | Perfecto |
 
@@ -101,7 +110,7 @@ Los puntos son acumulables. Pronóstico perfecto = **10 pts**.
 | Resultado correcto al final del tiempo reglamentario o prórroga | 10 |
 | Goles exactos del local | 4 |
 | Goles exactos del visitante | 4 |
-| Diferencia de goles correcta **y** resultado correcto | 2 |
+| Diferencia de goles correcta (en la dirección predicha) | 2 |
 | Quién avanza | 5 |
 
 Pronóstico perfecto = **25 pts**.
@@ -109,6 +118,8 @@ Pronóstico perfecto = **25 pts**.
 > **Sobre el marcador:** Los goles de la prórroga (tiempo extra) cuentan en el marcador final. Si el partido está 1–1 a los 90' y el local marca en el tiempo extra, el resultado oficial es **2–1**. Solo hay penales si el marcador sigue empatado al final de la prórroga.
 
 > **Goles independientes del resultado:** Acertar el gol del local o del visitante suma puntos aunque el resultado general esté mal.
+
+> **Sobre la diferencia de goles:** La diferencia debe coincidir en magnitud *y* dirección. Si predices 2–1 (local gana por 1), no ganas este criterio si el resultado es 1–2 o 2–3, aunque la diferencia sea también de 1 — porque el ganador es distinto.
 
 > **Quién avanza — independiente de cómo:** Este criterio solo depende de qué equipo pasó a la siguiente ronda, sin importar si fue ganando en tiempo regular, en prórroga o en penales. Tu equipo predicho se compara directamente con quien avanzó — si coinciden, sumas los 5 puntos aunque el marcador exacto haya sido distinto.
 
