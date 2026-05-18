@@ -43,7 +43,7 @@ export function Countdown({ lockTime, roundName, label }: CountdownProps) {
       className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium ${
         urgent
           ? "border-[#E10F1E]/30 bg-[#E10F1E]/10 text-[#E10F1E] dark:border-[#FF5C39]/30 dark:bg-[#FF5C39]/15 dark:text-[#FF8080]"
-          : "border-[#F4C430]/40 bg-[#F4C430]/15 text-[#1A2855] dark:border-[#F4C430]/30 dark:bg-[#F4C430]/10 dark:text-[#F4C430]"
+          : "border-[#F4C430]/40 bg-[#F4C430]/15 text-black dark:border-[#F4C430]/30 dark:bg-[#F4C430]/10 dark:text-[#F4C430]"
       }`}
     >
       <span className="opacity-70">{label}:</span>
