@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTheme } from "next-themes";
 import { savePrediction } from "@/lib/actions/predictions";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +75,8 @@ export function MatchCard({
     "idle" | "saving" | "saved" | "error"
   >(prediction !== null ? "saved" : "idle");
   const [, startTransition] = useTransition();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const isDirty =
     String(homeInput) !== String(prediction?.home_score_pred ?? "") ||
@@ -254,7 +257,9 @@ export function MatchCard({
             )}
             style={
               saveStatus !== "saved" && saveStatus !== "error"
-                ? { borderColor: "#1A2855", color: "#1A2855" }
+                ? isDark
+                  ? { borderColor: "#4A6FBE", color: "#F5F0E6" }
+                  : { borderColor: "#1A2855", color: "#1A2855" }
                 : undefined
             }
           >
