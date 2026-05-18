@@ -245,13 +245,18 @@ export function MatchCard({
             onClick={handleSave}
             disabled={saveStatus === "saving" || (!isDirty && saveStatus !== "error")}
             className={cn(
-              "rounded px-4 py-1 text-xs font-medium transition-colors",
+              "rounded border px-4 py-1 text-xs font-medium transition-colors",
               saveStatus === "saved"
-                ? "bg-green-600 text-white dark:bg-green-700 dark:text-white"
+                ? "border-transparent bg-green-600 text-white dark:bg-green-700 dark:text-white"
                 : saveStatus === "error"
-                  ? "bg-red-600 text-white dark:bg-red-700 dark:text-white"
-                  : "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 dark:border dark:border-primary dark:bg-primary/20 dark:text-primary-foreground dark:hover:bg-primary/30 dark:disabled:opacity-60"
+                  ? "border-transparent bg-red-600 text-white dark:bg-red-700 dark:text-white"
+                  : "bg-primary/10 hover:bg-primary/20 disabled:opacity-40 dark:border-primary dark:bg-primary/20 dark:text-primary-foreground dark:hover:bg-primary/30 dark:disabled:opacity-60"
             )}
+            style={
+              saveStatus !== "saved" && saveStatus !== "error"
+                ? { borderColor: "#1A2855", color: "#1A2855" }
+                : undefined
+            }
           >
             {saveStatus === "saving"
               ? t.saving
