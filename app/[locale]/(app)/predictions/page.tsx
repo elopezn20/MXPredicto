@@ -68,7 +68,7 @@ export default async function PredictionsPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
 
       {/* Countdown to next deadline */}
       {nextRound && (
@@ -97,7 +97,7 @@ export default async function PredictionsPage({ params }: Props) {
         return (
           <section key={round.id}>
             <div className="mb-3 flex items-center gap-2">
-              <h2 className="text-lg font-semibold">{tRounds(roundKey)}</h2>
+              <h2 className="border-l-4 border-highlight pl-3 text-lg font-semibold text-[#1A2855] dark:text-foreground">{tRounds(roundKey)}</h2>
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   isLocked

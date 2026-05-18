@@ -53,7 +53,7 @@ export default async function ScoreboardPage({ params }: Props) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
 
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{t("noData")}</p>
@@ -94,7 +94,7 @@ export default async function ScoreboardPage({ params }: Props) {
                     )}
                   >
                     <td className="px-3 py-2.5 text-muted-foreground">
-                      {row.rank}
+                      {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : row.rank}
                     </td>
                     <td className="px-3 py-2.5">
                       <Link
