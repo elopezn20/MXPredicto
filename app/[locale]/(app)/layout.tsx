@@ -35,6 +35,7 @@ export default async function AppLayout({ children, params }: Props) {
           predictions: t("predictions"),
           scoreboard: t("scoreboard"),
           podio: t("podio"),
+          rules: t("rules"),
           admin: t("admin"),
           logout: t("logout"),
           menu: t("menu"),

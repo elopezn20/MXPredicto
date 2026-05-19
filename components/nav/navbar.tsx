@@ -13,6 +13,7 @@ interface NavBarProps {
     predictions: string;
     scoreboard: string;
     podio: string;
+    rules: string;
     admin: string;
     logout: string;
     menu: string;
@@ -51,6 +52,7 @@ export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
           <NavLink href={`/${locale}/predictions`}>{t.predictions}</NavLink>
           <NavLink href={`/${locale}/podio`}>{t.podio}</NavLink>
           <NavLink href={`/${locale}/scoreboard`}>{t.scoreboard}</NavLink>
+          <NavLink href={`/${locale}/rules`}>{t.rules}</NavLink>
           {isAdmin && (
             <NavLink href={`/${locale}/admin`}>{t.admin}</NavLink>
           )}
