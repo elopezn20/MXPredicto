@@ -9,6 +9,7 @@
     "scoreboard": "Tabla",
     "podio": "Podio",
     "rules": "Reglas",
+    "profile": "Perfil",
     "admin": "Admin",
     "logout": "Cerrar sesión",
     "menu": "Menú"
@@ -145,6 +146,19 @@
       "empty": "Sin entradas de auditoría.",
       "changes": "Cambios"
     }
+  },
+  "profile": {
+    "podiumSection": "Bonus Podio",
+    "podiumOpen": "La ventana del podio sigue abierta — puedes cambiar tus selecciones hasta que empiecen los Dieciseisavos.",
+    "podiumNone": "No se enviaron predicciones de podio.",
+    "podiumTotal": "Total podio",
+    "champion": "Campeón",
+    "runnerUp": "Subcampeón",
+    "thirdPlace": "Tercer puesto",
+    "currentRoundBadge": "Ronda actual",
+    "upcomingBadge": "Próxima",
+    "currentRoundNote": "Esta ronda está abierta para predicciones.",
+    "upcomingNote": "Las predicciones para esta ronda aún no están disponibles."
   },
   "podio": {
     "title": "Bonus Podio",

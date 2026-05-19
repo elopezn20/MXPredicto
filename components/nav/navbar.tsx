@@ -9,18 +9,20 @@ interface NavBarProps {
   locale: string;
   displayName: string;
   isAdmin: boolean;
+  profileUserId: string;
   t: {
     predictions: string;
     scoreboard: string;
     podio: string;
     rules: string;
+    profile: string;
     admin: string;
     logout: string;
     menu: string;
   };
 }
 
-export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
+export function NavBar({ locale, displayName, isAdmin, profileUserId, t }: NavBarProps) {
   return (
     <nav className="border-b-4 border-[#F4C430] shadow-md" style={{ backgroundColor: '#1A2855', color: '#F5F0E6' }}>
       <div className="mx-auto flex min-h-16 max-w-5xl items-center gap-3 px-4 py-3 sm:py-4">
@@ -45,7 +47,7 @@ export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
         </Link>
 
         {/* Burger menu (mobile only) */}
-        <MobileNav locale={locale} isAdmin={isAdmin} t={t} />
+        <MobileNav locale={locale} isAdmin={isAdmin} profileUserId={profileUserId} t={t} />
 
         {/* Nav links (desktop only) */}
         <div className="hidden flex-1 items-center gap-1 sm:flex">
@@ -53,6 +55,9 @@ export function NavBar({ locale, displayName, isAdmin, t }: NavBarProps) {
           <NavLink href={`/${locale}/podio`}>{t.podio}</NavLink>
           <NavLink href={`/${locale}/scoreboard`}>{t.scoreboard}</NavLink>
           <NavLink href={`/${locale}/rules`}>{t.rules}</NavLink>
+          {profileUserId && (
+            <NavLink href={`/${locale}/profile/${profileUserId}`}>{t.profile}</NavLink>
+          )}
           {isAdmin && (
             <NavLink href={`/${locale}/admin`}>{t.admin}</NavLink>
           )}
