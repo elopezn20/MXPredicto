@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { savePodio } from "@/lib/actions/predictions";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface Team {
   id: string;
@@ -21,12 +20,14 @@ interface PodioPrediction {
 interface PodioProp {
   teams: Team[];
   existing: PodioPrediction | null;
+  isLocked: boolean;
   t: {
     champion: string;
     runnerUp: string;
     thirdPlace: string;
-    submit: string;
-    submitted: string;
+    save: string;
+    saving: string;
+    saved: string;
     selectTeam: string;
     mustBeDistinct: string;
     errorSaving: string;
@@ -34,27 +35,22 @@ interface PodioProp {
   };
 }
 
-export function PodioPicker({ teams, existing, t }: PodioProp) {
-  const [champion, setChampion] = useState(
-    existing?.champion_team_id ?? ""
+export function PodioPicker({ teams, existing, isLocked, t }: PodioProp) {
+  const [champion, setChampion] = useState(existing?.champion_team_id ?? "");
+  const [runnerUp, setRunnerUp] = useState(existing?.runner_up_team_id ?? "");
+  const [third, setThird] = useState(existing?.third_place_team_id ?? "");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
+    existing !== null ? "saved" : "idle"
   );
-  const [runnerUp, setRunnerUp] = useState(
-    existing?.runner_up_team_id ?? ""
-  );
-  const [third, setThird] = useState(
-    existing?.third_place_team_id ?? ""
-  );
-  const [submitted, setSubmitted] = useState(existing !== null);
-  const [error, setError] = useState<string | null>(null);
+  const [distinctError, setDistinctError] = useState(false);
   const [, startTransition] = useTransition();
 
-  if (submitted) {
+  if (isLocked) {
     const c = teams.find((t) => t.id === champion);
     const r = teams.find((t) => t.id === runnerUp);
     const th = teams.find((t) => t.id === third);
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">{t.submitted}</p>
         <PodioSlot label={`🥇 ${t.champion}`} team={c ?? null} />
         <PodioSlot label={`🥈 ${t.runnerUp}`} team={r ?? null} />
         <PodioSlot label={`🥉 ${t.thirdPlace}`} team={th ?? null} />
@@ -62,35 +58,43 @@ export function PodioPicker({ teams, existing, t }: PodioProp) {
     );
   }
 
+  const isDirty =
+    champion !== (existing?.champion_team_id ?? "") ||
+    runnerUp !== (existing?.runner_up_team_id ?? "") ||
+    third !== (existing?.third_place_team_id ?? "");
+
   const isDistinct =
-    champion && runnerUp && third &&
+    !!champion && !!runnerUp && !!third &&
     champion !== runnerUp &&
     champion !== third &&
     runnerUp !== third;
 
-  function handleSubmit() {
+  const canSave = saveStatus !== "saving" && isDistinct && (isDirty || saveStatus === "error");
+
+  function handleSelect(setter: (v: string) => void, value: string) {
+    setter(value);
+    setSaveStatus("idle");
+    setDistinctError(false);
+  }
+
+  function handleSave() {
     if (!isDistinct) {
-      setError(t.mustBeDistinct);
+      setDistinctError(true);
       return;
     }
-    setError(null);
+    setDistinctError(false);
+    setSaveStatus("saving");
     startTransition(async () => {
       const result = await savePodio(champion, runnerUp, third);
-      if (result.ok) {
-        setSubmitted(true);
-      } else {
-        setError(
-          result.error === "mustBeDistinct" ? t.mustBeDistinct : t.errorSaving
-        );
-      }
+      setSaveStatus(result.ok ? "saved" : "error");
     });
   }
 
   return (
     <div className="space-y-6">
-      {error && (
+      {distinctError && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
+          {t.mustBeDistinct}
         </p>
       )}
 
@@ -99,7 +103,7 @@ export function PodioPicker({ teams, existing, t }: PodioProp) {
         teams={teams}
         selected={champion}
         disabledIds={[runnerUp, third]}
-        onSelect={setChampion}
+        onSelect={(v) => handleSelect(setChampion, v)}
         placeholder={t.selectTeam}
       />
       <TeamPicker
@@ -107,7 +111,7 @@ export function PodioPicker({ teams, existing, t }: PodioProp) {
         teams={teams}
         selected={runnerUp}
         disabledIds={[champion, third]}
-        onSelect={setRunnerUp}
+        onSelect={(v) => handleSelect(setRunnerUp, v)}
         placeholder={t.selectTeam}
       />
       <TeamPicker
@@ -115,16 +119,22 @@ export function PodioPicker({ teams, existing, t }: PodioProp) {
         teams={teams}
         selected={third}
         disabledIds={[champion, runnerUp]}
-        onSelect={setThird}
+        onSelect={(v) => handleSelect(setThird, v)}
         placeholder={t.selectTeam}
       />
 
       <Button
-        onClick={handleSubmit}
-        disabled={!isDistinct}
+        onClick={handleSave}
+        disabled={!canSave}
         className="w-full"
       >
-        {t.submit}
+        {saveStatus === "saving"
+          ? t.saving
+          : saveStatus === "saved"
+            ? t.saved
+            : saveStatus === "error"
+              ? t.errorSaving
+              : t.save}
       </Button>
     </div>
   );

@@ -72,15 +72,17 @@ export default async function PodioPage({ params }: Props) {
         <PodioPicker
           teams={teams}
           existing={existing ?? null}
+          isLocked={isLocked}
           t={{
             champion: t("champion"),
             runnerUp: t("runnerUp"),
             thirdPlace: t("thirdPlace"),
-            submit: t("submit"),
-            submitted: t("submitted"),
+            save: t("save"),
+            saving: t("saving"),
+            saved: t("saved"),
             selectTeam: t("selectTeam"),
             mustBeDistinct: t("mustBeDistinct"),
-            errorSaving: "Error al guardar",
+            errorSaving: t("errorSaving"),
             pts: t("pts"),
           }}
         />

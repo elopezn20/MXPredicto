@@ -147,15 +147,17 @@
   },
   "podio": {
     "title": "Bonus Podio",
-    "description": "Elige el podio final del Mundial. Solo puedes enviarlo una vez.",
+    "description": "Elige el podio final del Mundial. Puedes actualizar tus selecciones hasta el cierre.",
     "champion": "Campeón",
     "runnerUp": "Subcampeón",
     "thirdPlace": "Tercer puesto",
-    "submit": "Confirmar podio",
-    "submitted": "¡Podio enviado! Ya no puedes modificarlo.",
+    "save": "Guardar podio",
+    "saving": "Guardando...",
+    "saved": "Podio guardado",
     "locked": "Las predicciones de podio están cerradas.",
     "selectTeam": "Seleccionar equipo",
     "mustBeDistinct": "Los tres equipos deben ser distintos.",
+    "errorSaving": "Error al guardar. Inténtalo de nuevo.",
     "pts": "pts"
   }
 }
