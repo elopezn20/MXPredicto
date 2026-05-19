@@ -147,15 +147,17 @@
   },
   "podio": {
     "title": "Bonus Podium",
-    "description": "Pick the final World Cup podium. You can only submit once.",
+    "description": "Pick the final World Cup podium. You can update your picks until the deadline.",
     "champion": "Champion",
     "runnerUp": "Runner-up",
     "thirdPlace": "Third place",
-    "submit": "Confirm podium",
-    "submitted": "Podium submitted! You cannot change it.",
+    "save": "Save podium",
+    "saving": "Saving...",
+    "saved": "Podium saved",
     "locked": "Podium predictions are locked.",
     "selectTeam": "Select team",
     "mustBeDistinct": "The three teams must be different.",
+    "errorSaving": "Error saving. Try again.",
     "pts": "pts"
   }
 }

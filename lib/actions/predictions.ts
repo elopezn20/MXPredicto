@@ -58,7 +58,7 @@ export async function savePrediction(
   return { ok: true };
 }
 
-// ── Save podio prediction (one-shot) ─────────────────────────────────────────
+// ── Save podio prediction (editable until deadline) ──────────────────────────
 
 const PodioSchema = z.object({
   championId: z.string().uuid(),
@@ -88,17 +88,19 @@ export async function savePodio(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "unauthenticated" };
 
-  const { error } = await supabase.from("podio_predictions").insert({
-    user_id: user.id,
-    champion_team_id: parsed.data.championId,
-    runner_up_team_id: parsed.data.runnerUpId,
-    third_place_team_id: parsed.data.thirdPlaceId,
-    submitted_at: new Date().toISOString(),
-  });
+  const { error } = await supabase.from("podio_predictions").upsert(
+    {
+      user_id: user.id,
+      champion_team_id: parsed.data.championId,
+      runner_up_team_id: parsed.data.runnerUpId,
+      third_place_team_id: parsed.data.thirdPlaceId,
+      submitted_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
 
   if (error) {
     if (error.message.includes("security")) return { ok: false, error: "locked" };
-    if (error.message.includes("unique")) return { ok: false, error: "already_submitted" };
     return { ok: false, error: error.message };
   }
 
