@@ -98,7 +98,7 @@ export default async function ScoreboardPage({ params }: Props) {
                     </td>
                     <td className="px-3 py-2.5">
                       <Link
-                        href={`/${locale}/scoreboard/${row.userId}`}
+                        href={`/${locale}/profile/${row.userId}`}
                         className="hover:underline"
                       >
                         {row.displayName}

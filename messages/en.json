@@ -9,6 +9,7 @@
     "scoreboard": "Scoreboard",
     "podio": "Podium",
     "rules": "Rules",
+    "profile": "Profile",
     "admin": "Admin",
     "logout": "Log out",
     "menu": "Menu"
@@ -145,6 +146,19 @@
       "empty": "No audit entries yet.",
       "changes": "Changes"
     }
+  },
+  "profile": {
+    "podiumSection": "Bonus Podium",
+    "podiumOpen": "Podium window still open — picks can be changed until the Round of 32 begins.",
+    "podiumNone": "No podium prediction submitted.",
+    "podiumTotal": "Podium total",
+    "champion": "Champion",
+    "runnerUp": "Runner-up",
+    "thirdPlace": "Third place",
+    "currentRoundBadge": "Current Round",
+    "upcomingBadge": "Upcoming",
+    "currentRoundNote": "This round is currently open for predictions.",
+    "upcomingNote": "Predictions for this round are not yet open."
   },
   "podio": {
     "title": "Bonus Podium",

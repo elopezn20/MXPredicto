@@ -31,11 +31,13 @@ export default async function AppLayout({ children, params }: Props) {
         locale={locale}
         displayName={profile?.display_name ?? ""}
         isAdmin={profile?.is_admin ?? false}
+        profileUserId={user?.id ?? ""}
         t={{
           predictions: t("predictions"),
           scoreboard: t("scoreboard"),
           podio: t("podio"),
           rules: t("rules"),
+          profile: t("profile"),
           admin: t("admin"),
           logout: t("logout"),
           menu: t("menu"),

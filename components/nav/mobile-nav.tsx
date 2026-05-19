@@ -13,17 +13,19 @@ import {
 interface MobileNavProps {
   locale: string;
   isAdmin: boolean;
+  profileUserId: string;
   t: {
     menu: string;
     predictions: string;
     scoreboard: string;
     podio: string;
     rules: string;
+    profile: string;
     admin: string;
   };
 }
 
-export function MobileNav({ locale, isAdmin, t }: MobileNavProps) {
+export function MobileNav({ locale, isAdmin, profileUserId, t }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -50,6 +52,11 @@ export function MobileNav({ locale, isAdmin, t }: MobileNavProps) {
           <MobileLink href={`/${locale}/rules`} onClick={close}>
             {t.rules}
           </MobileLink>
+          {profileUserId && (
+            <MobileLink href={`/${locale}/profile/${profileUserId}`} onClick={close}>
+              {t.profile}
+            </MobileLink>
+          )}
           {isAdmin && (
             <MobileLink href={`/${locale}/admin`} onClick={close}>
               {t.admin}
