@@ -1,4 +1,4 @@
-# Polla Mundial 2026 — Game Rules
+# MXPredicto — Game Rules
 
 ---
 

@@ -26,8 +26,12 @@ export default async function PredictionsPage({ params }: Props) {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Fetch all non-podio rounds with their matches and teams
-  const { data: rounds } = await supabase
+  const { data: rounds, error: roundsError } = await supabase
     .from("rounds")
     .select(
       `id, stage, name_key, order_index, lock_time,
@@ -42,11 +46,44 @@ export default async function PredictionsPage({ params }: Props) {
     .order("order_index", { ascending: true });
 
   // Fetch current user's predictions
-  const { data: predictions } = await supabase
+  const { data: predictions, error: predictionsError } = await supabase
     .from("predictions")
     .select(
       "match_id, home_score_pred, away_score_pred, penalty_winner_team_id, points_awarded"
     );
+
+  const matchCount = (rounds ?? []).reduce(
+    (n, r) => n + (r.matches?.length ?? 0),
+    0
+  );
+  // #region agent log
+  fetch("http://127.0.0.1:7352/ingest/b917a873-c8c0-4e0c-b28c-6699226afdd6", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "f8ab6d",
+    },
+    body: JSON.stringify({
+      sessionId: "f8ab6d",
+      runId: "pre-fix",
+      hypothesisId: "A-B-C-D-E",
+      location: "predictions/page.tsx:load",
+      message: "predictions page data load",
+      data: {
+        hasUser: !!user,
+        userIdPrefix: user?.id?.slice(0, 8) ?? null,
+        roundsCount: rounds?.length ?? 0,
+        matchCount,
+        roundsError: roundsError?.message ?? null,
+        roundsErrorCode: roundsError?.code ?? null,
+        predictionsCount: predictions?.length ?? 0,
+        predictionsError: predictionsError?.message ?? null,
+        locale,
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
 
   const predByMatchId = new Map(
     (predictions ?? []).map((p) => [p.match_id, p])
