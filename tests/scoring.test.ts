@@ -549,19 +549,6 @@ describe("computeLeaderboard", () => {
   });
 
   it("tiebreaker 2 — fewer zeros means higher rank", () => {
-    const predictions = [
-      { userId: "alice", matchId: M1, pointsAwarded: 10 },
-      { userId: "alice", matchId: M2, pointsAwarded: 5 },
-      // M3 unsubmitted for alice → 1 zero
-      { userId: "bob", matchId: M1, pointsAwarded: 10 },
-      { userId: "bob", matchId: M2, pointsAwarded: 5 },
-      // M3 and M4 unsubmitted for bob → 2 zeros
-    ];
-    const M4 = "match-4";
-    const rows = computeLeaderboard([alice, bob], [M1, M2, M3, M4], predictions);
-    // alice: 15 pts, 2 hits, 2 zeros
-    // bob: 15 pts, 2 hits, 2 zeros
-    // Same again — let's make them differ
     const predictions2 = [
       { userId: "alice", matchId: M1, pointsAwarded: 10 },
       { userId: "alice", matchId: M2, pointsAwarded: 5 },

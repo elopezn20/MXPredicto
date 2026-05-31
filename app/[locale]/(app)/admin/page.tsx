@@ -37,12 +37,6 @@ export default async function AdminPage({ params }: Props) {
     .neq("stage", "podio")
     .order("order_index", { ascending: true });
 
-  // All teams for penalty winner dropdowns
-  const { data: teams } = await admin
-    .from("teams")
-    .select("id, code, name_en")
-    .order("name_en", { ascending: true });
-
   // ── Users ────────────────────────────────────────────────────────────────────
   const { data: profiles } = await admin
     .from("profiles")
@@ -81,7 +75,7 @@ export default async function AdminPage({ params }: Props) {
         </TabsContent>
 
         <TabsContent value="matches" className="mt-4">
-          <MatchesSection rounds={rounds ?? []} allTeams={teams ?? []} />
+          <MatchesSection rounds={rounds ?? []} />
         </TabsContent>
 
         <TabsContent value="users" className="mt-4">

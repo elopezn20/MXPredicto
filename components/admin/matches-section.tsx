@@ -33,7 +33,6 @@ interface Round {
 
 interface Props {
   rounds: Round[];
-  allTeams: Team[];
 }
 
 function getTeam(t: Team | Team[] | null): Team | null {
@@ -44,11 +43,9 @@ function getTeam(t: Team | Team[] | null): Team | null {
 function MatchRow({
   match,
   isKnockout,
-  allTeams,
 }: {
   match: Match;
   isKnockout: boolean;
-  allTeams: Team[];
 }) {
   const t = useTranslations("admin.matches");
   const ht = getTeam(match.home_team);
@@ -184,7 +181,7 @@ function MatchRow({
   );
 }
 
-export function MatchesSection({ rounds, allTeams }: Props) {
+export function MatchesSection({ rounds }: Props) {
   const t = useTranslations("admin.matches");
   const tRounds = useTranslations("rounds");
 
@@ -236,7 +233,6 @@ export function MatchesSection({ rounds, allTeams }: Props) {
                       key={match.id}
                       match={match}
                       isKnockout={isKnockout}
-                      allTeams={allTeams}
                     />
                   ))}
                 </tbody>

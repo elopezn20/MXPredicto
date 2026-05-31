@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Run next-intl first to get locale-aware redirects and cookie settings
-  let response = handleI18n(request);
+  const response = handleI18n(request);
 
   // Attach Supabase session to the response (refreshes the JWT if needed)
   const supabase = createServerClient(
