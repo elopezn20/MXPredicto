@@ -24,17 +24,18 @@ interface CountdownProps {
 }
 
 export function Countdown({ lockTime, roundName, label }: CountdownProps) {
-  const [remaining, setRemaining] = useState(
-    new Date(lockTime).getTime() - Date.now()
-  );
+  const [remaining, setRemaining] = useState(0);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setRemaining(new Date(lockTime).getTime() - Date.now());
-    }, 1000);
-    return () => clearInterval(id);
+    const update = () => setRemaining(new Date(lockTime).getTime() - Date.now());
+    const initial = setTimeout(update, 0);
+    const id = setInterval(update, 1000);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(id);
+    };
   }, [lockTime]);
 
   if (remaining <= 0) return null;

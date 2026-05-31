@@ -7,8 +7,6 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
-type Locale = "en" | "es" | "ko";
-
 function teamName(
   team: { name_en: string; name_es: string; name_ko: string } | null,
   locale: string
