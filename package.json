@@ -1,6 +1,6 @@
 {
-  "name": "polla-mundial-2026",
-  "version": "0.1.0",
+  "name": "mxpredicto",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

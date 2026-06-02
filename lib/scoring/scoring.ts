@@ -220,8 +220,8 @@ export function computeLeaderboard(
     for (const matchId of finishedMatchIds) {
       const pts = predMap.get(`${user.id}:${matchId}`) ?? 0;
       total += pts;
-      if (pts > 0) hit++;
-      else zero++;
+      if (pts == 10) hit++;
+      if (pts == 0) zero++;
     }
     agg.set(user.id, { total, hit, zero });
   }
