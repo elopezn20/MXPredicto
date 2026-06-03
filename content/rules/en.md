@@ -200,7 +200,7 @@ The table shows: rank, name, points, hits, zeros, and gap to the leader.
 
 - Your predictions are **private until the round closes**.
 - Once the round closes, everyone can see everyone's picks for those matches.
-- Your **Bonus Podium** is likewise private until the Podium window closes (when the first Round of 32 match begins). After that, everyone can see everyone's podium picks.
+- Your **Podium predictions** are likewise private until the Podium window closes (when the first Round of 32 match begins). After that, everyone can see everyone's podium picks.
 
 ---
 

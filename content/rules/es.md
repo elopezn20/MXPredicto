@@ -200,7 +200,7 @@ La tabla muestra: posición, nombre, puntos, aciertos, ceros y diferencia con el
 
 - Tus predicciones son **privadas hasta que la ronda cierra**.
 - Una vez cerrada la ronda, todos pueden ver los pronósticos de todos para esos partidos.
-- Tu **Bonus Podio** también es privado hasta que se cierra la ventana del Podio (al comenzar el primer partido de Dieciseisavos). Después, todos pueden ver las selecciones de podio de cada jugador.
+- Tus **predicciones del Podio** también son privadas hasta que se cierra la ventana del Podio (al comenzar el primer partido de Dieciseisavos). Después, todos pueden ver las selecciones de podio de cada jugador.
 
 ---
 
