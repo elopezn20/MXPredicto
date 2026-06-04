@@ -16,7 +16,7 @@
 | **Bonus Podium** | Pick Champion (50 pts), Runner-up (25 pts), Third place (15 pts). Max **90 pts**. You can save and update your picks until the window closes. |
 | **Podium window** | Open from the first day of the tournament. Closes when the Round of 32 begins. |
 | **No prediction** | Worth 0 points and counts as zero in tiebreakers. |
-| **Rankings** | By total points (matches + podium). Tiebreaker: most hits (≥1 pt) → fewest zeros. |
+| **Rankings** | By total points (matches + podium). Tiebreaker: most hits (exact scores) → fewest zeros. |
 | **Visibility** | Your predictions are private until the round closes. Afterwards everyone can see everyone's picks. |
 | **Who wins?** | The player with the most total points at the end of the tournament. |
 | **Respect** | All players and their prefered teams must be respected [**Optional**] |
