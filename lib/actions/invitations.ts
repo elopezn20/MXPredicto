@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resend, FROM_EMAIL } from "@/lib/email/resend";
+import { getAppOrigin } from "@/lib/app-url";
 import { randomUUID } from "crypto";
 
 type ActionResult<T = undefined> =
@@ -35,7 +36,7 @@ const InviteSchema = z.object({
 export async function createInvitation(
   email: string,
   locale = "es"
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; emailSent: boolean; emailError: string | null }>> {
   const guard = await requireAdmin();
   if (guard) return guard;
 
@@ -47,8 +48,7 @@ export async function createInvitation(
   const { data: { user } } = await supabase.auth.getUser();
 
   const token = randomUUID();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const signupUrl = `${appUrl}/${locale}/signup?token=${token}`;
+  const signupUrl = `${getAppOrigin()}/${locale}/signup?token=${token}`;
 
   const { data: invitation, error: insertErr } = await admin
     .from("invitations")
@@ -69,9 +69,9 @@ export async function createInvitation(
   console.log("Invitation created with ID:", invitation!.id);
 
   // Send invitation email via Resend
+  let emailError: string | null = null;
   if (process.env.RESEND_API_KEY) {
-    console.log("Sending invitation email to:", parsed.data.email);
-    const { error: emailErr } = await resend.emails.send({
+    const { error: sendErr } = await resend.emails.send({
       from: FROM_EMAIL,
       to: parsed.data.email,
       subject: "You're invited to MX Predicto 🏆",
@@ -170,12 +170,21 @@ export async function createInvitation(
 </body>
 </html>`,
     });
-    if (emailErr) console.error("Failed to send invitation email:", emailErr);
-    else console.log("Invitation email sent to:", parsed.data.email);
+    if (sendErr) {
+      console.error("[createInvitation] Resend send failed", {
+        to: parsed.data.email,
+        from: FROM_EMAIL,
+        name: sendErr.name,
+        message: sendErr.message,
+      });
+      emailError = sendErr.message;
+    }
   } else {
-    console.warn("RESEND_API_KEY not set — invitation email skipped.");
+    console.warn("[createInvitation] RESEND_API_KEY not set; skipping email send");
+    emailError = "missingApiKey";
   }
-  return { ok: true, data: { id: invitation!.id } };
+
+  return { ok: true, data: { id: invitation!.id, emailSent: emailError === null, emailError } };
 }
 
 // ── Revoke invitation ─────────────────────────────────────────────────────────

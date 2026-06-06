@@ -4,6 +4,7 @@ import { LocaleSwitcher } from "./locale-switcher";
 import { LogoutButton } from "./logout-button";
 import { ThemeToggle } from "./theme-toggle";
 import { MobileNav } from "./mobile-nav";
+import { AdminDropdown } from "./admin-dropdown";
 
 interface NavBarProps {
   locale: string;
@@ -22,21 +23,16 @@ interface NavBarProps {
   };
 }
 
-export function NavBar({
-  locale,
-  displayName,
-  isAdmin,
-  profileUserId,
-  t,
-}: NavBarProps) {
+export function NavBar({ locale, displayName, isAdmin, profileUserId, t }: NavBarProps) {
+  const isAuthed = profileUserId !== "";
   return (
     <nav className="relative border-b border-white/10 bg-gradient-to-r from-[#05060A] via-[#0B0F1F] to-[#140A1A] text-white backdrop-blur-md">
       <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-4 px-4 py-3 sm:py-4">
         
         {/* Logo */}
         <Link
-          href={`/${locale}/predictions`}
-          className="flex shrink-0 items-center gap-3"
+          href={isAuthed ? `/${locale}/predictions` : `/${locale}/rules`}
+          className="flex shrink-0 items-center gap-2"
         >
           <span className="relative inline-flex items-center justify-center">
             {/* Glow */}
@@ -80,28 +76,35 @@ export function NavBar({
             {t.rules}
           </NavLink>
 
-          {profileUserId && (
-            <NavLink href={`/${locale}/profile/${profileUserId}`}>
-              {t.profile}
-            </NavLink>
+        {/* Nav links (desktop only) */}
+        <div className="hidden flex-1 items-center gap-1 sm:flex">
+          {isAuthed && (
+            <>
+              <NavLink href={`/${locale}/predictions`}>{t.predictions}</NavLink>
+              <NavLink href={`/${locale}/podio`}>{t.podio}</NavLink>
+              <NavLink href={`/${locale}/scoreboard`}>{t.scoreboard}</NavLink>
+            </>
+          )}
+          <NavLink href={`/${locale}/rules`}>{t.rules}</NavLink>
+          {isAuthed && (
+            <NavLink href={`/${locale}/profile/${profileUserId}`}>{t.profile}</NavLink>
           )}
 
           {isAdmin && (
-            <NavLink href={`/${locale}/admin`}>
-              {t.admin}
-            </NavLink>
+            <AdminDropdown label={t.admin} />
           )}
         </div>
 
         {/* Right side */}
         <div className="flex shrink-0 items-center gap-3">
-          <span className="hidden text-sm font-medium text-white/60 sm:block">
-            {displayName}
-          </span>
-
+          {isAuthed && (
+            <span className="hidden text-sm text-white/70 sm:block">
+              {displayName}
+            </span>
+          )}
           <ThemeToggle />
           <LocaleSwitcher currentLocale={locale} />
-          <LogoutButton locale={locale} label={t.logout} />
+          {isAuthed && <LogoutButton locale={locale} label={t.logout} />}
         </div>
       </div>
 

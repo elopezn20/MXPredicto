@@ -4,6 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 import { computeLeaderboard } from "@/lib/scoring/scoring";
 import { cn } from "@/lib/utils";
 
+const PRIZES_CLP = [
+  1_250_000, 500_000, 250_000, 150_000, 125_000, 100_000, 75_000, 50_000,
+] as const;
+const POOL_TOTAL_CLP = PRIZES_CLP.reduce((sum, n) => sum + n, 0);
+
+function formatCLP(locale: string, amount: number): string {
+  const tag = locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US";
+  return new Intl.NumberFormat(tag, {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 interface Props {
   params: Promise<{ locale: string }>;
 }
@@ -22,13 +36,19 @@ export default async function ScoreboardPage({ params }: Props) {
     .from("profiles")
     .select("id, display_name");
 
-  // Finished match IDs
+  // Finished matches with stage (group/knockout) for perfect-match hit detection
   const { data: finishedMatches } = await supabase
     .from("matches")
-    .select("id")
+    .select("id, rounds(stage)")
     .eq("status", "finished");
 
-  const finishedIds = (finishedMatches ?? []).map((m) => m.id);
+  const finishedWithStage = (finishedMatches ?? []).flatMap((m) => {
+    const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
+    const stage: "group" | "knockout" =
+      roundData?.stage === "group" ? "group" : "knockout";
+    return [{ id: m.id, stage }];
+  });
+  const finishedIds = finishedWithStage.map((m) => m.id);
 
   // All predictions for finished matches (RLS allows seeing others' in locked rounds)
   const { data: preds } = finishedIds.length
@@ -49,11 +69,41 @@ export default async function ScoreboardPage({ params }: Props) {
     pointsAwarded: p.points_awarded,
   }));
 
-  const rows = computeLeaderboard(users, finishedIds, predictions);
+  const rows = computeLeaderboard(users, finishedWithStage, predictions);
+
+  // Tied ranks split the combined pot for the positions they occupy.
+  // E.g. three players tied at rank 1 share prizes for positions 1, 2 and 3.
+  const prizeByRank = new Map<number, number>();
+  for (let i = 0; i < rows.length; ) {
+    const rank = rows[i]!.rank;
+    let j = i;
+    while (j < rows.length && rows[j]!.rank === rank) j++;
+    const groupSize = j - i;
+    let pot = 0;
+    for (let k = 0; k < groupSize; k++) {
+      pot += PRIZES_CLP[rank - 1 + k] ?? 0;
+    }
+    if (pot > 0) prizeByRank.set(rank, Math.round(pot / groupSize));
+    i = j;
+  }
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
+
+      <p className="text-sm text-muted-foreground">
+        {t.rich("poolCaption", {
+          amount: formatCLP(locale, POOL_TOTAL_CLP),
+          link: (chunks) => (
+            <Link
+              href={`/${locale}/rules`}
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
 
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{t("noData")}</p>
@@ -80,11 +130,17 @@ export default async function ScoreboardPage({ params }: Props) {
                 <th className="hidden px-3 py-2 text-right font-medium text-muted-foreground md:table-cell">
                   {t("gap")}
                 </th>
+                <th className="px-3 py-2 text-right font-medium text-muted-foreground">
+                  {t("prize")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {rows.map((row) => {
                 const isMe = row.userId === user?.id;
+                const prizeAmount = prizeByRank.get(row.rank);
+                const prize =
+                  prizeAmount !== undefined ? formatCLP(locale, prizeAmount) : "—";
                 return (
                   <tr
                     key={row.userId}
@@ -122,6 +178,16 @@ export default async function ScoreboardPage({ params }: Props) {
                       {row.deltaFromLeader < 0
                         ? `${row.deltaFromLeader}`
                         : "—"}
+                    </td>
+                    <td
+                      className={cn(
+                        "px-3 py-2.5 text-right whitespace-nowrap",
+                        prizeAmount !== undefined
+                          ? "font-medium text-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {prize}
                     </td>
                   </tr>
                 );

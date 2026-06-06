@@ -8,7 +8,7 @@
 |---|---|
 | **Matches** | 104 total: 72 group stage (3 matchdays × 24 matches) + 32 knockout. |
 | **What you predict** | The exact score of each match. In knockout matches that finish level after regular time/extra time, you must also pick who advances. |
-| **Round deadline** | When the round *starts* — kickoff of the first match. Predictions cannot be added or edited after the deadline. |
+| **Round deadline** | Midnight Chile time on the day of the first match in the round. Predictions cannot be added or edited after that. |
 | **Group stage — points** | Max **10 pts**: correct result ✓ (5) · exact home goals ✓ (2) · exact away goals ✓ (2) · goal diff + winner ✓ (1). All criteria are independent. |
 | **Knockout — points** | Max **25 pts**: correct result ✓ (10) · exact home goals ✓ (4) · exact away goals ✓ (4) · goal diff + winner ✓ (2) · who advances ✓ (5). |
 | **Extra time goals** | Extra time goals count in the final score. Exact goals earn points even if the overall result is wrong. |
@@ -16,7 +16,7 @@
 | **Bonus Podium** | Pick Champion (50 pts), Runner-up (25 pts), Third place (15 pts). Max **90 pts**. You can save and update your picks until the window closes. |
 | **Podium window** | Open from the first day of the tournament. Closes when the Round of 32 begins. |
 | **No prediction** | Worth 0 points and counts as zero in tiebreakers. |
-| **Rankings** | By total points (matches + podium). Tiebreaker: most hits (exact scores) → fewest zeros. |
+| **Rankings** | By total points (matches + podium). Tiebreaker: most hits (perfect match — 10 pts in group, 25 pts in knockout) → fewest zeros. |
 | **Visibility** | Your predictions are private until the round closes. Afterwards everyone can see everyone's picks. |
 | **Who wins?** | The player with the most total points at the end of the tournament. |
 | **Respect** | All players and their prefered teams must be respected [**Optional**] |
@@ -33,6 +33,8 @@ A prediction pool for the FIFA World Cup 2026. Each player predicts the exact sc
 
 The pool is **invite-only**. Admins will send you an email with a registration link. That link takes you to a page where you choose your name and password. Once registered, you can log in at any time from the link above.
 
+Each person may have at most one account — duplicate sign-ups are not allowed.
+
 ---
 
 ## Tournament structure
@@ -47,6 +49,34 @@ Plus a **Bonus Podium** (special bet, see below).
 
 ---
 
+## Prizes
+
+The total pool is **$2,500,000 CLP**, distributed across the top eight places in the final standings.
+
+| Place | Prize (CLP) |
+|---|---|
+| 1st | $1,250,000 |
+| 2nd | $500,000 |
+| 3rd | $250,000 |
+| 4th | $150,000 |
+| 5th | $125,000 |
+| 6th | $100,000 |
+| 7th | $75,000 |
+| 8th | $50,000 |
+| **Total** | **$2,500,000** |
+
+### Ties on the payout
+
+If two or more players finish tied on points, hits, and zeros, the prize pot for the positions they occupy is split equally among them.
+
+**Examples:**
+
+- Two-way tie for 1st → each receives **($1,250,000 + $500,000) / 2 = $875,000**.
+- Three-way tie for 1st → each receives **($1,250,000 + $500,000 + $250,000) / 3 ≈ $666,667**.
+- Two-way tie for 8th (the last paid position) → each receives **($50,000 + $0) / 2 = $25,000**.
+
+---
+
 ## How does predicting work?
 
 ### Match predictions
@@ -57,15 +87,15 @@ Plus a **Bonus Podium** (special bet, see below).
 
 ### Round deadline
 
-> **The round closes at the exact moment it begins — the kickoff of the first match in that round (UTC time).**
+> **The round closes at 00:00 Chile time on the day of the first match in that round.**
 
-This means the deadline is when the matchday *starts*, not when it ends. If Matchday 1 kicks off on Monday at 18:00 UTC, all Matchday 1 predictions are locked at 18:00 UTC on Monday, even if other matches in that matchday are played days later.
+If the first match of a round is on Monday, June 15 (Chile time), all predictions for that round are locked at 00:00 (midnight) on Monday, June 15 Chile time — even though the matches themselves are played later that day.
 
 Once closed, predictions cannot be edited or added. Matches with no prediction are worth 0 points. The app shows a countdown to the next deadline.
 
 ### Bonus Podium
 
-- You pick the **Champion**, **Runner-up**, and **Third place** of the World Cup.
+- You pick the **Champion** (50 pts), **Runner-up** (25 pts), and **Third place** (15 pts) of the World Cup. Maximum total: **90 pts**. Each slot is scored independently — get the Champion right and you earn 50 pts even if the other two are wrong.
 - The three teams must be different.
 - The window is open **during the group stage** (from the first day of the tournament). Once the first Round of 32 match kicks off, the Bonus Podium closes permanently.
 - You can save and update your picks as many times as you like **before the window closes**.
@@ -160,8 +190,8 @@ Each position is scored independently. You can earn 50 pts just for the Champion
 The ranking is ordered by **total points** (matches + podium).
 
 **Tiebreaker (in order):**
-1. Most matches with at least 1 point ("hits").
-2. Fewest matches with 0 points ("zeros") — matches with no prediction count as zero.
+1. Most "hits" — matches scored at maximum: **10 pts** in group stage, **25 pts** in knockout.
+2. Fewest matches with 0 points ("zeros") — matches with no prediction count as zero. Partial scores (>0 but below the match maximum) are neither hits nor zeros.
 
 The table shows: rank, name, points, hits, zeros, and gap to the leader.
 
@@ -171,6 +201,7 @@ The table shows: rank, name, points, hits, zeros, and gap to the leader.
 
 - Your predictions are **private until the round closes**.
 - Once the round closes, everyone can see everyone's picks for those matches.
+- Your **Podium predictions** are likewise private until the Podium window closes (when the first Round of 32 match begins). After that, everyone can see everyone's podium picks.
 
 ---
 
@@ -186,4 +217,4 @@ That match is worth 0 points for you.
 You can save and update your picks as many times as you want before the window closes. The last saved version is the one that counts.
 
 **How do I know when each round closes?**
-The app shows a countdown at all times. The deadline is when the round *starts* — at the kickoff of the first match in each matchday. Not when the last match ends, but when the first one begins.
+The app shows a countdown at all times. Each round's deadline is 00:00 Chile time on the day of the first match in that round — when the matchday begins, not when its matches actually kick off.

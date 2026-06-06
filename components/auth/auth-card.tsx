@@ -1,4 +1,8 @@
+import Image from "next/image";
+import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/nav/theme-toggle";
 import type { ReactNode } from "react";
 
 interface AuthCardProps {
@@ -6,7 +10,10 @@ interface AuthCardProps {
   children: ReactNode;
 }
 
-export function AuthCard({ title, children }: AuthCardProps) {
+export async function AuthCard({ title, children }: AuthCardProps) {
+  const locale = await getLocale();
+  const tNav = await getTranslations("nav");
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden">
       

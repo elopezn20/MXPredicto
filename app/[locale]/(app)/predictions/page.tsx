@@ -7,8 +7,6 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
-type Locale = "en" | "es" | "ko";
-
 function teamName(
   team: { name_en: string; name_es: string; name_ko: string } | null,
   locale: string
@@ -45,12 +43,25 @@ export default async function PredictionsPage({ params }: Props) {
     .neq("stage", "podio")
     .order("order_index", { ascending: true });
 
-  // Fetch current user's predictions
-  const { data: predictions, error: predictionsError } = await supabase
-    .from("predictions")
-    .select(
-      "match_id, home_score_pred, away_score_pred, penalty_winner_team_id, points_awarded"
-    );
+
+  // Reads from the my_predictions view (security_invoker, filters by auth.uid())
+  // so this query can NEVER return another user's rows — even though the base
+  // table's RLS exposes others' rows for locked rounds. See CLAUDE.md "User-data
+  // queries". The explicit .eq filter is redundant with the view but kept as a
+  // belt that signals intent.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: predictions } = user
+    ? await supabase
+        .from("my_predictions")
+        .select(
+          "match_id, home_score_pred, away_score_pred, penalty_winner_team_id, points_awarded"
+        )
+        .eq("user_id", user.id)
+    : { data: [] };
+
 
   const matchCount = (rounds ?? []).reduce(
     (n, r) => n + (r.matches?.length ?? 0),
