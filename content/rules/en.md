@@ -51,29 +51,11 @@ Plus a **Bonus Podium** (special bet, see below).
 
 ## Prizes
 
-The total pool is **$2,500,000 CLP**, distributed across the top eight places in the final standings.
-
-| Place | Prize (CLP) |
-|---|---|
-| 1st | $1,250,000 |
-| 2nd | $500,000 |
-| 3rd | $250,000 |
-| 4th | $150,000 |
-| 5th | $125,000 |
-| 6th | $100,000 |
-| 7th | $75,000 |
-| 8th | $50,000 |
-| **Total** | **$2,500,000** |
+The total prize pool will be split among 1st, 2nd, and 3rd place in a 7:2:1 ratio, respectively.
 
 ### Ties on the payout
 
 If two or more players finish tied on points, hits, and zeros, the prize pot for the positions they occupy is split equally among them.
-
-**Examples:**
-
-- Two-way tie for 1st → each receives **($1,250,000 + $500,000) / 2 = $875,000**.
-- Three-way tie for 1st → each receives **($1,250,000 + $500,000 + $250,000) / 3 ≈ $666,667**.
-- Two-way tie for 8th (the last paid position) → each receives **($50,000 + $0) / 2 = $25,000**.
 
 ---
 

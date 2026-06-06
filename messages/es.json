@@ -85,7 +85,7 @@
     "viewPredictions": "Ver predicciones",
     "predictionsOf": "Predicciones de {name}",
     "backToScoreboard": "← Volver a la tabla",
-    "poolCaption": "Pozo total: {amount} CLP — premio para los 8 primeros. Ver premios en las <link>reglas</link>."
+    "poolCaption": "Pozo estimado: {amount} CLP — premio para los 3 primeros. Ver premios en las <link>reglas</link>."
   },
   "admin": {
     "title": "Panel de administración",

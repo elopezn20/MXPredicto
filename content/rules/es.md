@@ -51,29 +51,11 @@ Más un **Bonus Podio** (apuesta especial, ver más abajo).
 
 ## Premios
 
-El pozo total es de **$2.500.000 CLP**, distribuido entre los ocho primeros lugares de la tabla final.
-
-| Lugar | Premio (CLP) |
-|---|---|
-| 1° | $1.250.000 |
-| 2° | $500.000 |
-| 3° | $250.000 |
-| 4° | $150.000 |
-| 5° | $125.000 |
-| 6° | $100.000 |
-| 7° | $75.000 |
-| 8° | $50.000 |
-| **Total** | **$2.500.000** |
+El pozo total se repartirá entre el 1°, 2° y 3° lugar en una proporción de 7:2:1, respectivamente.
 
 ### Empates en el pago
 
 Si dos o más jugadores terminan empatados en puntos, aciertos y ceros, el pozo de las posiciones que ocupan se reparte en partes iguales entre ellos.
-
-**Ejemplos:**
-
-- Empate de dos en el 1° lugar → cada uno recibe **($1.250.000 + $500.000) / 2 = $875.000**.
-- Empate de tres en el 1° lugar → cada uno recibe **($1.250.000 + $500.000 + $250.000) / 3 ≈ $666.667**.
-- Empate de dos en el 8° lugar (la última posición premiada) → cada uno recibe **($50.000 + $0) / 2 = $25.000**.
 
 ---
 

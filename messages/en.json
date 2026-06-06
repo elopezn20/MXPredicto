@@ -85,7 +85,7 @@
     "viewPredictions": "View predictions",
     "predictionsOf": "Predictions by {name}",
     "backToScoreboard": "← Back to scoreboard",
-    "poolCaption": "Total pool: {amount} CLP — top 8 win. See the prize table in the <link>rules</link>."
+    "poolCaption": "Estimated pool prize: {amount} CLP — top 3 win. See the prize table in the <link>rules</link>."
   },
   "admin": {
     "title": "Admin Panel",
