@@ -61,21 +61,6 @@ export function NavBar({ locale, displayName, isAdmin, profileUserId, t }: NavBa
           t={t}
         />
 
-        {/* Nav links */}
-        <div className="hidden flex-1 items-center gap-2 sm:flex">
-          <NavLink href={`/${locale}/predictions`}>
-            {t.predictions}
-          </NavLink>
-          <NavLink href={`/${locale}/podio`}>
-            {t.podio}
-          </NavLink>
-          <NavLink href={`/${locale}/scoreboard`}>
-            {t.scoreboard}
-          </NavLink>
-          <NavLink href={`/${locale}/rules`}>
-            {t.rules}
-          </NavLink>
-
         {/* Nav links (desktop only) */}
         <div className="hidden flex-1 items-center gap-1 sm:flex">
           {isAuthed && (
