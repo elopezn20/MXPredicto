@@ -15,46 +15,41 @@ export async function AuthCard({ title, children }: AuthCardProps) {
   const tNav = await getTranslations("nav");
 
   return (
-    <main className="flex min-h-screen flex-col bg-background">
-      <header
-        className="border-b-4 border-[#F4C430] shadow-md"
-        style={{ backgroundColor: "#1A2855", color: "#F5F0E6" }}
-      >
-        <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:py-4">
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="inline-flex items-center justify-center rounded-md bg-cream px-2 py-1.5">
-              <Image
-                src="/fwc26-emblem.png"
-                alt="FIFA World Cup 26"
-                width={56}
-                height={44}
-                priority
-                className="h-9 w-auto sm:h-11"
-              />
-            </span>
-            <span className="font-bold tracking-tight">Polla 2026</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/${locale}/rules`}
-              className="whitespace-nowrap rounded px-2 py-1 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              {tNav("rules")}
-            </Link>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden">
+      
+      {/* 🔥 Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/login.png')", // 👉 move your image here
+        }}
+      />
 
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">{title}</CardTitle>
-            </CardHeader>
-            <CardContent>{children}</CardContent>
-          </Card>
+      {/* 🔥 Dark overlay (cinematic) */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+
+      {/* 🔥 Content */}
+      <div className="relative z-10 w-full max-w-sm px-4">
+        
+        {/* 🔥 Logo */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">
+            MX<span className="text-pink-500">Predicto</span>
+          </h1>
+          <p className="mt-1 text-sm text-gray-300">
+            Predict the game. Own the leaderboard.
+          </p>
         </div>
+
+        {/* 🔥 Card */}
+        <Card className="border border-white/10 bg-white/10 backdrop-blur-xl shadow-2xl">
+          <CardHeader>
+            <CardTitle className="text-xl text-white">{title}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-white">
+            {children}
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

@@ -1,4 +1,4 @@
-# Polla Mundial 2026 — Game Rules
+# MXPredicto — Game Rules
 
 ---
 
@@ -19,6 +19,7 @@
 | **Rankings** | By total points (matches + podium). Tiebreaker: most hits (perfect match — 10 pts in group, 25 pts in knockout) → fewest zeros. |
 | **Visibility** | Your predictions are private until the round closes. Afterwards everyone can see everyone's picks. |
 | **Who wins?** | The player with the most total points at the end of the tournament. |
+| **Respect** | All players and their prefered teams must be respected [**Optional**] |
 
 ---
 

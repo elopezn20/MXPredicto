@@ -1,4 +1,4 @@
-# Polla Mundial 2026 — Reglas del juego
+# MXPredicto — Reglas del juego
 
 ---
 
@@ -19,6 +19,7 @@
 | **Ranking** | Por puntos totales (partidos + podio). Desempate: más aciertos (pronóstico perfecto — 10 pts en grupos, 25 pts en eliminatorias) → menos ceros. |
 | **Visibilidad** | Tus predicciones son privadas hasta que la ronda cierra. Después todos ven los pronósticos de todos. |
 | **¿Quién gana?** | El jugador con más puntos totales al final del torneo. |
+| **Respeto** | Todos los jugadores y sus equipos preferidos deben ser respetados [Opcional] |
 
 ---
 
