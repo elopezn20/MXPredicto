@@ -5,7 +5,7 @@ import { computeLeaderboard } from "@/lib/scoring/scoring";
 import { cn } from "@/lib/utils";
 
 const PRIZES_CLP = [
-  616_000, 176_000, 88_000
+  868_000, 248_000, 124_000
 ] as const;
 const POOL_TOTAL_CLP = PRIZES_CLP.reduce((sum, n) => sum + n, 0);
 
