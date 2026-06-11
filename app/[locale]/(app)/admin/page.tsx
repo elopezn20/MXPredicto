@@ -7,6 +7,14 @@ import { RoundsSection } from "@/components/admin/rounds-section";
 import { SyncSection } from "@/components/admin/sync-section";
 import { AuditSection } from "@/components/admin/audit-section";
 import { UsersSection } from "@/components/admin/users-section";
+import {
+  ExportLastClosedPredictionsButton,
+  ExportNextRoundPredictionsButton,
+} from "@/components/admin/export-predictions-button";
+import {
+  ExportLastClosedParticipationButton,
+  ExportNextRoundParticipationButton,
+} from "@/components/admin/export-participation-button";
 
 const VALID_TABS = ["invitations", "matches", "rounds", "users", "sync", "audit"] as const;
 
@@ -103,7 +111,15 @@ export default async function AdminPage({ params, searchParams }: Props) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <div className="flex items-center gap-2">
+          <ExportLastClosedParticipationButton />
+          <ExportNextRoundParticipationButton />
+          <ExportLastClosedPredictionsButton />
+          <ExportNextRoundPredictionsButton />
+        </div>
+      </div>
 
       <Tabs defaultValue={defaultTab} orientation="vertical">
         <TabsList className="w-44 shrink-0">
