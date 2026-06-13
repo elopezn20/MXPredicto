@@ -2,7 +2,19 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { computeLeaderboard } from "@/lib/scoring/scoring";
+import { computeNextMatchStats } from "@/lib/scoring/next-match-stats";
+import { NextMatchStatsPanel } from "@/components/scoreboard/next-match-stats";
 import { cn } from "@/lib/utils";
+
+function teamName(
+  team: { code: string; name_en: string; name_es: string; name_ko: string } | null,
+  locale: string
+): string {
+  if (!team) return "—";
+  if (locale === "ko") return team.name_ko;
+  if (locale === "en") return team.name_en;
+  return team.name_es;
+}
 
 const PRIZES_CLP = [
   868_000, 248_000, 124_000
@@ -71,6 +83,80 @@ export default async function ScoreboardPage({ params }: Props) {
 
   const rows = computeLeaderboard(users, finishedWithStage, predictions);
 
+  // ── Next match panel + per-player "next pick" column ──────────────────────────
+  // The next not-yet-finished match, earliest first. Other players' predictions
+  // for it are only visible (per RLS) once its round has locked, so we only
+  // surface aggregate stats / picks when lock_time has passed.
+  const nowIso = new Date().toISOString();
+  const { data: nextMatch } = await supabase
+    .from("matches")
+    .select(
+      `id, kickoff_at, status,
+       rounds ( lock_time ),
+       home_team:home_team_id ( code, name_en, name_es, name_ko ),
+       away_team:away_team_id ( code, name_en, name_es, name_ko )`
+    )
+    .neq("status", "finished")
+    .order("kickoff_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const nextRound = nextMatch
+    ? Array.isArray(nextMatch.rounds)
+      ? nextMatch.rounds[0]
+      : nextMatch.rounds
+    : null;
+  const nextMatchLocked =
+    !!nextRound?.lock_time && nextRound.lock_time <= nowIso;
+
+  // Picks are only fetched/shown once the round locks (RLS would hide others
+  // anyway; this also keeps the column empty before lock).
+  const { data: nextPreds } = nextMatch && nextMatchLocked
+    ? await supabase
+        .from("predictions")
+        .select("user_id, home_score_pred, away_score_pred")
+        .eq("match_id", nextMatch.id)
+    : { data: [] };
+
+  const nextStats = computeNextMatchStats(
+    (nextPreds ?? []).map((p) => ({
+      userId: p.user_id,
+      homeScore: p.home_score_pred,
+      awayScore: p.away_score_pred,
+    }))
+  );
+
+  const pickByUser = new Map<string, string>(
+    (nextPreds ?? []).map((p) => [
+      p.user_id,
+      `${p.home_score_pred}–${p.away_score_pred}`,
+    ])
+  );
+
+  const nextHomeTeam = nextMatch
+    ? Array.isArray(nextMatch.home_team)
+      ? nextMatch.home_team[0]
+      : nextMatch.home_team
+    : null;
+  const nextAwayTeam = nextMatch
+    ? Array.isArray(nextMatch.away_team)
+      ? nextMatch.away_team[0]
+      : nextMatch.away_team
+    : null;
+
+  const nextHomeName = teamName(nextHomeTeam ?? null, locale);
+  const nextAwayName = teamName(nextAwayTeam ?? null, locale);
+
+  const kickoffLabel = nextMatch
+    ? new Intl.DateTimeFormat(
+        locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US",
+        { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+      ).format(new Date(nextMatch.kickoff_at))
+    : "";
+
+  // Show the column header only when there's a next match to predict.
+  const showNextPick = !!nextMatch;
+
   // Tied ranks split the combined pot for the positions they occupy.
   // E.g. three players tied at rank 1 share prizes for positions 1, 2 and 3.
   const prizeByRank = new Map<number, number>();
@@ -90,6 +176,31 @@ export default async function ScoreboardPage({ params }: Props) {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
+
+      {nextMatch && (
+        <div className="space-y-2">
+          <h2 className="text-center text-base font-semibold text-muted-foreground">
+            {t("nextMatch")}
+          </h2>
+          <NextMatchStatsPanel
+            homeName={nextHomeName}
+            awayName={nextAwayName}
+            kickoffLabel={kickoffLabel}
+            stats={nextStats}
+            labels={{
+              heading: t("nextMatch"),
+              modeTitle: t("mode"),
+              averageTitle: t("averageScore"),
+              topPrefix: t("top"),
+              winsWord: t("wins"),
+              drawsWord: t("draws"),
+              noPredictions: nextMatchLocked
+                ? t("noPredictions")
+                : t("picksLocked"),
+            }}
+          />
+        </div>
+      )}
 
       <p className="text-sm text-muted-foreground">
         {t.rich("poolCaption", {
@@ -118,6 +229,11 @@ export default async function ScoreboardPage({ params }: Props) {
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground">
                   {t("player")}
                 </th>
+                {showNextPick && (
+                  <th className="px-3 py-2 text-center font-medium text-muted-foreground">
+                    {t("nextPick")}
+                  </th>
+                )}
                 <th className="px-3 py-2 text-right font-medium text-muted-foreground">
                   {t("points")}
                 </th>
@@ -165,6 +281,11 @@ export default async function ScoreboardPage({ params }: Props) {
                         </span>
                       )}
                     </td>
+                    {showNextPick && (
+                      <td className="px-3 py-2.5 text-center tabular-nums text-muted-foreground">
+                        {pickByUser.get(row.userId) ?? "—"}
+                      </td>
+                    )}
                     <td className="px-3 py-2.5 text-right font-bold text-primary">
                       {row.totalPoints}
                     </td>

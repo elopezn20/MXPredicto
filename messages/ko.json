@@ -85,7 +85,16 @@
     "viewPredictions": "예측 보기",
     "predictionsOf": "{name}의 예측",
     "backToScoreboard": "← 순위표로 돌아가기",
-    "poolCaption": "총 상금: {amount} CLP — 상위 8명에게 분배. 상금표는 <link>규칙</link>에서 확인하세요."
+    "poolCaption": "총 상금: {amount} CLP — 상위 8명에게 분배. 상금표는 <link>규칙</link>에서 확인하세요.",
+    "nextMatch": "다음 경기",
+    "mode": "최빈값 (가장 많은 예측)",
+    "averageScore": "평균 스코어",
+    "top": "상위",
+    "wins": "승",
+    "draws": "무승부",
+    "nextPick": "예측",
+    "noPredictions": "아직 예측이 없습니다.",
+    "picksLocked": "라운드가 잠기면 예측이 공개됩니다."
   },
   "admin": {
     "title": "관리자 패널",

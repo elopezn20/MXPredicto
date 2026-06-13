@@ -85,7 +85,16 @@
     "viewPredictions": "Ver predicciones",
     "predictionsOf": "Predicciones de {name}",
     "backToScoreboard": "← Volver a la tabla",
-    "poolCaption": "Pozo estimado: {amount} CLP — premio para los 3 primeros. Ver premios en las <link>reglas</link>."
+    "poolCaption": "Pozo estimado: {amount} CLP — premio para los 3 primeros. Ver premios en las <link>reglas</link>.",
+    "nextMatch": "Próximo partido",
+    "mode": "Moda (más predicho)",
+    "averageScore": "Marcador promedio",
+    "top": "Top",
+    "wins": "gana",
+    "draws": "Empates",
+    "nextPick": "Pronóstico",
+    "noPredictions": "Aún no hay pronósticos.",
+    "picksLocked": "Los pronósticos se revelan cuando cierra la fecha."
   },
   "admin": {
     "title": "Panel de administración",
