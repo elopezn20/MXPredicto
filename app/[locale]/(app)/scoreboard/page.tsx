@@ -156,6 +156,10 @@ export default async function ScoreboardPage({ params }: Props) {
 
   // Show the column header only when there's a next match to predict.
   const showNextPick = !!nextMatch;
+  const nextMatchCodes =
+    nextHomeTeam?.code && nextAwayTeam?.code
+      ? `${nextHomeTeam.code}–${nextAwayTeam.code}`
+      : null;
 
   // Tied ranks split the combined pot for the positions they occupy.
   // E.g. three players tied at rank 1 share prizes for positions 1, 2 and 3.
@@ -231,7 +235,12 @@ export default async function ScoreboardPage({ params }: Props) {
                 </th>
                 {showNextPick && (
                   <th className="px-3 py-2 text-center font-medium text-muted-foreground">
-                    {t("nextPick")}
+                    <span>{t("nextPick")}</span>
+                    {nextMatchCodes && (
+                      <span className="block text-[11px] font-semibold tracking-wide text-foreground/70">
+                        {nextMatchCodes}
+                      </span>
+                    )}
                   </th>
                 )}
                 <th className="px-3 py-2 text-right font-medium text-muted-foreground">
