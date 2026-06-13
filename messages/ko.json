@@ -94,7 +94,8 @@
     "draws": "무승부",
     "nextPick": "예측",
     "noPredictions": "아직 예측이 없습니다.",
-    "picksLocked": "라운드가 잠기면 예측이 공개됩니다."
+    "picksLocked": "라운드가 잠기면 예측이 공개됩니다.",
+    "exportPdf": "PDF 내보내기"
   },
   "admin": {
     "title": "관리자 패널",

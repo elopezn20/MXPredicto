@@ -71,3 +71,49 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
+/* ── Print: export the scoreboard as PDF ──────────────────────────────────────
+   Isolates #scoreboard-print so navbar/chrome are dropped, forces a light
+   palette (so dark-mode users still get a readable document), and keeps
+   coloured borders/backgrounds in the printout. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #scoreboard-print,
+  #scoreboard-print * {
+    visibility: visible;
+  }
+
+  #scoreboard-print {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.25rem;
+
+    /* Re-declare theme tokens to light values so bg-card / text-foreground /
+       text-muted-foreground etc. print cleanly regardless of active theme. */
+    --color-background: #ffffff;
+    --color-foreground: #0a0a0a;
+    --color-card: #ffffff;
+    --color-card-foreground: #0a0a0a;
+    --color-muted: #e8e0d0;
+    --color-muted-foreground: #5b6478;
+    --color-border: #d9cfbe;
+    --color-primary: #1a2855;
+
+    background: #ffffff;
+    color: #0a0a0a;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

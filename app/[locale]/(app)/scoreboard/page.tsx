@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { computeLeaderboard } from "@/lib/scoring/scoring";
 import { computeNextMatchStats } from "@/lib/scoring/next-match-stats";
 import { NextMatchStatsPanel } from "@/components/scoreboard/next-match-stats";
+import { ExportPdfButton } from "@/components/scoreboard/export-pdf-button";
 import { cn } from "@/lib/utils";
 
 function teamName(
@@ -161,6 +162,12 @@ export default async function ScoreboardPage({ params }: Props) {
       ? `${nextHomeTeam.code}–${nextAwayTeam.code}`
       : null;
 
+  // Print-only generation timestamp.
+  const generatedLabel = new Intl.DateTimeFormat(
+    locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US",
+    { dateStyle: "long", timeStyle: "short" }
+  ).format(new Date());
+
   // Tied ranks split the combined pot for the positions they occupy.
   // E.g. three players tied at rank 1 share prizes for positions 1, 2 and 3.
   const prizeByRank = new Map<number, number>();
@@ -178,8 +185,15 @@ export default async function ScoreboardPage({ params }: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
+    <div id="scoreboard-print" className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
+        <ExportPdfButton label={t("exportPdf")} />
+      </div>
+
+      <p className="hidden text-sm text-muted-foreground print:block">
+        {generatedLabel}
+      </p>
 
       {nextMatch && (
         <div className="space-y-2">

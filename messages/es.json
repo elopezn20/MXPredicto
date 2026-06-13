@@ -94,7 +94,8 @@
     "draws": "Empates",
     "nextPick": "Pronóstico",
     "noPredictions": "Aún no hay pronósticos.",
-    "picksLocked": "Los pronósticos se revelan cuando cierra la fecha."
+    "picksLocked": "Los pronósticos se revelan cuando cierra la fecha.",
+    "exportPdf": "Exportar PDF"
   },
   "admin": {
     "title": "Panel de administración",

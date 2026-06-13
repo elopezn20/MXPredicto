@@ -94,7 +94,8 @@
     "draws": "Draws",
     "nextPick": "Next pick",
     "noPredictions": "No predictions yet.",
-    "picksLocked": "Picks reveal once the round locks."
+    "picksLocked": "Picks reveal once the round locks.",
+    "exportPdf": "Export PDF"
   },
   "admin": {
     "title": "Admin Panel",
