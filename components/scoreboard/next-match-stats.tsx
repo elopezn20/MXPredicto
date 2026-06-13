@@ -106,7 +106,7 @@ export function NextMatchStatsPanel({
   return (
     <section className="rounded-2xl border bg-card p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-[#1A2855] dark:text-foreground">
+        <h2 className="text-xl font-bold text-primary">
           {homeName} – {awayName}
         </h2>
         <span className="text-sm text-muted-foreground">{kickoffLabel}</span>
@@ -125,7 +125,7 @@ export function NextMatchStatsPanel({
                 {labels.modeTitle}
               </div>
               <div className="mt-1">
-                <span className="text-2xl font-bold text-[#1A2855] dark:text-foreground tabular-nums">
+                <span className="text-2xl font-bold text-foreground tabular-nums">
                   {stats.mode ? `${stats.mode.home}–${stats.mode.away}` : "—"}
                 </span>
                 {stats.mode && (
@@ -139,7 +139,7 @@ export function NextMatchStatsPanel({
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {labels.averageTitle}
               </div>
-              <div className="mt-1 text-2xl font-bold text-[#1A2855] dark:text-foreground tabular-nums">
+              <div className="mt-1 text-2xl font-bold text-foreground tabular-nums">
                 {stats.avgHome} – {stats.avgAway}
               </div>
             </div>

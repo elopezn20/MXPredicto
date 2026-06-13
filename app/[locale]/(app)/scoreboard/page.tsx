@@ -187,7 +187,7 @@ export default async function ScoreboardPage({ params }: Props) {
   return (
     <div id="scoreboard-print" className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-[#1A2855] dark:text-foreground">{t("title")}</h1>
+        <h1 className="text-2xl font-bold text-primary">{t("title")}</h1>
         <ExportPdfButton label={t("exportPdf")} />
       </div>
 
@@ -277,6 +277,7 @@ export default async function ScoreboardPage({ params }: Props) {
             <tbody className="divide-y">
               {rows.map((row) => {
                 const isMe = row.userId === user?.id;
+                const isFirst = row.rank === 1;
                 const prizeAmount = prizeByRank.get(row.rank);
                 const prize =
                   prizeAmount !== undefined ? formatCLP(locale, prizeAmount) : "—";
@@ -285,16 +286,28 @@ export default async function ScoreboardPage({ params }: Props) {
                     key={row.userId}
                     className={cn(
                       "transition-colors hover:bg-muted/30",
-                      isMe && "bg-highlight/10 font-semibold"
+                      isFirst &&
+                        "bg-highlight/15 ring-1 ring-inset ring-highlight/40 hover:bg-highlight/20",
+                      isMe && !isFirst && "bg-highlight/10 font-semibold"
                     )}
                   >
-                    <td className="px-3 py-2.5 text-muted-foreground">
-                      {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : row.rank}
+                    <td
+                      className={cn(
+                        "px-3 text-muted-foreground",
+                        isFirst ? "py-4" : "py-2.5"
+                      )}
+                    >
+                      <span className={cn(isFirst && "text-3xl")}>
+                        {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : row.rank}
+                      </span>
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className={cn("px-3", isFirst ? "py-4" : "py-2.5")}>
                       <Link
                         href={`/${locale}/profile/${row.userId}`}
-                        className="hover:underline"
+                        className={cn(
+                          "hover:underline",
+                          isFirst && "text-lg font-bold text-foreground"
+                        )}
                       >
                         {row.displayName}
                       </Link>
@@ -305,27 +318,53 @@ export default async function ScoreboardPage({ params }: Props) {
                       )}
                     </td>
                     {showNextPick && (
-                      <td className="px-3 py-2.5 text-center tabular-nums text-muted-foreground">
+                      <td
+                        className={cn(
+                          "px-3 text-center tabular-nums text-muted-foreground",
+                          isFirst ? "py-4" : "py-2.5"
+                        )}
+                      >
                         {pickByUser.get(row.userId) ?? "—"}
                       </td>
                     )}
-                    <td className="px-3 py-2.5 text-right font-bold text-primary">
+                    <td
+                      className={cn(
+                        "px-3 text-right font-bold text-primary",
+                        isFirst ? "py-4 text-xl" : "py-2.5"
+                      )}
+                    >
                       {row.totalPoints}
                     </td>
-                    <td className="hidden px-3 py-2.5 text-right text-muted-foreground sm:table-cell">
+                    <td
+                      className={cn(
+                        "hidden px-3 text-right text-muted-foreground sm:table-cell",
+                        isFirst ? "py-4" : "py-2.5"
+                      )}
+                    >
                       {row.matchesHit}
                     </td>
-                    <td className="hidden px-3 py-2.5 text-right text-muted-foreground sm:table-cell">
+                    <td
+                      className={cn(
+                        "hidden px-3 text-right text-muted-foreground sm:table-cell",
+                        isFirst ? "py-4" : "py-2.5"
+                      )}
+                    >
                       {row.zeroMatches}
                     </td>
-                    <td className="hidden px-3 py-2.5 text-right text-muted-foreground md:table-cell">
+                    <td
+                      className={cn(
+                        "hidden px-3 text-right text-muted-foreground md:table-cell",
+                        isFirst ? "py-4" : "py-2.5"
+                      )}
+                    >
                       {row.deltaFromLeader < 0
                         ? `${row.deltaFromLeader}`
                         : "—"}
                     </td>
                     <td
                       className={cn(
-                        "px-3 py-2.5 text-right whitespace-nowrap",
+                        "px-3 text-right whitespace-nowrap",
+                        isFirst ? "py-4" : "py-2.5",
                         prizeAmount !== undefined
                           ? "font-medium text-foreground"
                           : "text-muted-foreground"
