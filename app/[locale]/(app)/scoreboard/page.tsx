@@ -346,6 +346,14 @@ export default async function ScoreboardPage({ params }: Props) {
                     </td>
                     <td className={cn("px-3", isFirst ? "py-4" : "py-2.5")}>
                       <span className="inline-flex items-center gap-1.5">
+                        {move !== 0 && (
+                          <MovementIndicator
+                            delta={move}
+                            title={t(move > 0 ? "rankUp" : "rankDown", {
+                              count: Math.abs(move),
+                            })}
+                          />
+                        )}
                         <Link
                           href={`/${locale}/profile/${row.userId}`}
                           className={cn(
@@ -355,14 +363,6 @@ export default async function ScoreboardPage({ params }: Props) {
                         >
                           {row.displayName}
                         </Link>
-                        {move !== 0 && (
-                          <MovementIndicator
-                            delta={move}
-                            title={t(move > 0 ? "rankUp" : "rankDown", {
-                              count: Math.abs(move),
-                            })}
-                          />
-                        )}
                         {isMe && (
                           <span className="text-xs text-muted-foreground">
                             {t("you")}
