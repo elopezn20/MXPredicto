@@ -346,14 +346,16 @@ export default async function ScoreboardPage({ params }: Props) {
                     </td>
                     <td className={cn("px-3", isFirst ? "py-4" : "py-2.5")}>
                       <span className="inline-flex items-center gap-1.5">
-                        {move !== 0 && (
-                          <MovementIndicator
-                            delta={move}
-                            title={t(move > 0 ? "rankUp" : "rankDown", {
-                              count: Math.abs(move),
-                            })}
-                          />
-                        )}
+                        <span className="flex w-7 shrink-0 justify-end">
+                          {move !== 0 && (
+                            <MovementIndicator
+                              delta={move}
+                              title={t(move > 0 ? "rankUp" : "rankDown", {
+                                count: Math.abs(move),
+                              })}
+                            />
+                          )}
+                        </span>
                         <Link
                           href={`/${locale}/profile/${row.userId}`}
                           className={cn(
