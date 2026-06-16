@@ -66,20 +66,40 @@ export default async function ScoreboardPage({ params }: Props) {
   });
   const finishedIds = finishedWithStage.map((m) => m.id);
 
-  // All predictions for finished matches (RLS allows seeing others' in locked rounds)
-  const { data: preds } = finishedIds.length
-    ? await supabase
+  // All predictions for finished matches (RLS allows seeing others' in locked
+  // rounds). PostgREST caps a single response at 1000 rows, and the
+  // finished-match prediction count already exceeds that (e.g. 17 matches ×
+  // ~62 players = 1054), so a single .in() select was silently truncated —
+  // undercounting whichever players' rows fell past row 1000. (Profile pages
+  // query one user at a time, ≤ matches rows, so they were never truncated;
+  // that's why a player's profile total could exceed their scoreboard total.)
+  // Paginate so every row is counted.
+  const PAGE_SIZE = 1000;
+  const preds: Array<{
+    user_id: string;
+    match_id: string;
+    points_awarded: number | null;
+  }> = [];
+  if (finishedIds.length) {
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await supabase
         .from("predictions")
         .select("user_id, match_id, points_awarded")
         .in("match_id", finishedIds)
-    : { data: [] };
+        .order("id", { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !data?.length) break;
+      preds.push(...data);
+      if (data.length < PAGE_SIZE) break;
+    }
+  }
 
   const users = (profiles ?? []).map((p) => ({
     id: p.id,
     displayName: p.display_name,
   }));
 
-  const predictions = (preds ?? []).map((p) => ({
+  const predictions = preds.map((p) => ({
     userId: p.user_id,
     matchId: p.match_id,
     pointsAwarded: p.points_awarded,
