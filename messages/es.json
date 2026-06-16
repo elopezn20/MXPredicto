@@ -95,7 +95,9 @@
     "nextPick": "Pronóstico",
     "noPredictions": "Aún no hay pronósticos.",
     "picksLocked": "Los pronósticos se revelan cuando cierra la fecha.",
-    "exportPdf": "Exportar PDF"
+    "exportPdf": "Exportar PDF",
+    "rankUp": "Subió {count} desde el último partido",
+    "rankDown": "Bajó {count} desde el último partido"
   },
   "admin": {
     "title": "Panel de administración",
