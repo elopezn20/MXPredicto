@@ -17,7 +17,7 @@ export interface NextMatchStatsLabels {
 interface Props {
   homeName: string;
   awayName: string;
-  kickoffLabel: string;
+  kickoff: React.ReactNode;
   stats: NextMatchStats;
   labels: NextMatchStatsLabels;
 }
@@ -97,7 +97,7 @@ function OutcomeColumn({
 export function NextMatchStatsPanel({
   homeName,
   awayName,
-  kickoffLabel,
+  kickoff,
   stats,
   labels,
 }: Props) {
@@ -109,7 +109,7 @@ export function NextMatchStatsPanel({
         <h2 className="text-xl font-bold text-primary">
           {homeName} – {awayName}
         </h2>
-        <span className="text-sm text-muted-foreground">{kickoffLabel}</span>
+        <span className="text-sm text-muted-foreground">{kickoff}</span>
       </div>
 
       {!hasData ? (

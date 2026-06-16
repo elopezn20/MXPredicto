@@ -95,7 +95,9 @@
     "nextPick": "Next pick",
     "noPredictions": "No predictions yet.",
     "picksLocked": "Picks reveal once the round locks.",
-    "exportPdf": "Export PDF"
+    "exportPdf": "Export PDF",
+    "rankUp": "Up {count} since last match",
+    "rankDown": "Down {count} since last match"
   },
   "admin": {
     "title": "Admin Panel",

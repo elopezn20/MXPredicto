@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { computeLeaderboard } from "@/lib/scoring/scoring";
 import { computeNextMatchStats } from "@/lib/scoring/next-match-stats";
 import { NextMatchStatsPanel } from "@/components/scoreboard/next-match-stats";
+import { KickoffTime } from "@/components/scoreboard/kickoff-time";
+import { MovementIndicator } from "@/components/scoreboard/movement-indicator";
 import { ExportPdfButton } from "@/components/scoreboard/export-pdf-button";
 import { cn } from "@/lib/utils";
 
@@ -49,17 +51,18 @@ export default async function ScoreboardPage({ params }: Props) {
     .from("profiles")
     .select("id, display_name");
 
-  // Finished matches with stage (group/knockout) for perfect-match hit detection
+  // Finished matches with stage (group/knockout) for perfect-match hit detection.
+  // kickoff_at lets us identify the most-recent game for rank-movement arrows.
   const { data: finishedMatches } = await supabase
     .from("matches")
-    .select("id, rounds(stage)")
+    .select("id, kickoff_at, rounds(stage)")
     .eq("status", "finished");
 
   const finishedWithStage = (finishedMatches ?? []).flatMap((m) => {
     const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
     const stage: "group" | "knockout" =
       roundData?.stage === "group" ? "group" : "knockout";
-    return [{ id: m.id, stage }];
+    return [{ id: m.id, stage, kickoff: m.kickoff_at as string }];
   });
   const finishedIds = finishedWithStage.map((m) => m.id);
 
@@ -83,6 +86,28 @@ export default async function ScoreboardPage({ params }: Props) {
   }));
 
   const rows = computeLeaderboard(users, finishedWithStage, predictions);
+
+  // ── Rank movement vs the previous game ────────────────────────────────────────
+  // "Previous game" = the single most-recently-played finished match (latest
+  // kickoff). Recompute the leaderboard excluding every match at that latest
+  // kickoff and diff each player's rank: positive = moved up, negative = down.
+  // Hidden entirely when there's no earlier game to compare against.
+  const moveByUser = new Map<string, number>();
+  if (finishedWithStage.length > 0) {
+    const latestKickoff = finishedWithStage.reduce(
+      (max, m) => (m.kickoff > max ? m.kickoff : max),
+      finishedWithStage[0]!.kickoff
+    );
+    const before = finishedWithStage.filter((m) => m.kickoff < latestKickoff);
+    if (before.length > 0) {
+      const prevRows = computeLeaderboard(users, before, predictions);
+      const prevRankByUser = new Map(prevRows.map((r) => [r.userId, r.rank]));
+      for (const row of rows) {
+        const prevRank = prevRankByUser.get(row.userId);
+        if (prevRank !== undefined) moveByUser.set(row.userId, prevRank - row.rank);
+      }
+    }
+  }
 
   // ── Next match panel + per-player "next pick" column ──────────────────────────
   // The next not-yet-finished match, earliest first. Other players' predictions
@@ -148,10 +173,21 @@ export default async function ScoreboardPage({ params }: Props) {
   const nextHomeName = teamName(nextHomeTeam ?? null, locale);
   const nextAwayName = teamName(nextAwayTeam ?? null, locale);
 
-  const kickoffLabel = nextMatch
+  // Server-rendered fallback in the pool's home timezone (Chile). The
+  // <KickoffTime> client component re-formats this in the viewer's local
+  // timezone after mount, matching how the prediction match cards display
+  // kickoff times. Without a fixed timeZone here the server would format in
+  // its own tz (UTC), which is what caused the scoreboard/predictions mismatch.
+  const kickoffFallback = nextMatch
     ? new Intl.DateTimeFormat(
         locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US",
-        { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+        {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "America/Santiago",
+        }
       ).format(new Date(nextMatch.kickoff_at))
     : "";
 
@@ -203,7 +239,13 @@ export default async function ScoreboardPage({ params }: Props) {
           <NextMatchStatsPanel
             homeName={nextHomeName}
             awayName={nextAwayName}
-            kickoffLabel={kickoffLabel}
+            kickoff={
+              <KickoffTime
+                iso={nextMatch.kickoff_at}
+                locale={locale}
+                fallback={kickoffFallback}
+              />
+            }
             stats={nextStats}
             labels={{
               heading: t("nextMatch"),
@@ -278,6 +320,7 @@ export default async function ScoreboardPage({ params }: Props) {
               {rows.map((row) => {
                 const isMe = row.userId === user?.id;
                 const isFirst = row.rank === 1;
+                const move = moveByUser.get(row.userId) ?? 0;
                 const prizeAmount = prizeByRank.get(row.rank);
                 const prize =
                   prizeAmount !== undefined ? formatCLP(locale, prizeAmount) : "—";
@@ -302,20 +345,32 @@ export default async function ScoreboardPage({ params }: Props) {
                       </span>
                     </td>
                     <td className={cn("px-3", isFirst ? "py-4" : "py-2.5")}>
-                      <Link
-                        href={`/${locale}/profile/${row.userId}`}
-                        className={cn(
-                          "hover:underline",
-                          isFirst && "text-lg font-bold text-foreground"
-                        )}
-                      >
-                        {row.displayName}
-                      </Link>
-                      {isMe && (
-                        <span className="ml-1.5 text-xs text-muted-foreground">
-                          {t("you")}
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="flex w-7 shrink-0 justify-end">
+                          {move !== 0 && (
+                            <MovementIndicator
+                              delta={move}
+                              title={t(move > 0 ? "rankUp" : "rankDown", {
+                                count: Math.abs(move),
+                              })}
+                            />
+                          )}
                         </span>
-                      )}
+                        <Link
+                          href={`/${locale}/profile/${row.userId}`}
+                          className={cn(
+                            "hover:underline",
+                            isFirst && "text-lg font-bold text-foreground"
+                          )}
+                        >
+                          {row.displayName}
+                        </Link>
+                        {isMe && (
+                          <span className="text-xs text-muted-foreground">
+                            {t("you")}
+                          </span>
+                        )}
+                      </span>
                     </td>
                     {showNextPick && (
                       <td
