@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { computeLeaderboard } from "@/lib/scoring/scoring";
 import { computeNextMatchStats } from "@/lib/scoring/next-match-stats";
 import { NextMatchStatsPanel } from "@/components/scoreboard/next-match-stats";
+import { KickoffTime } from "@/components/scoreboard/kickoff-time";
 import { ExportPdfButton } from "@/components/scoreboard/export-pdf-button";
 import { cn } from "@/lib/utils";
 
@@ -148,10 +149,21 @@ export default async function ScoreboardPage({ params }: Props) {
   const nextHomeName = teamName(nextHomeTeam ?? null, locale);
   const nextAwayName = teamName(nextAwayTeam ?? null, locale);
 
-  const kickoffLabel = nextMatch
+  // Server-rendered fallback in the pool's home timezone (Chile). The
+  // <KickoffTime> client component re-formats this in the viewer's local
+  // timezone after mount, matching how the prediction match cards display
+  // kickoff times. Without a fixed timeZone here the server would format in
+  // its own tz (UTC), which is what caused the scoreboard/predictions mismatch.
+  const kickoffFallback = nextMatch
     ? new Intl.DateTimeFormat(
         locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US",
-        { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+        {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "America/Santiago",
+        }
       ).format(new Date(nextMatch.kickoff_at))
     : "";
 
@@ -203,7 +215,13 @@ export default async function ScoreboardPage({ params }: Props) {
           <NextMatchStatsPanel
             homeName={nextHomeName}
             awayName={nextAwayName}
-            kickoffLabel={kickoffLabel}
+            kickoff={
+              <KickoffTime
+                iso={nextMatch.kickoff_at}
+                locale={locale}
+                fallback={kickoffFallback}
+              />
+            }
             stats={nextStats}
             labels={{
               heading: t("nextMatch"),
