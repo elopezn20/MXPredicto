@@ -8,6 +8,11 @@ const handleI18n = createIntlMiddleware(routing);
 // Any locale-prefixed route that isn't an auth page or a public page requires login
 const LOCALE_ROOT = /^\/(en|es|ko)(\/|$)/;
 const AUTH_PAGES = /^\/(en|es|ko)\/(login|signup|forgot-password|reset-password)/;
+// Authenticated users are redirected away from these. reset-password is
+// intentionally excluded: the recovery email link establishes a session before
+// the user reaches the page, so bouncing them here would make password resets
+// impossible.
+const AUTH_REDIRECT_PAGES = /^\/(en|es|ko)\/(login|signup|forgot-password)/;
 const PUBLIC_PAGES = /^\/(en|es|ko)\/rules(\/|$)/;
 
 export async function proxy(request: NextRequest) {
@@ -52,7 +57,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
-  if (AUTH_PAGES.test(pathname) && user) {
+  if (AUTH_REDIRECT_PAGES.test(pathname) && user) {
     return NextResponse.redirect(new URL(`/${locale}/predictions`, request.url));
   }
 

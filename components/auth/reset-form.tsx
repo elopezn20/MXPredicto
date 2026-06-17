@@ -27,7 +27,9 @@ export function ResetForm({ locale, t }: ResetFormProps) {
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.error === "error.passwordTooShort"
             ? t.error.passwordTooShort
-            : t.error.generic}
+            : state.error === "error.passwordsMustMatch"
+              ? t.error.passwordsMustMatch
+              : t.error.generic}
         </p>
       )}
 

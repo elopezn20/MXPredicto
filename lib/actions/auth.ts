@@ -183,6 +183,7 @@ export async function forgotPassword(
 
 const ResetSchema = z.object({
   password: z.string().min(8),
+  confirmPassword: z.string().min(1),
   locale: z.string().default("es"),
 });
 
@@ -192,6 +193,7 @@ export async function resetPassword(
 ): Promise<ActionResult> {
   const parsed = ResetSchema.safeParse({
     password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
     locale: formData.get("locale"),
   });
 
@@ -199,7 +201,12 @@ export async function resetPassword(
     return { ok: false, error: "error.passwordTooShort" };
   }
 
-  const { password, locale } = parsed.data;
+  const { password, confirmPassword, locale } = parsed.data;
+
+  if (password !== confirmPassword) {
+    return { ok: false, error: "error.passwordsMustMatch" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.updateUser({ password });
