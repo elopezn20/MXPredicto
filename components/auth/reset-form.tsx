@@ -8,20 +8,27 @@ import { resetPassword } from "@/lib/actions/auth";
 
 interface ResetFormProps {
   locale: string;
+  tokenHash?: string;
   t: {
     newPassword: string;
     confirmPassword: string;
     resetPassword: string;
-    error: { generic: string; passwordTooShort: string; passwordsMustMatch: string };
+    error: {
+      generic: string;
+      passwordTooShort: string;
+      passwordsMustMatch: string;
+      linkExpired: string;
+    };
   };
 }
 
-export function ResetForm({ locale, t }: ResetFormProps) {
+export function ResetForm({ locale, tokenHash, t }: ResetFormProps) {
   const [state, formAction, pending] = useActionState(resetPassword, null);
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="locale" value={locale} />
+      {tokenHash && <input type="hidden" name="tokenHash" value={tokenHash} />}
 
       {state && !state.ok && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -29,7 +36,9 @@ export function ResetForm({ locale, t }: ResetFormProps) {
             ? t.error.passwordTooShort
             : state.error === "error.passwordsMustMatch"
               ? t.error.passwordsMustMatch
-              : t.error.generic}
+              : state.error === "error.linkExpired"
+                ? t.error.linkExpired
+                : t.error.generic}
         </p>
       )}
 

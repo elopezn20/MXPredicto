@@ -37,7 +37,8 @@
       "emailInUse": "Este correo ya está registrado.",
       "generic": "Ocurrió un error. Por favor intenta de nuevo.",
       "passwordsMustMatch": "Las contraseñas no coinciden.",
-      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "linkExpired": "Este enlace de restablecimiento no es válido o ha expirado. Solicita uno nuevo."
     }
   },
   "rounds": {
