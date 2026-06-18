@@ -108,7 +108,8 @@
       "users": "Usuarios",
       "sync": "Sincronizar",
       "audit": "Auditoría",
-      "rounds": "Rondas"
+      "rounds": "Rondas",
+      "participation": "Participación"
     },
     "users": {
       "save": "Guardar",
@@ -189,6 +190,26 @@
       "saved": "Guardado",
       "errorAfterKickoff": "El plazo no puede ser posterior al primer partido.",
       "errorGeneric": "Error al guardar"
+    },
+    "participation": {
+      "title": "Participación de la próxima ronda",
+      "description": "Muestra cuántas predicciones ha enviado cada jugador para la próxima ronda en cerrar. Exporta un PDF para compartir o imprimir el resumen.",
+      "loadButton": "Ver participación",
+      "loading": "Cargando…",
+      "exportPdf": "Exportar PDF",
+      "deadlineLabel": "cierra {time}",
+      "totalMatchesLabel": "{count} partidos",
+      "colUser": "Jugador",
+      "colPredicted": "Predichos",
+      "colTotal": "Total de partidos",
+      "colPercent": "Porcentaje",
+      "noOpenRound": "No hay ninguna ronda próxima abierta para predicciones.",
+      "errorGeneric": "No se pudo cargar la participación.",
+      "pdfTitle": "Reporte de participación de la ronda",
+      "pdfRound": "Ronda",
+      "pdfDeadline": "Cierra",
+      "pdfTotalMatches": "Total de partidos",
+      "pdfGenerated": "Generado"
     }
   },
   "profile": {

@@ -332,3 +332,99 @@ export async function syncFromFootballData(): Promise<
     return { ok: false, error: (err as Error).message };
   }
 }
+
+// ── Next-round participation report ─────────────────────────────────────────────
+
+export interface ParticipationRow {
+  userId: string;
+  displayName: string;
+  predicted: number;
+}
+
+export interface ParticipationReport {
+  roundNameKey: string;
+  lockTime: string;
+  totalMatches: number;
+  rows: ParticipationRow[];
+}
+
+/**
+ * Participation snapshot for the next round that is still open (the soonest
+ * `lock_time` in the future, among rounds that actually have matches). For each
+ * registered player it reports how many of the round's matches they have
+ * predicted, so the admin can chase down stragglers before the deadline.
+ */
+export async function getNextRoundParticipation(): Promise<
+  ActionResult<ParticipationReport>
+> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const admin = createAdminClient();
+  const nowIso = new Date().toISOString();
+
+  // Next round to close: earliest lock_time still in the future.
+  const { data: nextRound } = await admin
+    .from("rounds")
+    .select("id, name_key, lock_time")
+    .gt("lock_time", nowIso)
+    .order("lock_time", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (!nextRound) return { ok: false, error: "noOpenRound" };
+
+  // Matches belonging to that round.
+  const { data: matchRows } = await admin
+    .from("matches")
+    .select("id")
+    .eq("round_id", nextRound.id);
+
+  const matchIds = (matchRows ?? []).map((m) => m.id);
+  const totalMatches = matchIds.length;
+
+  // Every registered player.
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, display_name")
+    .order("display_name", { ascending: true });
+
+  // Predictions for this round's matches, tallied per user. PostgREST caps a
+  // single response at 1000 rows (Supabase free tier), and a group round
+  // (24 matches × dozens of players) easily exceeds that — a single .in()
+  // select would be silently truncated and undercount stragglers. Paginate so
+  // every row is counted. (Same pattern as scoreboard/page.tsx.)
+  const PAGE_SIZE = 1000;
+  const counts = new Map<string, number>();
+  if (matchIds.length > 0) {
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await admin
+        .from("predictions")
+        .select("user_id")
+        .in("match_id", matchIds)
+        .order("id", { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error || !data?.length) break;
+      for (const p of data) {
+        counts.set(p.user_id, (counts.get(p.user_id) ?? 0) + 1);
+      }
+      if (data.length < PAGE_SIZE) break;
+    }
+  }
+
+  const rows: ParticipationRow[] = (profiles ?? []).map((p) => ({
+    userId: p.id,
+    displayName: p.display_name,
+    predicted: counts.get(p.id) ?? 0,
+  }));
+
+  return {
+    ok: true,
+    data: {
+      roundNameKey: nextRound.name_key,
+      lockTime: nextRound.lock_time,
+      totalMatches,
+      rows,
+    },
+  };
+}
