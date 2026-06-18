@@ -30,6 +30,18 @@ export interface OutcomeBucket {
 
 export interface NextMatchStats {
   total: number;
+  /**
+   * Spread across the three results (home win / draw / away win), 0–1
+   * (normalized Shannon entropy over the outcome buckets). 0 = everyone agrees
+   * on the result, 1 = a perfectly even three-way split.
+   */
+  outcomeSpread: number;
+  /**
+   * True when there's no clear favourite result — the leading outcome is short
+   * of a majority, so the pool is genuinely split on home/draw/away. Requires a
+   * minimum sample so a few differing picks don't trip it.
+   */
+  highVariety: boolean;
   /** Single most-predicted exact scoreline (null when no predictions). */
   mode: Scoreline | null;
   /** Mean predicted goals, one decimal, null when no predictions. */
@@ -40,10 +52,22 @@ export interface NextMatchStats {
   awayWins: OutcomeBucket;
 }
 
+/** Below this many predictions the spread signal is too noisy to flag. */
+const MIN_TOTAL_FOR_VARIETY = 8;
+/**
+ * When the leading result (home/draw/away) holds at most this share of all
+ * predictions, no outcome has a majority (>50%) and we flag high variety.
+ */
+const MAJORITY_SHARE = 0.5;
+
 const EMPTY_BUCKET: OutcomeBucket = { count: 0, pct: 0, top: [] };
 
 function round1(n: number): number {
   return Math.round(n * 10) / 10;
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
 }
 
 /**
@@ -64,6 +88,8 @@ export function computeNextMatchStats(
   if (total === 0) {
     return {
       total: 0,
+      outcomeSpread: 0,
+      highVariety: false,
       mode: null,
       avgHome: null,
       avgAway: null,
@@ -99,13 +125,35 @@ export function computeNextMatchStats(
     };
   };
 
+  const homeWins = buildBucket((s) => s.home > s.away);
+  const draws = buildBucket((s) => s.home === s.away);
+  const awayWins = buildBucket((s) => s.home < s.away);
+
+  // Spread is measured over the three results, not exact scorelines — a pool
+  // split between 1-0, 2-1 and 3-0 all agree it's a home win. Normalized
+  // Shannon entropy over the outcome buckets: 0 = one result is certain, 1 = a
+  // perfectly even home/draw/away split. Flag "high variety" only when no
+  // single result reaches a majority (and we have enough predictions).
+  const outcomeCounts = [homeWins.count, draws.count, awayWins.count];
+  const entropy = outcomeCounts.reduce((sum, c) => {
+    if (c === 0) return sum;
+    const p = c / total;
+    return sum - p * Math.log(p);
+  }, 0);
+  const outcomeSpread = round2(entropy / Math.log(3));
+  const leadShare = Math.max(...outcomeCounts) / total;
+  const highVariety =
+    total >= MIN_TOTAL_FOR_VARIETY && leadShare <= MAJORITY_SHARE;
+
   return {
     total,
+    outcomeSpread,
+    highVariety,
     mode,
     avgHome: round1(sumHome / total),
     avgAway: round1(sumAway / total),
-    homeWins: buildBucket((s) => s.home > s.away),
-    draws: buildBucket((s) => s.home === s.away),
-    awayWins: buildBucket((s) => s.home < s.away),
+    homeWins,
+    draws,
+    awayWins,
   };
 }

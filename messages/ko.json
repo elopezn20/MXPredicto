@@ -96,6 +96,7 @@
     "nextPick": "예측",
     "noPredictions": "아직 예측이 없습니다.",
     "picksLocked": "라운드가 잠기면 예측이 공개됩니다.",
+    "highVariety": "고위험 경기! 뚜렷한 우세가 없습니다 — 결과 예측이 갈립니다.",
     "exportPdf": "PDF 내보내기",
     "rankUp": "지난 경기 대비 {count}계단 상승",
     "rankDown": "지난 경기 대비 {count}계단 하락"

@@ -12,6 +12,7 @@ export interface NextMatchStatsLabels {
   winsWord: string; // "wins"
   drawsWord: string; // "Draws"
   noPredictions: string; // shown when nobody has predicted
+  highVariety: string; // tiny alert when predictions are very scattered
 }
 
 interface Props {
@@ -118,6 +119,24 @@ export function NextMatchStatsPanel({
         </p>
       ) : (
         <div className="space-y-4">
+          {stats.highVariety && (
+            <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-400">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5Z" />
+              </svg>
+              <span>{labels.highVariety}</span>
+            </div>
+          )}
+
           {/* Mode + average */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border bg-muted/40 p-3 text-center">

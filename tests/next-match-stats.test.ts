@@ -83,6 +83,62 @@ describe("computeNextMatchStats — CAN vs BIH mockup", () => {
       "0-2×1",
     ]);
   });
+
+  it("is not flagged as high variety (home win is the clear favourite)", () => {
+    // 72.6% home wins → a majority result, so no alert despite varied scores.
+    expect(s.highVariety).toBe(false);
+  });
+});
+
+describe("computeNextMatchStats — variety flag (outcome spread)", () => {
+  it("flags a genuine three-way split on the result", () => {
+    // Even across home win / draw / away win, varied scorelines within each.
+    const s = computeNextMatchStats([
+      ...many(1, 0, 3),
+      ...many(2, 1, 1), // 4 home wins
+      ...many(1, 1, 3),
+      ...many(2, 2, 1), // 4 draws
+      ...many(0, 1, 3),
+      ...many(1, 2, 1), // 4 away wins
+    ]);
+    expect(s.highVariety).toBe(true);
+    expect(s.outcomeSpread).toBeGreaterThan(0.9);
+  });
+
+  it("flags a home-vs-away coin flip with almost no draws", () => {
+    const s = computeNextMatchStats([...many(1, 0, 6), ...many(0, 1, 6)]);
+    expect(s.highVariety).toBe(true);
+  });
+
+  it("does NOT flag varied scorelines that agree on the result", () => {
+    // 12 different home-win scorelines → high scoreline variety, one result.
+    const s = computeNextMatchStats([
+      ...many(1, 0, 3),
+      ...many(2, 1, 3),
+      ...many(3, 0, 3),
+      ...many(2, 0, 3),
+    ]);
+    expect(s.highVariety).toBe(false);
+    expect(s.outcomeSpread).toBe(0);
+  });
+
+  it("does not flag a split below the minimum sample", () => {
+    const s = computeNextMatchStats([
+      ...many(1, 0, 1),
+      ...many(1, 1, 1),
+      ...many(0, 1, 1),
+    ]);
+    expect(s.highVariety).toBe(false);
+  });
+
+  it("does not flag when one result holds a majority", () => {
+    const s = computeNextMatchStats([
+      ...many(1, 0, 11), // 55% home wins
+      ...many(1, 1, 5),
+      ...many(0, 1, 4),
+    ]);
+    expect(s.highVariety).toBe(false);
+  });
 });
 
 describe("computeNextMatchStats — determinism", () => {
