@@ -96,6 +96,7 @@
     "nextPick": "Next pick",
     "noPredictions": "No predictions yet.",
     "picksLocked": "Picks reveal once the round locks.",
+    "highVariety": "High-risk game! No clear favourite — the pool is split on the result.",
     "exportPdf": "Export PDF",
     "rankUp": "Up {count} since last match",
     "rankDown": "Down {count} since last match"

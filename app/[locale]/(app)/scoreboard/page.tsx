@@ -277,6 +277,7 @@ export default async function ScoreboardPage({ params }: Props) {
               noPredictions: nextMatchLocked
                 ? t("noPredictions")
                 : t("picksLocked"),
+              highVariety: t("highVariety"),
             }}
           />
         </div>
