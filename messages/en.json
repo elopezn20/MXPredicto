@@ -108,7 +108,8 @@
       "users": "Users",
       "sync": "Sync & Rescore",
       "audit": "Audit Log",
-      "rounds": "Rounds"
+      "rounds": "Rounds",
+      "participation": "Participation"
     },
     "users": {
       "save": "Save",
@@ -189,6 +190,26 @@
       "saved": "Saved",
       "errorAfterKickoff": "Deadline cannot be after first kickoff.",
       "errorGeneric": "Error saving"
+    },
+    "participation": {
+      "title": "Next round participation",
+      "description": "Shows how many predictions each player has submitted for the next round to close. Export a PDF to share or print the snapshot.",
+      "loadButton": "Show participation",
+      "loading": "Loading…",
+      "exportPdf": "Export PDF",
+      "deadlineLabel": "closes {time}",
+      "totalMatchesLabel": "{count} matches",
+      "colUser": "Player",
+      "colPredicted": "Predicted",
+      "colTotal": "Total matches",
+      "colPercent": "Percentage",
+      "noOpenRound": "No upcoming round is open for predictions.",
+      "errorGeneric": "Could not load participation.",
+      "pdfTitle": "Round participation report",
+      "pdfRound": "Round",
+      "pdfDeadline": "Closes",
+      "pdfTotalMatches": "Total matches",
+      "pdfGenerated": "Generated"
     }
   },
   "profile": {

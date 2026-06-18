@@ -7,8 +7,9 @@ import { RoundsSection } from "@/components/admin/rounds-section";
 import { SyncSection } from "@/components/admin/sync-section";
 import { AuditSection } from "@/components/admin/audit-section";
 import { UsersSection } from "@/components/admin/users-section";
+import { ParticipationSection } from "@/components/admin/participation-section";
 
-const VALID_TABS = ["invitations", "matches", "rounds", "users", "sync", "audit"] as const;
+const VALID_TABS = ["invitations", "matches", "rounds", "users", "participation", "sync", "audit"] as const;
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -111,6 +112,7 @@ export default async function AdminPage({ params, searchParams }: Props) {
           <TabsTrigger value="matches">{t("tabs.matches")}</TabsTrigger>
           <TabsTrigger value="rounds">{t("tabs.rounds")}</TabsTrigger>
           <TabsTrigger value="users">{t("tabs.users")}</TabsTrigger>
+          <TabsTrigger value="participation">{t("tabs.participation")}</TabsTrigger>
           <TabsTrigger value="sync">{t("tabs.sync")}</TabsTrigger>
           <TabsTrigger value="audit">{t("tabs.audit")}</TabsTrigger>
         </TabsList>
@@ -129,6 +131,10 @@ export default async function AdminPage({ params, searchParams }: Props) {
 
         <TabsContent value="users" className="mt-0">
           <UsersSection users={profiles ?? []} />
+        </TabsContent>
+
+        <TabsContent value="participation" className="mt-0">
+          <ParticipationSection />
         </TabsContent>
 
         <TabsContent value="sync" className="mt-0">
