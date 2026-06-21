@@ -7,10 +7,7 @@ import {
 } from "@/lib/scoring/progress";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
-import {
-  PlayerStatsTable,
-  type PlayerStatsRow,
-} from "@/components/progress/player-stats-table";
+import { PlayerStatCards } from "@/components/progress/player-stat-cards";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -127,38 +124,28 @@ export default async function ProgressPage({ params, searchParams }: Props) {
       .map((p) => [p.match_id, p])
   );
 
-  // Per-player season stats (best/worst rank, hits, zeros) for the table.
+  // Season stats (best/worst rank, hits, zeros) computed across all players —
+  // best/worst rank is inherently relative — then we read off the selected one.
   const playerStats = computePlayerRankStats(
     users,
     orderedMatches,
     pointsInput
   );
+  const selectedStats = playerStats.find((s) => s.userId === selectedId) ?? null;
 
-  // Average goals predicted per match, per player.
-  const goalAgg = new Map<string, { sum: number; count: number }>();
+  // The selected player's average goals predicted per match.
+  let goalSum = 0;
+  let goalCount = 0;
   for (const p of allPreds) {
-    const g = goalAgg.get(p.user_id) ?? { sum: 0, count: 0 };
-    g.sum += p.home_score_pred + p.away_score_pred;
-    g.count += 1;
-    goalAgg.set(p.user_id, g);
+    if (p.user_id === selectedId) {
+      goalSum += p.home_score_pred + p.away_score_pred;
+      goalCount += 1;
+    }
   }
+  const selectedAvgGoals = goalCount > 0 ? goalSum / goalCount : null;
 
-  const statsRows: PlayerStatsRow[] = playerStats
-    .slice()
-    .sort((a, b) => a.currentRank - b.currentRank)
-    .map((s) => {
-      const g = goalAgg.get(s.userId);
-      return {
-        userId: s.userId,
-        displayName: s.displayName,
-        bestRank: s.bestRank,
-        worstRank: s.worstRank,
-        hits: s.hits,
-        zeros: s.zeros,
-        avgGoals: g && g.count > 0 ? g.sum / g.count : null,
-        team: null, // intentionally blank for now
-      };
-    });
+  const selectedName =
+    users.find((u) => u.id === selectedId)?.displayName ?? "";
 
   const trajectory = computeRankTrajectory(
     users,
@@ -188,8 +175,6 @@ export default async function ProgressPage({ params, searchParams }: Props) {
     };
   });
 
-  const last = points[points.length - 1];
-
   return (
     <div className="space-y-5">
       <div>
@@ -199,49 +184,45 @@ export default async function ProgressPage({ params, searchParams }: Props) {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <section className="space-y-2">
-        <h2 className="font-semibold">{t("playersTitle")}</h2>
-        <PlayerStatsTable
-          rows={statsRows}
-          selectedId={selectedId}
-          locale={locale}
-          labels={{
-            player: t("colPlayer"),
-            bestRank: t("colBestRank"),
-            worstRank: t("colWorstRank"),
-            hits: t("colHits"),
-            zeros: t("colZeros"),
-            avgGoals: t("colAvgGoals"),
-            team: t("colTeam"),
-          }}
-        />
-      </section>
-
+      {/* 1. Choose a player */}
       <UserSelect users={users} selectedId={selectedId} label={t("selectUser")} />
 
+      {selectedStats && (
+        <div className="space-y-4">
+          {/* 2. That player's stats */}
+          <h2 className="font-semibold">{selectedName}</h2>
+          <PlayerStatCards
+            data={{
+              currentRank: orderedMatches.length ? selectedStats.currentRank : null,
+              totalPlayers: users.length,
+              bestRank: selectedStats.bestRank,
+              worstRank: selectedStats.worstRank,
+              totalPoints: selectedStats.totalPoints,
+              hits: selectedStats.hits,
+              zeros: selectedStats.zeros,
+              avgGoals: selectedAvgGoals,
+              team: null, // intentionally blank for now
+            }}
+            labels={{
+              currentRank: t("currentRank"),
+              bestRank: t("colBestRank"),
+              worstRank: t("colWorstRank"),
+              totalPoints: t("totalPoints"),
+              hits: t("colHits"),
+              zeros: t("colZeros"),
+              avgGoals: t("colAvgGoals"),
+              team: t("colTeam"),
+            }}
+          />
+        </div>
+      )}
+
+      {/* 3. Ranking over time */}
       {points.length === 0 ? (
         <p className="text-muted-foreground">{t("noData")}</p>
       ) : (
-        <div className="space-y-4 rounded-xl border p-4">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-            <span>
-              <span className="text-muted-foreground">{t("currentRank")}: </span>
-              <span className="font-bold text-primary">
-                #{last?.rank} / {last?.totalPlayers}
-              </span>
-            </span>
-            <span>
-              <span className="text-muted-foreground">{t("totalPoints")}: </span>
-              <span className="font-bold text-primary">
-                {last?.cumulativePoints}
-              </span>
-            </span>
-            <span>
-              <span className="text-muted-foreground">{t("matchesPlayed")}: </span>
-              <span className="font-medium">{points.length}</span>
-            </span>
-          </div>
-
+        <div className="space-y-3 rounded-xl border p-4">
+          <h2 className="font-semibold">{t("rankAxis")}</h2>
           <RankChart
             points={points}
             labels={{

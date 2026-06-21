@@ -7,7 +7,7 @@
   "nav": {
     "predictions": "Predicciones",
     "scoreboard": "Tabla",
-    "progress": "Progreso",
+    "progress": "Estadísticas",
     "podio": "Podio",
     "rules": "Reglas",
     "profile": "Perfil",
@@ -228,9 +228,8 @@
     "upcomingNote": "Las predicciones para esta ronda aún no están disponibles."
   },
   "progress": {
-    "title": "Progreso",
-    "subtitle": "Mira cómo cambió la posición de un jugador partido a partido.",
-    "playersTitle": "Jugadores",
+    "title": "Estadísticas del jugador",
+    "subtitle": "Elige un jugador para ver sus estadísticas y su posición en el tiempo.",
     "colPlayer": "Jugador",
     "colBestRank": "Mejor posición",
     "colWorstRank": "Peor posición",

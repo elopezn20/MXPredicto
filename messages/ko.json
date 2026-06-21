@@ -7,7 +7,7 @@
   "nav": {
     "predictions": "예측",
     "scoreboard": "순위표",
-    "progress": "진행 상황",
+    "progress": "선수 통계",
     "podio": "포디엄",
     "rules": "규칙",
     "profile": "프로필",
@@ -228,9 +228,8 @@
     "upcomingNote": "이 라운드의 예측은 아직 시작되지 않았습니다."
   },
   "progress": {
-    "title": "진행 상황",
-    "subtitle": "선수의 순위가 경기마다 어떻게 바뀌었는지 확인하세요.",
-    "playersTitle": "선수",
+    "title": "선수 통계",
+    "subtitle": "선수를 선택하면 통계와 시간별 순위를 볼 수 있습니다.",
     "colPlayer": "선수",
     "colBestRank": "최고 순위",
     "colWorstRank": "최저 순위",

@@ -7,7 +7,7 @@
   "nav": {
     "predictions": "Predictions",
     "scoreboard": "Scoreboard",
-    "progress": "Progress",
+    "progress": "Player stats",
     "podio": "Podium",
     "rules": "Rules",
     "profile": "Profile",
@@ -228,9 +228,8 @@
     "upcomingNote": "Predictions for this round are not yet open."
   },
   "progress": {
-    "title": "Progress",
-    "subtitle": "Track how a player's ranking moved match by match.",
-    "playersTitle": "Players",
+    "title": "Player stats",
+    "subtitle": "Pick a player to see their stats and ranking over time.",
     "colPlayer": "Player",
     "colBestRank": "Best rank",
     "colWorstRank": "Worst rank",
