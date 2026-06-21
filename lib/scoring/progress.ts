@@ -1,9 +1,15 @@
-import type { LeaderboardUser } from "./scoring";
+import type { LeaderboardUser, Stage } from "./scoring";
 
 export interface ProgressPredictionInput {
   userId: string;
   matchId: string;
   pointsAwarded: number | null;
+}
+
+/** A finished match with the stage that determines its maximum points. */
+export interface FinishedMatch {
+  id: string;
+  stage: Stage;
 }
 
 export interface RankPoint {
@@ -20,6 +26,11 @@ export interface RankPoint {
   pointsThisMatch: number;
 }
 
+/** Maximum points obtainable for a match — 10 in group stage, 25 in knockout. */
+function maxPoints(stage: Stage): number {
+  return stage === "group" ? 10 : 25;
+}
+
 /**
  * Builds the rank-over-time trajectory for a single target user.
  *
@@ -28,27 +39,29 @@ export interface RankPoint {
  * the standings after each match. Ranking mirrors {@link computeLeaderboard}:
  * total points (desc) → matches hit (desc) → zero matches (asc).
  *
- * A "hit" is a match worth exactly 10 points; a "zero" is any finished match
- * worth 0 points (including matches the user never predicted).
+ * A "hit" is a perfect prediction (the match maximum: 10 group / 25 knockout);
+ * a "zero" is any finished match worth 0 points (including matches the user
+ * never predicted). Partial scores (>0 but <max) are neither.
  *
  * @param users            All ranked players.
- * @param orderedMatchIds  Finished match IDs in chronological order.
+ * @param orderedMatches   Finished matches (id + stage) in chronological order.
  * @param predictions      Scored predictions across all users (only finished
  *                         matches are consulted).
  * @param targetUserId     The user whose trajectory to return.
  */
 export function computeRankTrajectory(
   users: LeaderboardUser[],
-  orderedMatchIds: string[],
+  orderedMatches: FinishedMatch[],
   predictions: ProgressPredictionInput[],
   targetUserId: string
 ): RankPoint[] {
-  const finishedSet = new Set(orderedMatchIds);
+  const maxByMatch = new Map<string, number>();
+  for (const m of orderedMatches) maxByMatch.set(m.id, maxPoints(m.stage));
 
   // "userId:matchId" → points
   const predMap = new Map<string, number>();
   for (const p of predictions) {
-    if (finishedSet.has(p.matchId)) {
+    if (maxByMatch.has(p.matchId)) {
       predMap.set(`${p.userId}:${p.matchId}`, p.pointsAwarded ?? 0);
     }
   }
@@ -60,14 +73,16 @@ export function computeRankTrajectory(
   const totalPlayers = users.length;
   const trajectory: RankPoint[] = [];
 
-  orderedMatchIds.forEach((matchId, index) => {
+  orderedMatches.forEach((match, index) => {
+    const max = maxByMatch.get(match.id)!;
+
     // Apply this match's results to every user's running totals.
     for (const u of users) {
       const entry = agg.get(u.id)!;
-      const pts = predMap.get(`${u.id}:${matchId}`) ?? 0;
+      const pts = predMap.get(`${u.id}:${match.id}`) ?? 0;
       entry.total += pts;
-      if (pts === 10) entry.hit += 1;
-      if (pts === 0) entry.zero += 1;
+      if (pts === max) entry.hit += 1;
+      else if (pts === 0) entry.zero += 1;
     }
 
     const target = agg.get(targetUserId);
@@ -91,11 +106,11 @@ export function computeRankTrajectory(
 
     trajectory.push({
       index,
-      matchId,
+      matchId: match.id,
       rank: ahead + 1,
       totalPlayers,
       cumulativePoints: target.total,
-      pointsThisMatch: predMap.get(`${targetUserId}:${matchId}`) ?? 0,
+      pointsThisMatch: predMap.get(`${targetUserId}:${match.id}`) ?? 0,
     });
   });
 
@@ -122,18 +137,20 @@ export interface PlayerRankStats {
  *
  * Ranking at each step uses the same ordering as {@link computeLeaderboard}
  * (total → hits → zeros) with standard competition ranking (ties share a rank,
- * the next distinct entry skips ahead).
+ * the next distinct entry skips ahead). Hits and zeros follow the same per-match
+ * definitions as {@link computeRankTrajectory}.
  */
 export function computePlayerRankStats(
   users: LeaderboardUser[],
-  orderedMatchIds: string[],
+  orderedMatches: FinishedMatch[],
   predictions: ProgressPredictionInput[]
 ): PlayerRankStats[] {
-  const finishedSet = new Set(orderedMatchIds);
+  const maxByMatch = new Map<string, number>();
+  for (const m of orderedMatches) maxByMatch.set(m.id, maxPoints(m.stage));
 
   const predMap = new Map<string, number>();
   for (const p of predictions) {
-    if (finishedSet.has(p.matchId)) {
+    if (maxByMatch.has(p.matchId)) {
       predMap.set(`${p.userId}:${p.matchId}`, p.pointsAwarded ?? 0);
     }
   }
@@ -174,13 +191,14 @@ export function computePlayerRankStats(
     return ranks;
   };
 
-  for (const matchId of orderedMatchIds) {
+  for (const match of orderedMatches) {
+    const max = maxByMatch.get(match.id)!;
     for (const u of users) {
       const e = agg.get(u.id)!;
-      const pts = predMap.get(`${u.id}:${matchId}`) ?? 0;
+      const pts = predMap.get(`${u.id}:${match.id}`) ?? 0;
       e.total += pts;
-      if (pts === 10) e.hit += 1;
-      if (pts === 0) e.zero += 1;
+      if (pts === max) e.hit += 1;
+      else if (pts === 0) e.zero += 1;
     }
     const ranks = rankAll();
     for (const u of users) {
@@ -192,7 +210,7 @@ export function computePlayerRankStats(
     }
   }
 
-  const finalRanks = orderedMatchIds.length
+  const finalRanks = orderedMatches.length
     ? rankAll()
     : new Map<string, number>();
 

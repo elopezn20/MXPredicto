@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   computeRankTrajectory,
   computePlayerRankStats,
+  type FinishedMatch,
 } from "@/lib/scoring/progress";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
@@ -59,11 +60,14 @@ export default async function ProgressPage({ params, searchParams }: Props) {
   const selectedId =
     validId(userParam) ?? validId(authUser?.id) ?? users[0]?.id ?? "";
 
-  // Finished matches in chronological order, with team names.
+  // Finished matches in chronological order, with team names and stage.
+  // Stage decides a match's maximum points (10 group / 25 knockout), which the
+  // ranking uses to detect "hits".
   const { data: matchesData } = await supabase
     .from("matches")
     .select(
       `id, kickoff_at, home_score, away_score,
+       rounds ( stage ),
        home_team:home_team_id ( name_en, name_es, name_ko ),
        away_team:away_team_id ( name_en, name_es, name_ko )`
     )
@@ -72,6 +76,15 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 
   const matches = matchesData ?? [];
   const orderedMatchIds = matches.map((m) => m.id);
+
+  // Map each match to its stage for the ranking functions.
+  const orderedMatches: FinishedMatch[] = matches.map((m) => {
+    const round = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
+    return {
+      id: m.id,
+      stage: round?.stage === "group" ? "group" : "knockout",
+    };
+  });
 
   // All predictions for finished matches, across every user. Carries both the
   // scored points (for ranking) and the predicted goals (for the table + tooltip).
@@ -117,7 +130,7 @@ export default async function ProgressPage({ params, searchParams }: Props) {
   // Per-player season stats (best/worst rank, hits, zeros) for the table.
   const playerStats = computePlayerRankStats(
     users,
-    orderedMatchIds,
+    orderedMatches,
     pointsInput
   );
 
@@ -149,7 +162,7 @@ export default async function ProgressPage({ params, searchParams }: Props) {
 
   const trajectory = computeRankTrajectory(
     users,
-    orderedMatchIds,
+    orderedMatches,
     pointsInput,
     selectedId
   );

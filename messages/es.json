@@ -38,7 +38,8 @@
       "emailInUse": "Este correo ya está registrado.",
       "generic": "Ocurrió un error. Por favor intenta de nuevo.",
       "passwordsMustMatch": "Las contraseñas no coinciden.",
-      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "linkExpired": "Este enlace de restablecimiento no es válido o ha expirado. Solicita uno nuevo."
     }
   },
   "rounds": {
@@ -77,6 +78,7 @@
     "rank": "Pos.",
     "player": "Jugador",
     "points": "Pts",
+    "prize": "Premio",
     "hits": "Aciertos",
     "zeros": "Ceros",
     "gap": "Dif.",
@@ -84,7 +86,21 @@
     "noData": "Aún no hay puntuaciones.",
     "viewPredictions": "Ver predicciones",
     "predictionsOf": "Predicciones de {name}",
-    "backToScoreboard": "← Volver a la tabla"
+    "backToScoreboard": "← Volver a la tabla",
+    "poolCaption": "Pozo estimado: {amount} CLP — premio para los 3 primeros. Ver premios en las <link>reglas</link>.",
+    "nextMatch": "Próximo partido",
+    "mode": "Moda",
+    "averageScore": "Marcador promedio",
+    "top": "Top",
+    "wins": "gana",
+    "draws": "Empates",
+    "nextPick": "Pronóstico",
+    "noPredictions": "Aún no hay pronósticos.",
+    "picksLocked": "Los pronósticos se revelan cuando cierra la fecha.",
+    "highVariety": "¡Partido de alto riesgo! Sin favorito claro — los pronósticos están divididos sobre el resultado.",
+    "exportPdf": "Exportar PDF",
+    "rankUp": "Subió {count} desde el último partido",
+    "rankDown": "Bajó {count} desde el último partido"
   },
   "admin": {
     "title": "Panel de administración",
@@ -93,7 +109,9 @@
       "matches": "Partidos",
       "users": "Usuarios",
       "sync": "Sincronizar",
-      "audit": "Auditoría"
+      "audit": "Auditoría",
+      "rounds": "Rondas",
+      "participation": "Participación"
     },
     "users": {
       "save": "Guardar",
@@ -103,15 +121,25 @@
       "insertEmoji": "Insertar emoji"
     },
     "invitations": {
-      "inviteTitle": "Invitar usuario",
-      "emailPlaceholder": "usuario@ejemplo.com",
-      "sendInvite": "Enviar invitación",
+      "inviteTitle": "Invitar usuarios",
+      "bulkLabel": "Correos (uno por línea, coma o punto y coma)",
+      "bulkPlaceholder": "juan@ejemplo.com\nmaria@ejemplo.com",
+      "detected": "{count, plural, =0 {Sin correos detectados} one {# correo detectado} other {# correos detectados}}",
+      "invalidCount": "{count, plural, one {, # inválido} other {, # inválidos}}",
+      "sendInvites": "Enviar invitaciones",
       "sending": "Enviando…",
       "pending": "Invitaciones pendientes",
       "noPending": "No hay invitaciones pendientes.",
       "revoke": "Revocar",
       "accepted": "Aceptada",
-      "expires": "Vence"
+      "expires": "Vence",
+      "summary": "{sent} enviadas, {failed} fallaron",
+      "resultSent": "Enviada",
+      "resultExists": "Ya invitado",
+      "resultSendFailed": "Envío falló: {error}",
+      "resultInvalid": "Correo inválido",
+      "resultServerError": "Error del servidor: {error}",
+      "revokeFailed": "No se pudo revocar la invitación: {error}"
     },
     "matches": {
       "status": "Estado",
@@ -140,12 +168,50 @@
       "rescoreSuccess": "Recalculado: {updated} predicciones actualizadas."
     },
     "audit": {
-      "title": "Cambios recientes",
+      "title": "Cambios en partidos",
       "changedBy": "Por",
       "changedAt": "Cuándo",
       "match": "Partido",
       "empty": "Sin entradas de auditoría.",
-      "changes": "Cambios"
+      "changes": "Cambios",
+      "roundChangesTitle": "Cambios de plazos",
+      "round": "Ronda",
+      "deadlineChange": "plazo",
+      "roundEmpty": "Sin cambios de plazos aún."
+    },
+    "rounds": {
+      "title": "Plazos de cada ronda",
+      "description": "Cada ronda se cierra por defecto a las 00:00 ET del día del primer partido. Puedes adelantar el plazo, nunca atrasarlo.",
+      "round": "Ronda",
+      "currentDeadline": "Plazo actual",
+      "newDeadline": "Nuevo plazo",
+      "ceiling": "Máximo: {time}",
+      "locked": "Cerrada",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "errorAfterKickoff": "El plazo no puede ser posterior al primer partido.",
+      "errorGeneric": "Error al guardar"
+    },
+    "participation": {
+      "title": "Participación de la próxima ronda",
+      "description": "Muestra cuántas predicciones ha enviado cada jugador para la próxima ronda en cerrar. Exporta un PDF para compartir o imprimir el resumen.",
+      "loadButton": "Ver participación",
+      "loading": "Cargando…",
+      "exportPdf": "Exportar PDF",
+      "deadlineLabel": "cierra {time}",
+      "totalMatchesLabel": "{count} partidos",
+      "colUser": "Jugador",
+      "colPredicted": "Predichos",
+      "colTotal": "Total de partidos",
+      "colPercent": "Porcentaje",
+      "noOpenRound": "No hay ninguna ronda próxima abierta para predicciones.",
+      "errorGeneric": "No se pudo cargar la participación.",
+      "pdfTitle": "Reporte de participación de la ronda",
+      "pdfRound": "Ronda",
+      "pdfDeadline": "Cierra",
+      "pdfTotalMatches": "Total de partidos",
+      "pdfGenerated": "Generado"
     }
   },
   "profile": {

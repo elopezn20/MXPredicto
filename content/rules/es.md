@@ -8,7 +8,7 @@
 |---|---|
 | **Partidos** | 104 en total: 72 de fase de grupos (3 fechas × 24 partidos) + 32 de eliminatorias. |
 | **Qué predices** | El marcador exacto de cada partido. En eliminatorias con empate al final del tiempo reglamentario/prórroga, también debes indicar quién avanza. |
-| **Cierre de cada ronda** | Cuando la ronda *empieza* — pitazo inicial del primer partido. No se puede editar ni agregar predicciones después del cierre. |
+| **Cierre de cada ronda** | Medianoche hora de Chile del día del primer partido de la ronda. No se puede editar ni agregar predicciones después. |
 | **Grupos — puntos** | Máx. **10 pts**: resultado ✓ (5) · goles local exactos ✓ (2) · goles visita exactos ✓ (2) · diferencia+ganador ✓ (1). Todos los criterios son independientes entre sí. |
 | **Eliminatorias — puntos** | Máx. **25 pts**: resultado ✓ (10) · goles local exactos ✓ (4) · goles visita exactos ✓ (4) · diferencia+ganador ✓ (2) · quién avanza ✓ (5). |
 | **Goles en eliminatorias** | Los goles de prórroga cuentan en el marcador final. Los goles exactos suman puntos aunque el resultado general no esté correcto. |
@@ -16,7 +16,7 @@
 | **Bonus Podio** | Predice Campeón (50 pts), Subcampeón (25 pts) y Tercer lugar (15 pts). Máx. **90 pts**. Puedes guardar y cambiar tus selecciones hasta que se cierre la ventana. |
 | **Ventana del Podio** | Se puede enviar desde el primer día del torneo. Se cierra cuando empieza el primer partido de Dieciseisavos. |
 | **Sin predicción** | Vale 0 puntos y cuenta como cero en el desempate. |
-| **Ranking** | Por puntos totales (partidos + podio). Desempate: más aciertos (≥1 pt) → menos ceros. |
+| **Ranking** | Por puntos totales (partidos + podio). Desempate: más aciertos (pronóstico perfecto — 10 pts en grupos, 25 pts en eliminatorias) → menos ceros. |
 | **Visibilidad** | Tus predicciones son privadas hasta que la ronda cierra. Después todos ven los pronósticos de todos. |
 | **¿Quién gana?** | El jugador con más puntos totales al final del torneo. |
 | **Respeto** | Todos los jugadores y sus equipos preferidos deben ser respetados [Opcional] |
@@ -33,6 +33,8 @@ Una polla de pronósticos para el Mundial FIFA 2026. Cada jugador predice el mar
 
 La polla es **por invitación**. Los administradores te enviarán un correo con un enlace de registro. Ese enlace te lleva a una página donde eliges tu nombre y contraseña. Una vez registrado, puedes ingresar en cualquier momento desde el link de arriba.
 
+Cada persona puede tener máximo una cuenta — no se permiten registros duplicados.
+
 ---
 
 ## Estructura del torneo
@@ -47,6 +49,16 @@ Más un **Bonus Podio** (apuesta especial, ver más abajo).
 
 ---
 
+## Premios
+
+El pozo total se repartirá entre el 1°, 2° y 3° lugar en una proporción de 7:2:1, respectivamente.
+
+### Empates en el pago
+
+Si dos o más jugadores terminan empatados en puntos, aciertos y ceros, el pozo de las posiciones que ocupan se reparte en partes iguales entre ellos.
+
+---
+
 ## ¿Cómo funciona el pronóstico?
 
 ### Predicciones de partido
@@ -57,15 +69,15 @@ Más un **Bonus Podio** (apuesta especial, ver más abajo).
 
 ### Cierre de cada ronda
 
-> **La ronda se cierra en el momento exacto en que empieza — es decir, el pitazo inicial del primer partido de esa ronda (hora UTC).**
+> **La ronda se cierra a las 00:00 hora de Chile del día del primer partido de esa ronda.**
 
-Esto significa que el cierre es cuando la fecha *comienza*, no cuando termina. Si la Fecha 1 arranca el lunes a las 18:00 UTC, todas las predicciones de la Fecha 1 quedan bloqueadas a las 18:00 UTC del lunes, aunque los demás partidos de esa fecha se jueguen días después.
+Si el primer partido de una ronda es el lunes 15 de junio (hora de Chile), todas las predicciones de esa ronda quedan bloqueadas a las 00:00 (medianoche) del lunes 15 de junio hora de Chile — aunque los partidos en sí se jueguen más tarde ese mismo día.
 
 Una vez cerrada, no se pueden editar ni agregar predicciones. Los partidos sin predicción valen 0 puntos. La app muestra una cuenta regresiva al próximo cierre.
 
 ### Bonus Podio
 
-- Predices el **Campeón**, **Subcampeón** y **Tercer lugar** del Mundial.
+- Predices el **Campeón** (50 pts), **Subcampeón** (25 pts) y **Tercer lugar** (15 pts) del Mundial. Máximo total: **90 pts**. Cada posición se evalúa por separado — aciertas el campeón solo y ganas 50 pts aunque el resto esté mal.
 - Los tres equipos deben ser distintos.
 - La ventana para enviarlo es **durante la fase de grupos** (puedes hacerlo desde el primer día del torneo). Una vez que empieza el primer partido de Dieciseisavos, el Bonus Podio se cierra definitivamente.
 - Puedes guardar y modificar tus selecciones cuantas veces quieras **antes del cierre**.
@@ -160,8 +172,8 @@ Cada posición se evalúa de forma independiente. Puedes ganar 50 pts solo por e
 El ranking se ordena por **puntos totales** (partidos + podio).
 
 **Desempate (en orden):**
-1. Mayor cantidad de partidos con al menos 1 punto ("aciertos").
-2. Menor cantidad de partidos con 0 puntos ("ceros") — los partidos sin predicción cuentan como cero.
+1. Mayor cantidad de "aciertos" — partidos puntuados al máximo: **10 pts** en fase de grupos, **25 pts** en eliminatorias.
+2. Menor cantidad de partidos con 0 puntos ("ceros") — los partidos sin predicción cuentan como cero. Los puntajes parciales (>0 pero por debajo del máximo del partido) no cuentan como aciertos ni como ceros.
 
 La tabla muestra: posición, nombre, puntos, aciertos, ceros y diferencia con el líder.
 
@@ -171,6 +183,7 @@ La tabla muestra: posición, nombre, puntos, aciertos, ceros y diferencia con el
 
 - Tus predicciones son **privadas hasta que la ronda cierra**.
 - Una vez cerrada la ronda, todos pueden ver los pronósticos de todos para esos partidos.
+- Tus **predicciones del Podio** también son privadas hasta que se cierra la ventana del Podio (al comenzar el primer partido de Dieciseisavos). Después, todos pueden ver las selecciones de podio de cada jugador.
 
 ---
 
@@ -186,4 +199,4 @@ Ese partido vale 0 puntos para ti.
 Puedes guardar y modificar tus selecciones cuantas veces quieras antes del cierre de la ventana. La última versión guardada es la que cuenta.
 
 **¿Cómo sé cuándo cierra cada ronda?**
-La app muestra una cuenta regresiva en todo momento. El cierre ocurre cuando la ronda *empieza* — en el pitazo inicial del primer partido de cada fecha. No cuando termina la última fecha, sino cuando arranca la primera.
+La app muestra una cuenta regresiva en todo momento. Cada ronda se cierra a las 00:00 hora de Chile del día del primer partido de esa ronda — cuando empieza la fecha, no cuando los partidos efectivamente arrancan.

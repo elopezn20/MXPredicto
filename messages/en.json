@@ -38,7 +38,8 @@
       "emailInUse": "This email is already registered.",
       "generic": "Something went wrong. Please try again.",
       "passwordsMustMatch": "Passwords do not match.",
-      "passwordTooShort": "Password must be at least 8 characters."
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "linkExpired": "This reset link is invalid or has expired. Please request a new one."
     }
   },
   "rounds": {
@@ -77,6 +78,7 @@
     "rank": "Rank",
     "player": "Player",
     "points": "Pts",
+    "prize": "Prize",
     "hits": "Hits",
     "zeros": "Zeros",
     "gap": "Gap",
@@ -84,7 +86,21 @@
     "noData": "No scores yet.",
     "viewPredictions": "View predictions",
     "predictionsOf": "Predictions by {name}",
-    "backToScoreboard": "← Back to scoreboard"
+    "backToScoreboard": "← Back to scoreboard",
+    "poolCaption": "Estimated pool prize: {amount} CLP — top 3 win. See the prize table in the <link>rules</link>.",
+    "nextMatch": "Next match",
+    "mode": "Mode (most predicted)",
+    "averageScore": "Average score",
+    "top": "Top",
+    "wins": "wins",
+    "draws": "Draws",
+    "nextPick": "Next pick",
+    "noPredictions": "No predictions yet.",
+    "picksLocked": "Picks reveal once the round locks.",
+    "highVariety": "High-risk game! No clear favourite — the pool is split on the result.",
+    "exportPdf": "Export PDF",
+    "rankUp": "Up {count} since last match",
+    "rankDown": "Down {count} since last match"
   },
   "admin": {
     "title": "Admin Panel",
@@ -93,7 +109,9 @@
       "matches": "Matches",
       "users": "Users",
       "sync": "Sync & Rescore",
-      "audit": "Audit Log"
+      "audit": "Audit Log",
+      "rounds": "Rounds",
+      "participation": "Participation"
     },
     "users": {
       "save": "Save",
@@ -103,15 +121,25 @@
       "insertEmoji": "Insert emoji"
     },
     "invitations": {
-      "inviteTitle": "Invite a user",
-      "emailPlaceholder": "user@example.com",
-      "sendInvite": "Send invite",
+      "inviteTitle": "Invite users",
+      "bulkLabel": "Emails (one per line, comma, or semicolon)",
+      "bulkPlaceholder": "juan@example.com\nmaria@example.com",
+      "detected": "{count, plural, =0 {No emails detected} one {# email detected} other {# emails detected}}",
+      "invalidCount": "{count, plural, one {, # invalid} other {, # invalid}}",
+      "sendInvites": "Send invites",
       "sending": "Sending…",
       "pending": "Pending invitations",
       "noPending": "No pending invitations.",
       "revoke": "Revoke",
       "accepted": "Accepted",
-      "expires": "Expires"
+      "expires": "Expires",
+      "summary": "{sent} sent, {failed} failed",
+      "resultSent": "Sent",
+      "resultExists": "Already invited",
+      "resultSendFailed": "Email failed: {error}",
+      "resultInvalid": "Invalid email",
+      "resultServerError": "Server error: {error}",
+      "revokeFailed": "Could not revoke invitation: {error}"
     },
     "matches": {
       "status": "Status",
@@ -140,12 +168,50 @@
       "rescoreSuccess": "Rescored: {updated} predictions updated."
     },
     "audit": {
-      "title": "Recent changes",
+      "title": "Match changes",
       "changedBy": "By",
       "changedAt": "When",
       "match": "Match",
       "empty": "No audit entries yet.",
-      "changes": "Changes"
+      "changes": "Changes",
+      "roundChangesTitle": "Round deadline changes",
+      "round": "Round",
+      "deadlineChange": "deadline",
+      "roundEmpty": "No round changes yet."
+    },
+    "rounds": {
+      "title": "Round deadlines",
+      "description": "Each round defaults to 00:00 ET on the day of its first match. You can move a deadline earlier, never later.",
+      "round": "Round",
+      "currentDeadline": "Current deadline",
+      "newDeadline": "New deadline",
+      "ceiling": "Max: {time}",
+      "locked": "Locked",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "errorAfterKickoff": "Deadline cannot be after first kickoff.",
+      "errorGeneric": "Error saving"
+    },
+    "participation": {
+      "title": "Next round participation",
+      "description": "Shows how many predictions each player has submitted for the next round to close. Export a PDF to share or print the snapshot.",
+      "loadButton": "Show participation",
+      "loading": "Loading…",
+      "exportPdf": "Export PDF",
+      "deadlineLabel": "closes {time}",
+      "totalMatchesLabel": "{count} matches",
+      "colUser": "Player",
+      "colPredicted": "Predicted",
+      "colTotal": "Total matches",
+      "colPercent": "Percentage",
+      "noOpenRound": "No upcoming round is open for predictions.",
+      "errorGeneric": "Could not load participation.",
+      "pdfTitle": "Round participation report",
+      "pdfRound": "Round",
+      "pdfDeadline": "Closes",
+      "pdfTotalMatches": "Total matches",
+      "pdfGenerated": "Generated"
     }
   },
   "profile": {

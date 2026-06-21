@@ -5,15 +5,21 @@ import { routing } from "@/lib/i18n/routing";
 
 const handleI18n = createIntlMiddleware(routing);
 
-// Any locale-prefixed route that isn't an auth page requires login
+// Any locale-prefixed route that isn't an auth page or a public page requires login
 const LOCALE_ROOT = /^\/(en|es|ko)(\/|$)/;
 const AUTH_PAGES = /^\/(en|es|ko)\/(login|signup|forgot-password|reset-password)/;
+// Authenticated users are redirected away from these. reset-password is
+// intentionally excluded: the recovery email link establishes a session before
+// the user reaches the page, so bouncing them here would make password resets
+// impossible.
+const AUTH_REDIRECT_PAGES = /^\/(en|es|ko)\/(login|signup|forgot-password)/;
+const PUBLIC_PAGES = /^\/(en|es|ko)\/rules(\/|$)/;
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Run next-intl first to get locale-aware redirects and cookie settings
-  let response = handleI18n(request);
+  const response = handleI18n(request);
 
   // Attach Supabase session to the response (refreshes the JWT if needed)
   const supabase = createServerClient(
@@ -42,11 +48,16 @@ export async function proxy(request: NextRequest) {
   const localeMatch = pathname.match(/^\/(en|es|ko)(\/|$)/);
   const locale = localeMatch?.[1] ?? routing.defaultLocale;
 
-  if (LOCALE_ROOT.test(pathname) && !AUTH_PAGES.test(pathname) && !user) {
+  if (
+    LOCALE_ROOT.test(pathname) &&
+    !AUTH_PAGES.test(pathname) &&
+    !PUBLIC_PAGES.test(pathname) &&
+    !user
+  ) {
     return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
-  if (AUTH_PAGES.test(pathname) && user) {
+  if (AUTH_REDIRECT_PAGES.test(pathname) && user) {
     return NextResponse.redirect(new URL(`/${locale}/predictions`, request.url));
   }
 

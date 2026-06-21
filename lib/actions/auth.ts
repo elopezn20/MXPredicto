@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAppOrigin } from "@/lib/app-url";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -168,11 +169,10 @@ export async function forgotPassword(
   }
 
   const { email, locale } = parsed.data;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const supabase = await createClient();
 
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${appUrl}/api/auth/callback?next=/${locale}/reset-password`,
+    redirectTo: `${getAppOrigin()}/api/auth/callback?next=/${locale}/reset-password`,
   });
 
   // Always return ok to avoid email enumeration
@@ -183,6 +183,11 @@ export async function forgotPassword(
 
 const ResetSchema = z.object({
   password: z.string().min(8),
+  confirmPassword: z.string().min(1),
+  // Present when the recovery email links here with a token_hash. The token is
+  // only redeemed now, on submit, so email link-scanners that GET the page
+  // can't consume the single-use token before the user acts.
+  tokenHash: z.string().optional(),
   locale: z.string().default("es"),
 });
 
@@ -192,6 +197,8 @@ export async function resetPassword(
 ): Promise<ActionResult> {
   const parsed = ResetSchema.safeParse({
     password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+    tokenHash: formData.get("tokenHash") || undefined,
     locale: formData.get("locale"),
   });
 
@@ -199,8 +206,25 @@ export async function resetPassword(
     return { ok: false, error: "error.passwordTooShort" };
   }
 
-  const { password, locale } = parsed.data;
+  const { password, confirmPassword, tokenHash, locale } = parsed.data;
+
+  if (password !== confirmPassword) {
+    return { ok: false, error: "error.passwordsMustMatch" };
+  }
+
   const supabase = await createClient();
+
+  // Redeem the recovery token to establish the session. Falls through to an
+  // existing session (e.g. legacy ?code callback flow) when no token_hash.
+  if (tokenHash) {
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      type: "recovery",
+      token_hash: tokenHash,
+    });
+    if (verifyError) {
+      return { ok: false, error: "error.linkExpired" };
+    }
+  }
 
   const { error } = await supabase.auth.updateUser({ password });
 
