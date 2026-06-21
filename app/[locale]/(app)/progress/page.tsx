@@ -5,9 +5,16 @@ import {
   computePlayerRankStats,
   type FinishedMatch,
 } from "@/lib/scoring/progress";
+import {
+  computePickSimilarity,
+  selectNeighbours,
+  type SimMatch,
+  type RankedPlayer,
+} from "@/lib/scoring/pick-similarity";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
 import { PlayerStatCards } from "@/components/progress/player-stat-cards";
+import { SimilarityHeatmap } from "@/components/progress/similarity-heatmap";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -147,6 +154,75 @@ export default async function ProgressPage({ params, searchParams }: Props) {
   const selectedName =
     users.find((u) => u.id === selectedId)?.displayName ?? "";
 
+  // ── Pick-similarity heatmap ───────────────────────────────────────────────
+  // Compares the selected player's picks against their leaderboard neighbours
+  // over the next few upcoming matches in the current round. Other players'
+  // picks are only visible once the round locks (RLS), so this is gated on
+  // lock_time having passed — mirroring the scoreboard's next-match panel.
+  const HEATMAP_PLAYERS = 8; // selected player + nearest neighbours
+  const HEATMAP_MATCHES = 3; // "upcoming 3 matches of that round"
+  const nowIso = new Date().toISOString();
+
+  const { data: upcoming } = await supabase
+    .from("matches")
+    .select("id, round_id, kickoff_at, rounds ( lock_time, stage )")
+    .neq("status", "finished")
+    .order("kickoff_at", { ascending: true })
+    .limit(30);
+
+  const roundOf = (m: { rounds: unknown }) =>
+    (Array.isArray(m.rounds) ? m.rounds[0] : m.rounds) as
+      | { lock_time: string; stage: string }
+      | null;
+
+  // The current round = the round of the earliest upcoming match; take that
+  // round's first few upcoming matches.
+  const firstUpcoming = upcoming?.[0];
+  const currentRoundId = firstUpcoming?.round_id ?? null;
+  const roundMatches = (upcoming ?? [])
+    .filter((m) => m.round_id === currentRoundId)
+    .slice(0, HEATMAP_MATCHES);
+  const lockTime = firstUpcoming ? roundOf(firstUpcoming)?.lock_time ?? null : null;
+  const heatmapLocked = !!lockTime && lockTime <= nowIso;
+
+  const simMatchIds = roundMatches.map((m) => m.id);
+  const { data: simPredsData } =
+    heatmapLocked && simMatchIds.length > 0
+      ? await supabase
+          .from("predictions")
+          .select("user_id, match_id, home_score_pred, away_score_pred")
+          .in("match_id", simMatchIds)
+      : { data: [] };
+
+  const simMatches: SimMatch[] = roundMatches.map((m) => ({
+    id: m.id,
+    stage: roundOf(m)?.stage === "group" ? "group" : "knockout",
+  }));
+
+  // Selected player + neighbours, ranked by current standing.
+  const ranked: RankedPlayer[] = playerStats.map((s) => ({
+    userId: s.userId,
+    displayName: s.displayName,
+    rank: s.currentRank,
+  }));
+  const neighbours = selectNeighbours(ranked, selectedId, HEATMAP_PLAYERS).map(
+    (p) => ({ userId: p.userId, displayName: p.displayName })
+  );
+
+  const similarity = computePickSimilarity(
+    neighbours,
+    simMatches,
+    (simPredsData ?? []).map((p) => ({
+      userId: p.user_id,
+      matchId: p.match_id,
+      homeScore: p.home_score_pred,
+      awayScore: p.away_score_pred,
+    }))
+  );
+
+  const showHeatmap =
+    heatmapLocked && simMatches.length > 0 && neighbours.length >= 2;
+
   const trajectory = computeRankTrajectory(
     users,
     orderedMatches,
@@ -214,6 +290,23 @@ export default async function ProgressPage({ params, searchParams }: Props) {
               team: t("colTeam"),
             }}
           />
+
+          {/* 2b. Pick-similarity vs leaderboard neighbours */}
+          {showHeatmap && (
+            <SimilarityHeatmap
+              data={similarity}
+              selectedId={selectedId}
+              labels={{
+                heading: t("simHeading"),
+                subtitle: t("simSubtitle", { count: simMatches.length }),
+                legendLow: t("simLegendLow"),
+                legendHigh: t("simLegendHigh"),
+                noData: t("simNoData"),
+                blank: t("simBlank"),
+                cellTitle: t.raw("simCellTitle"),
+              }}
+            />
+          )}
         </div>
       )}
 

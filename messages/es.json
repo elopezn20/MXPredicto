@@ -250,7 +250,14 @@
     "noPrediction": "Sin pronóstico",
     "matchAxis": "Partido",
     "rankAxis": "Posición en el tiempo",
-    "hint": "Pasa el cursor o toca un punto para ver el partido, el resultado y el pronóstico."
+    "hint": "Pasa el cursor o toca un punto para ver el partido, el resultado y el pronóstico.",
+    "simHeading": "Similitud de pronósticos",
+    "simSubtitle": "Qué tan parecidos son los pronósticos de este jugador a los de sus vecinos en la tabla, en los próximos {count} partidos.",
+    "simLegendLow": "Diferentes",
+    "simLegendHigh": "Parecidos",
+    "simNoData": "Aún no hay suficientes pronósticos bloqueados para comparar.",
+    "simBlank": "—",
+    "simCellTitle": "{a} vs {b}: {pct}% de parecido en {count} partido(s)"
   },
   "podio": {
     "title": "Bonus Podio",

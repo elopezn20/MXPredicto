@@ -250,7 +250,14 @@
     "noPrediction": "예측 없음",
     "matchAxis": "경기",
     "rankAxis": "시간별 순위",
-    "hint": "포인트에 마우스를 올리거나 탭하면 경기, 결과, 예측이 표시됩니다."
+    "hint": "포인트에 마우스를 올리거나 탭하면 경기, 결과, 예측이 표시됩니다.",
+    "simHeading": "예측 유사도",
+    "simSubtitle": "다가오는 {count}경기에서 이 선수의 예측이 순위표상 인접한 선수들과 얼마나 비슷한지 보여줍니다.",
+    "simLegendLow": "다름",
+    "simLegendHigh": "비슷함",
+    "simNoData": "아직 비교할 수 있는 잠긴 예측이 충분하지 않습니다.",
+    "simBlank": "—",
+    "simCellTitle": "{a} 대 {b}: {count}경기 기준 {pct}% 유사"
   },
   "podio": {
     "title": "보너스 포디엄",

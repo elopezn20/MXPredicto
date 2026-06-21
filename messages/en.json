@@ -250,7 +250,14 @@
     "noPrediction": "No prediction",
     "matchAxis": "Match",
     "rankAxis": "Ranking over time",
-    "hint": "Hover or tap a point to see the match, result and prediction."
+    "hint": "Hover or tap a point to see the match, result and prediction.",
+    "simHeading": "Pick similarity",
+    "simSubtitle": "How alike this player's picks are to their leaderboard neighbours, over the next {count} upcoming matches.",
+    "simLegendLow": "Different",
+    "simLegendHigh": "Alike",
+    "simNoData": "Not enough locked picks to compare yet.",
+    "simBlank": "—",
+    "simCellTitle": "{a} vs {b}: {pct}% alike over {count} match(es)"
   },
   "podio": {
     "title": "Bonus Podium",
