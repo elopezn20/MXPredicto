@@ -7,6 +7,7 @@
   "nav": {
     "predictions": "Predictions",
     "scoreboard": "Scoreboard",
+    "progress": "Progress",
     "podio": "Podium",
     "rules": "Rules",
     "profile": "Profile",
@@ -159,6 +160,24 @@
     "upcomingBadge": "Upcoming",
     "currentRoundNote": "This round is currently open for predictions.",
     "upcomingNote": "Predictions for this round are not yet open."
+  },
+  "progress": {
+    "title": "Progress",
+    "subtitle": "Track how a player's ranking moved match by match.",
+    "selectUser": "Player",
+    "noData": "No finished matches yet.",
+    "currentRank": "Current rank",
+    "totalPoints": "Total points",
+    "matchesPlayed": "Matches",
+    "match": "Match",
+    "result": "Result",
+    "prediction": "Prediction",
+    "rank": "Rank",
+    "points": "Points",
+    "noPrediction": "No prediction",
+    "matchAxis": "Match",
+    "rankAxis": "Ranking over time",
+    "hint": "Hover or tap a point to see the match, result and prediction."
   },
   "podio": {
     "title": "Bonus Podium",

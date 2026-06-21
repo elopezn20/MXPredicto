@@ -7,6 +7,7 @@
   "nav": {
     "predictions": "예측",
     "scoreboard": "순위표",
+    "progress": "진행 상황",
     "podio": "포디엄",
     "rules": "규칙",
     "profile": "프로필",
@@ -159,6 +160,24 @@
     "upcomingBadge": "예정",
     "currentRoundNote": "이 라운드는 현재 예측 가능합니다.",
     "upcomingNote": "이 라운드의 예측은 아직 시작되지 않았습니다."
+  },
+  "progress": {
+    "title": "진행 상황",
+    "subtitle": "선수의 순위가 경기마다 어떻게 바뀌었는지 확인하세요.",
+    "selectUser": "선수",
+    "noData": "아직 종료된 경기가 없습니다.",
+    "currentRank": "현재 순위",
+    "totalPoints": "총점",
+    "matchesPlayed": "경기 수",
+    "match": "경기",
+    "result": "결과",
+    "prediction": "예측",
+    "rank": "순위",
+    "points": "점수",
+    "noPrediction": "예측 없음",
+    "matchAxis": "경기",
+    "rankAxis": "시간별 순위",
+    "hint": "포인트에 마우스를 올리거나 탭하면 경기, 결과, 예측이 표시됩니다."
   },
   "podio": {
     "title": "보너스 포디엄",

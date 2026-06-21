@@ -18,6 +18,7 @@ interface MobileNavProps {
     menu: string;
     predictions: string;
     scoreboard: string;
+    progress: string;
     podio: string;
     rules: string;
     profile: string;
@@ -48,6 +49,9 @@ export function MobileNav({ locale, isAdmin, profileUserId, t }: MobileNavProps)
           </MobileLink>
           <MobileLink href={`/${locale}/scoreboard`} onClick={close}>
             {t.scoreboard}
+          </MobileLink>
+          <MobileLink href={`/${locale}/progress`} onClick={close}>
+            {t.progress}
           </MobileLink>
           <MobileLink href={`/${locale}/rules`} onClick={close}>
             {t.rules}

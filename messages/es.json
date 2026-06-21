@@ -7,6 +7,7 @@
   "nav": {
     "predictions": "Predicciones",
     "scoreboard": "Tabla",
+    "progress": "Progreso",
     "podio": "Podio",
     "rules": "Reglas",
     "profile": "Perfil",
@@ -159,6 +160,24 @@
     "upcomingBadge": "Próxima",
     "currentRoundNote": "Esta ronda está abierta para predicciones.",
     "upcomingNote": "Las predicciones para esta ronda aún no están disponibles."
+  },
+  "progress": {
+    "title": "Progreso",
+    "subtitle": "Mira cómo cambió la posición de un jugador partido a partido.",
+    "selectUser": "Jugador",
+    "noData": "Aún no hay partidos finalizados.",
+    "currentRank": "Posición actual",
+    "totalPoints": "Puntos totales",
+    "matchesPlayed": "Partidos",
+    "match": "Partido",
+    "result": "Resultado",
+    "prediction": "Pronóstico",
+    "rank": "Posición",
+    "points": "Puntos",
+    "noPrediction": "Sin pronóstico",
+    "matchAxis": "Partido",
+    "rankAxis": "Posición en el tiempo",
+    "hint": "Pasa el cursor o toca un punto para ver el partido, el resultado y el pronóstico."
   },
   "podio": {
     "title": "Bonus Podio",

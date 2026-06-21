@@ -13,6 +13,7 @@ interface NavBarProps {
   t: {
     predictions: string;
     scoreboard: string;
+    progress: string;
     podio: string;
     rules: string;
     profile: string;
@@ -75,6 +76,9 @@ export function NavBar({
           </NavLink>
           <NavLink href={`/${locale}/scoreboard`}>
             {t.scoreboard}
+          </NavLink>
+          <NavLink href={`/${locale}/progress`}>
+            {t.progress}
           </NavLink>
           <NavLink href={`/${locale}/rules`}>
             {t.rules}
