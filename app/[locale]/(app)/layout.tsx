@@ -35,6 +35,7 @@ export default async function AppLayout({ children, params }: Props) {
         t={{
           predictions: t("predictions"),
           scoreboard: t("scoreboard"),
+          progress: t("progress"),
           podio: t("podio"),
           rules: t("rules"),
           profile: t("profile"),
