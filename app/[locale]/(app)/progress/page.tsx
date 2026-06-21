@@ -1,8 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { computeRankTrajectory } from "@/lib/scoring/progress";
+import {
+  computeRankTrajectory,
+  computePlayerRankStats,
+} from "@/lib/scoring/progress";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
+import {
+  PlayerStatsTable,
+  type PlayerStatsRow,
+} from "@/components/progress/player-stats-table";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -66,20 +73,25 @@ export default async function ProgressPage({ params, searchParams }: Props) {
   const matches = matchesData ?? [];
   const orderedMatchIds = matches.map((m) => m.id);
 
-  // All scored predictions for finished matches, across every user.
+  // All predictions for finished matches, across every user. Carries both the
+  // scored points (for ranking) and the predicted goals (for the table + tooltip).
   // Free tier caps a single request at 1000 rows; 62 users × 104 matches can
   // exceed that, so page through with .range() until a short page returns.
   const allPreds: Array<{
     user_id: string;
     match_id: string;
     points_awarded: number | null;
+    home_score_pred: number;
+    away_score_pred: number;
   }> = [];
 
   if (orderedMatchIds.length > 0) {
     for (let from = 0; ; from += PAGE_SIZE) {
       const { data: page } = await supabase
         .from("predictions")
-        .select("user_id, match_id, points_awarded")
+        .select(
+          "user_id, match_id, points_awarded, home_score_pred, away_score_pred"
+        )
         .in("match_id", orderedMatchIds)
         .range(from, from + PAGE_SIZE - 1);
 
@@ -89,27 +101,56 @@ export default async function ProgressPage({ params, searchParams }: Props) {
     }
   }
 
-  // The selected user's predicted scores (for the tooltip). ≤104 rows.
-  const { data: userPreds } = selectedId && orderedMatchIds.length
-    ? await supabase
-        .from("predictions")
-        .select("match_id, home_score_pred, away_score_pred")
-        .eq("user_id", selectedId)
-        .in("match_id", orderedMatchIds)
-    : { data: [] };
+  const pointsInput = allPreds.map((p) => ({
+    userId: p.user_id,
+    matchId: p.match_id,
+    pointsAwarded: p.points_awarded,
+  }));
 
+  // The selected user's predicted scores (for the chart tooltip).
   const userPredMap = new Map(
-    (userPreds ?? []).map((p) => [p.match_id, p])
+    allPreds
+      .filter((p) => p.user_id === selectedId)
+      .map((p) => [p.match_id, p])
   );
+
+  // Per-player season stats (best/worst rank, hits, zeros) for the table.
+  const playerStats = computePlayerRankStats(
+    users,
+    orderedMatchIds,
+    pointsInput
+  );
+
+  // Average goals predicted per match, per player.
+  const goalAgg = new Map<string, { sum: number; count: number }>();
+  for (const p of allPreds) {
+    const g = goalAgg.get(p.user_id) ?? { sum: 0, count: 0 };
+    g.sum += p.home_score_pred + p.away_score_pred;
+    g.count += 1;
+    goalAgg.set(p.user_id, g);
+  }
+
+  const statsRows: PlayerStatsRow[] = playerStats
+    .slice()
+    .sort((a, b) => a.currentRank - b.currentRank)
+    .map((s) => {
+      const g = goalAgg.get(s.userId);
+      return {
+        userId: s.userId,
+        displayName: s.displayName,
+        bestRank: s.bestRank,
+        worstRank: s.worstRank,
+        hits: s.hits,
+        zeros: s.zeros,
+        avgGoals: g && g.count > 0 ? g.sum / g.count : null,
+        team: null, // intentionally blank for now
+      };
+    });
 
   const trajectory = computeRankTrajectory(
     users,
     orderedMatchIds,
-    allPreds.map((p) => ({
-      userId: p.user_id,
-      matchId: p.match_id,
-      pointsAwarded: p.points_awarded,
-    })),
+    pointsInput,
     selectedId
   );
 
@@ -144,6 +185,24 @@ export default async function ProgressPage({ params, searchParams }: Props) {
         </h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
+
+      <section className="space-y-2">
+        <h2 className="font-semibold">{t("playersTitle")}</h2>
+        <PlayerStatsTable
+          rows={statsRows}
+          selectedId={selectedId}
+          locale={locale}
+          labels={{
+            player: t("colPlayer"),
+            bestRank: t("colBestRank"),
+            worstRank: t("colWorstRank"),
+            hits: t("colHits"),
+            zeros: t("colZeros"),
+            avgGoals: t("colAvgGoals"),
+            team: t("colTeam"),
+          }}
+        />
+      </section>
 
       <UserSelect users={users} selectedId={selectedId} label={t("selectUser")} />
 
