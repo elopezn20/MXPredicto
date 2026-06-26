@@ -150,6 +150,8 @@
       "awayScore": "V",
       "penaltyWinner": "Ganador penales",
       "advancingTeam": "Clasificado",
+      "homeTeam": "Equipo local",
+      "awayTeam": "Equipo visitante",
       "save": "Guardar",
       "saving": "Guardando…",
       "saved": "Guardado",

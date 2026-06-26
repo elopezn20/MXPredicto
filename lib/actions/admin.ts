@@ -29,14 +29,23 @@ async function requireAdmin(): Promise<null | { ok: false; error: string }> {
 
 // ── Update match result ────────────────────────────────────────────────────────
 
-const UpdateMatchSchema = z.object({
-  matchId: z.string().uuid(),
-  homeScore: z.number().int().min(0).nullable(),
-  awayScore: z.number().int().min(0).nullable(),
-  status: z.enum(["scheduled", "in_progress", "finished"]),
-  penaltyWinnerTeamId: z.string().uuid().nullable(),
-  advancingTeamId: z.string().uuid().nullable(),
-});
+const UpdateMatchSchema = z
+  .object({
+    matchId: z.string().uuid(),
+    // Knockout-only: assign the teams qualifying into a bracket slot.
+    // Omitted entirely for group matches (whose teams come from the feed).
+    homeTeamId: z.string().uuid().nullable().optional(),
+    awayTeamId: z.string().uuid().nullable().optional(),
+    homeScore: z.number().int().min(0).nullable(),
+    awayScore: z.number().int().min(0).nullable(),
+    status: z.enum(["scheduled", "in_progress", "finished"]),
+    penaltyWinnerTeamId: z.string().uuid().nullable(),
+    advancingTeamId: z.string().uuid().nullable(),
+  })
+  .refine(
+    (v) => !v.homeTeamId || !v.awayTeamId || v.homeTeamId !== v.awayTeamId,
+    { message: "Home and away team must be different", path: ["awayTeamId"] }
+  );
 
 export type UpdateMatchInput = z.infer<typeof UpdateMatchSchema>;
 
@@ -51,6 +60,12 @@ export async function updateMatchResult(
 
   const { matchId, homeScore, awayScore, status, penaltyWinnerTeamId, advancingTeamId } =
     parsed.data;
+  // Only treat the team fields as part of the change when the caller sent them
+  // (knockout rows). `undefined` means "leave the existing teams untouched".
+  const setTeams =
+    parsed.data.homeTeamId !== undefined || parsed.data.awayTeamId !== undefined;
+  const homeTeamId = parsed.data.homeTeamId ?? null;
+  const awayTeamId = parsed.data.awayTeamId ?? null;
 
   const supabase = await createClient();
   const admin = createAdminClient();
@@ -61,14 +76,22 @@ export async function updateMatchResult(
   // Snapshot old value for audit
   const { data: oldMatch } = await admin
     .from("matches")
-    .select("home_score, away_score, status, penalty_winner_team_id, advancing_team_id")
+    .select(
+      "home_team_id, away_team_id, home_score, away_score, status, penalty_winner_team_id, advancing_team_id"
+    )
     .eq("id", matchId)
     .single();
 
-  const { error } = await admin
-    .from("matches")
-    .update({ home_score: homeScore, away_score: awayScore, status, penalty_winner_team_id: penaltyWinnerTeamId, advancing_team_id: advancingTeamId })
-    .eq("id", matchId);
+  const newValue = {
+    home_score: homeScore,
+    away_score: awayScore,
+    status,
+    penalty_winner_team_id: penaltyWinnerTeamId,
+    advancing_team_id: advancingTeamId,
+    ...(setTeams ? { home_team_id: homeTeamId, away_team_id: awayTeamId } : {}),
+  };
+
+  const { error } = await admin.from("matches").update(newValue).eq("id", matchId);
 
   if (error) return { ok: false, error: error.message };
 
@@ -76,7 +99,7 @@ export async function updateMatchResult(
     match_id: matchId,
     changed_by: user!.id,
     old_value: oldMatch,
-    new_value: { home_score: homeScore, away_score: awayScore, status, penalty_winner_team_id: penaltyWinnerTeamId, advancing_team_id: advancingTeamId },
+    new_value: newValue,
   });
 
   return { ok: true, data: { matchId } };

@@ -44,6 +44,13 @@ export default async function AdminPage({ params, searchParams }: Props) {
     .neq("stage", "podio")
     .order("order_index", { ascending: true });
 
+  // ── Teams (for the knockout team-picker) ──────────────────────────────────────
+  const { data: teams } = await admin
+    .from("teams")
+    .select("id, code, name_en, group_letter")
+    .order("group_letter", { ascending: true })
+    .order("code", { ascending: true });
+
   // ── Users ────────────────────────────────────────────────────────────────────
   const { data: profiles } = await admin
     .from("profiles")
@@ -122,7 +129,7 @@ export default async function AdminPage({ params, searchParams }: Props) {
         </TabsContent>
 
         <TabsContent value="matches" className="mt-0">
-          <MatchesSection rounds={rounds ?? []} />
+          <MatchesSection rounds={rounds ?? []} teams={teams ?? []} />
         </TabsContent>
 
         <TabsContent value="rounds" className="mt-0">

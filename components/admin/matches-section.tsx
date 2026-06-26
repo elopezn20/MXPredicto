@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { updateMatchResult } from "@/lib/actions/admin";
 
@@ -9,6 +9,7 @@ interface Team {
   id: string;
   code: string;
   name_en: string;
+  group_letter?: string | null;
 }
 
 interface Match {
@@ -33,6 +34,7 @@ interface Round {
 
 interface Props {
   rounds: Round[];
+  teams: Team[];
 }
 
 function getTeam(t: Team | Team[] | null): Team | null {
@@ -43,13 +45,13 @@ function getTeam(t: Team | Team[] | null): Team | null {
 function MatchRow({
   match,
   isKnockout,
+  teams,
 }: {
   match: Match;
   isKnockout: boolean;
+  teams: Team[];
 }) {
   const t = useTranslations("admin.matches");
-  const ht = getTeam(match.home_team);
-  const at = getTeam(match.away_team);
 
   const [status, setStatus] = useState(match.status);
   const [homeScore, setHomeScore] = useState<string>(
@@ -61,15 +63,45 @@ function MatchRow({
   const [penWinnerId, setPenWinnerId] = useState<string>(
     match.penalty_winner_team_id ?? ""
   );
+  // Knockout-only: the teams assigned to this bracket slot. Editable so an admin
+  // can seed R32/R16/… once the qualifiers are known. Group matches keep the
+  // feed-provided teams and never render the pickers.
+  const [homeTeamId, setHomeTeamId] = useState<string>(
+    getTeam(match.home_team)?.id ?? ""
+  );
+  const [awayTeamId, setAwayTeamId] = useState<string>(
+    getTeam(match.away_team)?.id ?? ""
+  );
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [isPending, startTransition] = useTransition();
+
+  const teamById = useMemo(() => {
+    const m = new Map<string, Team>();
+    for (const team of teams) m.set(team.id, team);
+    return m;
+  }, [teams]);
+
+  // For knockout rows the displayed teams follow the dropdowns; for group rows
+  // they come from the joined match data.
+  const ht = isKnockout
+    ? (homeTeamId ? teamById.get(homeTeamId) ?? null : null)
+    : getTeam(match.home_team);
+  const at = isKnockout
+    ? (awayTeamId ? teamById.get(awayTeamId) ?? null : null)
+    : getTeam(match.away_team);
 
   const homeVal = homeScore !== "" ? parseInt(homeScore, 10) : null;
   const awayVal = awayScore !== "" ? parseInt(awayScore, 10) : null;
 
+  // Penalty winner can only be one of the two currently-selected teams.
+  const validPenWinnerId =
+    penWinnerId && (penWinnerId === ht?.id || penWinnerId === at?.id)
+      ? penWinnerId
+      : "";
+
   // Advancing team: derived from score + penalty winner
   function deriveAdvancingId(): string | null {
-    if (isKnockout && penWinnerId) return penWinnerId;
+    if (isKnockout && validPenWinnerId) return validPenWinnerId;
     if (homeVal != null && awayVal != null) {
       if (homeVal > awayVal) return ht?.id ?? null;
       if (awayVal > homeVal) return at?.id ?? null;
@@ -77,15 +109,24 @@ function MatchRow({
     return null;
   }
 
+  const sameTeam = isKnockout && !!homeTeamId && homeTeamId === awayTeamId;
+
   function handleSave() {
+    if (sameTeam) {
+      setSaveState("error");
+      return;
+    }
     setSaveState("saving");
     startTransition(async () => {
       const result = await updateMatchResult({
         matchId: match.id,
+        ...(isKnockout
+          ? { homeTeamId: homeTeamId || null, awayTeamId: awayTeamId || null }
+          : {}),
         homeScore: homeVal,
         awayScore: awayVal,
         status: status as "scheduled" | "in_progress" | "finished",
-        penaltyWinnerTeamId: penWinnerId || null,
+        penaltyWinnerTeamId: validPenWinnerId || null,
         advancingTeamId: deriveAdvancingId(),
       });
       setSaveState(result.ok ? "saved" : "error");
@@ -104,7 +145,41 @@ function MatchRow({
   return (
     <tr className="border-b text-xs hover:bg-muted/20">
       <td className="px-2 py-1.5 font-medium">
-        {ht?.code ?? "?"} vs {at?.code ?? "?"}
+        {isKnockout ? (
+          <div className="flex items-center gap-1">
+            <select
+              value={homeTeamId}
+              onChange={(e) => setHomeTeamId(e.target.value)}
+              aria-label={t("homeTeam")}
+              className="max-w-[7rem] rounded border bg-background px-1 py-0.5 text-xs"
+            >
+              <option value="">{t("noTeam")}</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id} disabled={team.id === awayTeamId}>
+                  {team.code}
+                </option>
+              ))}
+            </select>
+            <span>vs</span>
+            <select
+              value={awayTeamId}
+              onChange={(e) => setAwayTeamId(e.target.value)}
+              aria-label={t("awayTeam")}
+              className="max-w-[7rem] rounded border bg-background px-1 py-0.5 text-xs"
+            >
+              <option value="">{t("noTeam")}</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id} disabled={team.id === homeTeamId}>
+                  {team.code}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <>
+            {ht?.code ?? "?"} vs {at?.code ?? "?"}
+          </>
+        )}
       </td>
       <td className="px-2 py-1.5 text-muted-foreground">
         {new Date(match.kickoff_at).toLocaleDateString()}
@@ -147,7 +222,7 @@ function MatchRow({
         <td className="px-2 py-1.5">
           {showPenPicker ? (
             <select
-              value={penWinnerId}
+              value={validPenWinnerId}
               onChange={(e) => setPenWinnerId(e.target.value)}
               className="rounded border bg-background px-1 py-0.5 text-xs"
             >
@@ -165,7 +240,7 @@ function MatchRow({
           size="sm"
           variant="outline"
           onClick={handleSave}
-          disabled={isPending}
+          disabled={isPending || sameTeam}
           className="h-6 text-xs"
         >
           {saveState === "saving"
@@ -181,7 +256,7 @@ function MatchRow({
   );
 }
 
-export function MatchesSection({ rounds }: Props) {
+export function MatchesSection({ rounds, teams }: Props) {
   const t = useTranslations("admin.matches");
   const tRounds = useTranslations("rounds");
 
@@ -233,6 +308,7 @@ export function MatchesSection({ rounds }: Props) {
                       key={match.id}
                       match={match}
                       isKnockout={isKnockout}
+                      teams={teams}
                     />
                   ))}
                 </tbody>
