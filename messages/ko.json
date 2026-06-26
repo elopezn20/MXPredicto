@@ -213,7 +213,16 @@
       "pdfRound": "라운드",
       "pdfDeadline": "마감",
       "pdfTotalMatches": "전체 경기",
-      "pdfGenerated": "생성 시각"
+      "pdfGenerated": "생성 시각",
+      "podioButton": "시상대 참여 현황 보기",
+      "podioTitle": "시상대 참여 현황",
+      "podioSummary": "완료 {complete} · 부분 {partial} · 미제출 {none}",
+      "colStatus": "상태",
+      "colSlots": "입력 칸",
+      "statusComplete": "제출함",
+      "statusPartial": "부분 제출",
+      "statusNone": "미제출",
+      "podioPdfTitle": "시상대 참여 현황 보고서"
     }
   },
   "profile": {

@@ -451,3 +451,82 @@ export async function getNextRoundParticipation(): Promise<
     },
   };
 }
+
+// ── Podio participation report ──────────────────────────────────────────────────
+
+export type PodioStatus = "none" | "partial" | "complete";
+
+export interface PodioParticipationRow {
+  userId: string;
+  displayName: string;
+  /** How many of the three podio slots (champion / runner-up / third) are filled. */
+  filled: number;
+  status: PodioStatus;
+}
+
+export interface PodioParticipationReport {
+  lockTime: string | null;
+  rows: PodioParticipationRow[];
+}
+
+/** The podio prediction has three slots, all required to count as complete. */
+const PODIO_SLOTS = 3;
+
+/**
+ * Podio participation snapshot: for every registered player, whether they have
+ * submitted their podium pick fully, partially, or not at all. There is a single
+ * `stage = "podio"` round whose `lock_time` is the deadline; the admin client
+ * bypasses RLS so this reads every player's row regardless of lock state.
+ */
+export async function getPodioParticipation(): Promise<
+  ActionResult<PodioParticipationReport>
+> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const admin = createAdminClient();
+
+  // Deadline for the podium pick (single stage="podio" round). Optional — the
+  // report is still meaningful before the round row exists.
+  const { data: podioRound } = await admin
+    .from("rounds")
+    .select("lock_time")
+    .eq("stage", "podio")
+    .maybeSingle();
+
+  // Every registered player.
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, display_name")
+    .order("display_name", { ascending: true });
+
+  // One podio row per user (upsert on user_id), so this is well under the 1000
+  // PostgREST cap — no pagination needed.
+  const { data: preds } = await admin
+    .from("podio_predictions")
+    .select("user_id, champion_team_id, runner_up_team_id, third_place_team_id");
+
+  const filledByUser = new Map<string, number>();
+  for (const p of preds ?? []) {
+    let filled = 0;
+    if (p.champion_team_id) filled += 1;
+    if (p.runner_up_team_id) filled += 1;
+    if (p.third_place_team_id) filled += 1;
+    filledByUser.set(p.user_id, filled);
+  }
+
+  const rows: PodioParticipationRow[] = (profiles ?? []).map((p) => {
+    const filled = filledByUser.get(p.id) ?? 0;
+    const status: PodioStatus =
+      filled === 0 ? "none" : filled >= PODIO_SLOTS ? "complete" : "partial";
+    return { userId: p.id, displayName: p.display_name, filled, status };
+  });
+
+  return {
+    ok: true,
+    data: {
+      lockTime: podioRound?.lock_time ?? null,
+      rows,
+    },
+  };
+}

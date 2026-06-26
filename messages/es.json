@@ -213,7 +213,16 @@
       "pdfRound": "Ronda",
       "pdfDeadline": "Cierra",
       "pdfTotalMatches": "Total de partidos",
-      "pdfGenerated": "Generado"
+      "pdfGenerated": "Generado",
+      "podioButton": "Ver participación del podio",
+      "podioTitle": "Participación del podio",
+      "podioSummary": "{complete} completos · {partial} parciales · {none} sin enviar",
+      "colStatus": "Estado",
+      "colSlots": "Casillas",
+      "statusComplete": "Enviado",
+      "statusPartial": "Parcial",
+      "statusNone": "Sin enviar",
+      "podioPdfTitle": "Reporte de participación del podio"
     }
   },
   "profile": {

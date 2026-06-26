@@ -213,7 +213,16 @@
       "pdfRound": "Round",
       "pdfDeadline": "Closes",
       "pdfTotalMatches": "Total matches",
-      "pdfGenerated": "Generated"
+      "pdfGenerated": "Generated",
+      "podioButton": "Get podium participation",
+      "podioTitle": "Podium participation",
+      "podioSummary": "{complete} complete · {partial} partial · {none} not submitted",
+      "colStatus": "Status",
+      "colSlots": "Slots filled",
+      "statusComplete": "Submitted",
+      "statusPartial": "Partial",
+      "statusNone": "Not submitted",
+      "podioPdfTitle": "Podium participation report"
     }
   },
   "profile": {
