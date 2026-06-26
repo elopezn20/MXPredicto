@@ -150,6 +150,8 @@
       "awayScore": "A",
       "penaltyWinner": "Pen. winner",
       "advancingTeam": "Advancing",
+      "homeTeam": "Home team",
+      "awayTeam": "Away team",
       "save": "Save",
       "saving": "Saving…",
       "saved": "Saved",

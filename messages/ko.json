@@ -150,6 +150,8 @@
       "awayScore": "원정",
       "penaltyWinner": "승부차기 승자",
       "advancingTeam": "진출팀",
+      "homeTeam": "홈팀",
+      "awayTeam": "원정팀",
       "save": "저장",
       "saving": "저장 중…",
       "saved": "저장됨",
