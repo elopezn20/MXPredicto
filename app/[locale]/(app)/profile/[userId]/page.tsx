@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { RoundSection } from "@/components/profile/round-section";
 
 interface Props {
   params: Promise<{ locale: string; userId: string }>;
@@ -200,33 +201,35 @@ export default async function ProfilePage({ params }: Props) {
           return sum + (p?.points_awarded ?? 0);
         }, 0);
 
-        return (
-          <section key={round.id} className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold">{tRounds(roundKey)}</h2>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full border"
-                style={
-                  isLocked
-                    ? { color: "#6b7280", borderColor: "#d1d5db" }
-                    : isCurrent
-                    ? { color: "#16a34a", borderColor: "#16a34a" }
-                    : { color: "#9ca3af", borderColor: "#e5e7eb" }
-                }
-              >
-                {isLocked
-                  ? tPred("locked")
+        const header = (
+          <>
+            <h2 className="font-semibold">{tRounds(roundKey)}</h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full border"
+              style={
+                isLocked
+                  ? { color: "#6b7280", borderColor: "#d1d5db" }
                   : isCurrent
-                  ? t("currentRoundBadge")
-                  : t("upcomingBadge")}
+                  ? { color: "#16a34a", borderColor: "#16a34a" }
+                  : { color: "#9ca3af", borderColor: "#e5e7eb" }
+              }
+            >
+              {isLocked
+                ? tPred("locked")
+                : isCurrent
+                ? t("currentRoundBadge")
+                : t("upcomingBadge")}
+            </span>
+            {isLocked && (
+              <span className="ml-auto text-sm font-bold text-primary">
+                {roundPoints} {tPred("pts")}
               </span>
-              {isLocked && (
-                <span className="ml-auto text-sm font-bold text-primary">
-                  {roundPoints} {tPred("pts")}
-                </span>
-              )}
-            </div>
+            )}
+          </>
+        );
 
+        return (
+          <RoundSection key={round.id} header={header} collapsible={isLocked}>
             {isLocked ? (
               <div className="overflow-x-auto rounded-lg border">
                 <table className="w-full text-xs sm:text-sm">
@@ -308,7 +311,7 @@ export default async function ProfilePage({ params }: Props) {
                 {isCurrent ? t("currentRoundNote") : t("upcomingNote")}
               </p>
             )}
-          </section>
+          </RoundSection>
         );
       })}
     </div>
