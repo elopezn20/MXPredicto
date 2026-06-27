@@ -69,7 +69,7 @@ export function NavBar({ locale, displayName, isAdmin, profileUserId, t }: NavBa
               <NavLink href={`/${locale}/predictions`}>{t.predictions}</NavLink>
               <NavLink href={`/${locale}/podio`}>{t.podio}</NavLink>
               <NavLink href={`/${locale}/scoreboard`}>{t.scoreboard}</NavLink>
-              <NavLink href={`/${locale}/progress`}>{t.progress}</NavLink>
+              {/* Progress tab temporarily disabled */}
             </>
           )}
           <NavLink href={`/${locale}/rules`}>{t.rules}</NavLink>
