@@ -233,7 +233,7 @@
       "colThird": "3rd place",
       "colOffPodium": "Off podium",
       "resultsPdfTitle": "Podium results by team",
-      "currentButton": "Current predictions (Excel)",
+      "currentButton": "Current predictions (PDF)",
       "currentFileName": "current-round-predictions",
       "noCurrentRound": "No current round with open matches.",
       "noPredictionShort": "—",
@@ -243,7 +243,10 @@
       "vs": "vs",
       "statusScheduled": "Scheduled",
       "statusInProgress": "In progress",
-      "statusFinished": "Finished"
+      "statusFinished": "Finished",
+      "currentPdfTitle": "Current round predictions",
+      "podioListButton": "Podium predictions (PDF)",
+      "podioListPdfTitle": "Podium predictions by player"
     }
   },
   "profile": {

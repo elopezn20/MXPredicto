@@ -233,7 +233,7 @@
       "colThird": "3er lugar",
       "colOffPodium": "Fuera del podio",
       "resultsPdfTitle": "Resultados del podio por país",
-      "currentButton": "Predicciones actuales (Excel)",
+      "currentButton": "Predicciones actuales (PDF)",
       "currentFileName": "predicciones-ronda-actual",
       "noCurrentRound": "No hay ronda actual con partidos abiertos.",
       "noPredictionShort": "—",
@@ -243,7 +243,10 @@
       "vs": "vs",
       "statusScheduled": "Programado",
       "statusInProgress": "En curso",
-      "statusFinished": "Finalizado"
+      "statusFinished": "Finalizado",
+      "currentPdfTitle": "Predicciones de la ronda actual",
+      "podioListButton": "Predicciones del podio (PDF)",
+      "podioListPdfTitle": "Predicciones del podio por jugador"
     }
   },
   "profile": {
