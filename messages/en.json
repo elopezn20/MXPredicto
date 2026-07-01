@@ -167,7 +167,13 @@
       "rescoreDescription": "Recomputes points for all predictions on finished matches. Safe to run multiple times.",
       "rescoreButton": "Rescore all",
       "rescoring": "Rescoring…",
-      "rescoreSuccess": "Rescored: {updated} predictions updated."
+      "rescoreSuccess": "Rescored: {updated} predictions updated.",
+      "latestTitle": "Score latest game",
+      "latestDescription": "Scores predictions for the most recently finished match only — a quick way to add a just-ended game to the scoreboard.",
+      "latestButton": "Score latest game",
+      "latestRunning": "Scoring…",
+      "latestSuccess": "Scored latest game: {updated} predictions updated.",
+      "latestNoMatch": "No finished match found yet."
     },
     "audit": {
       "title": "Match changes",

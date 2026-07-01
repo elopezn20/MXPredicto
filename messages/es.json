@@ -167,7 +167,13 @@
       "rescoreDescription": "Recalcula los puntos de todas las predicciones en partidos finalizados. Idempotente.",
       "rescoreButton": "Recalcular todo",
       "rescoring": "Recalculando…",
-      "rescoreSuccess": "Recalculado: {updated} predicciones actualizadas."
+      "rescoreSuccess": "Recalculado: {updated} predicciones actualizadas.",
+      "latestTitle": "Puntuar último partido",
+      "latestDescription": "Puntúa solo las predicciones del partido finalizado más reciente: una forma rápida de añadir un partido recién terminado al marcador.",
+      "latestButton": "Puntuar último partido",
+      "latestRunning": "Puntuando…",
+      "latestSuccess": "Último partido puntuado: {updated} predicciones actualizadas.",
+      "latestNoMatch": "Aún no hay ningún partido finalizado."
     },
     "audit": {
       "title": "Cambios en partidos",
