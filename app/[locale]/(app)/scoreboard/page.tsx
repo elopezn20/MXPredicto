@@ -139,8 +139,8 @@ export default async function ScoreboardPage({ params }: Props) {
     .select(
       `id, kickoff_at, status,
        rounds ( lock_time ),
-       home_team:home_team_id ( code, name_en, name_es, name_ko ),
-       away_team:away_team_id ( code, name_en, name_es, name_ko )`
+       home_team:home_team_id ( id, code, name_en, name_es, name_ko ),
+       away_team:away_team_id ( id, code, name_en, name_es, name_ko )`
     )
     .neq("status", "finished")
     .order("kickoff_at", { ascending: true })
@@ -160,7 +160,9 @@ export default async function ScoreboardPage({ params }: Props) {
   const { data: nextPreds } = nextMatch && nextMatchLocked
     ? await supabase
         .from("predictions")
-        .select("user_id, home_score_pred, away_score_pred")
+        .select(
+          "user_id, home_score_pred, away_score_pred, penalty_winner_team_id"
+        )
         .eq("match_id", nextMatch.id)
     : { data: [] };
 
@@ -170,13 +172,6 @@ export default async function ScoreboardPage({ params }: Props) {
       homeScore: p.home_score_pred,
       awayScore: p.away_score_pred,
     }))
-  );
-
-  const pickByUser = new Map<string, string>(
-    (nextPreds ?? []).map((p) => [
-      p.user_id,
-      `${p.home_score_pred}–${p.away_score_pred}`,
-    ])
   );
 
   const nextHomeTeam = nextMatch
@@ -192,6 +187,28 @@ export default async function ScoreboardPage({ params }: Props) {
 
   const nextHomeName = teamName(nextHomeTeam ?? null, locale);
   const nextAwayName = teamName(nextAwayTeam ?? null, locale);
+
+  // Per-player pick for the next match. On a predicted draw we also surface the
+  // team the player picked to advance on penalties (KO ties), shown as a code
+  // suffix e.g. "1–1 (BRA)".
+  const pickByUser = new Map<string, string>(
+    (nextPreds ?? []).map((p) => {
+      let pick = `${p.home_score_pred}–${p.away_score_pred}`;
+      if (
+        p.home_score_pred === p.away_score_pred &&
+        p.penalty_winner_team_id
+      ) {
+        const advCode =
+          p.penalty_winner_team_id === nextHomeTeam?.id
+            ? nextHomeTeam?.code
+            : p.penalty_winner_team_id === nextAwayTeam?.id
+              ? nextAwayTeam?.code
+              : null;
+        if (advCode) pick += ` (${advCode})`;
+      }
+      return [p.user_id, pick];
+    })
+  );
 
   // Server-rendered fallback in the pool's home timezone (Chile). The
   // <KickoffTime> client component re-formats this in the viewer's local

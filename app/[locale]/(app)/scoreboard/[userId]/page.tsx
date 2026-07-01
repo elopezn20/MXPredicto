@@ -169,6 +169,23 @@ export default async function UserPredictionsPage({ params }: Props) {
                             {pred ? (
                               <span>
                                 {pred.home_score_pred}–{pred.away_score_pred}
+                                {pred.home_score_pred ===
+                                  pred.away_score_pred &&
+                                  pred.penalty_winner_team_id && (
+                                    <span className="ml-1 text-muted-foreground">
+                                      (
+                                      {teamName(
+                                        pred.penalty_winner_team_id === ht?.id
+                                          ? ht ?? null
+                                          : pred.penalty_winner_team_id ===
+                                              at?.id
+                                            ? at ?? null
+                                            : null,
+                                        locale
+                                      )}
+                                      )
+                                    </span>
+                                  )}
                               </span>
                             ) : (
                               <span className="text-muted-foreground">—</span>
