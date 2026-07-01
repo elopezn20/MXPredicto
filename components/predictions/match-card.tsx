@@ -95,6 +95,15 @@ export function MatchCard({
     awayInput !== "" &&
     Number(homeInput) === Number(awayInput);
 
+  // The team the user picked to win penalties (shown on locked cards)
+  const predictedPenTeam = prediction?.penalty_winner_team_id
+    ? prediction.penalty_winner_team_id === homeTeam?.id
+      ? homeTeam
+      : prediction.penalty_winner_team_id === awayTeam?.id
+        ? awayTeam
+        : null
+    : null;
+
   function handleSave() {
     if (homeInput === "" || awayInput === "") return;
     setSaveStatus("saving");
@@ -189,6 +198,16 @@ export function MatchCard({
         <p className="mt-1 text-center text-xs text-muted-foreground">
           {actualHome} – {actualAway}
           {actualPenaltyWinnerId && " (pens)"}
+        </p>
+      )}
+
+      {/* User's penalty-winner pick (locked KO draws) */}
+      {isLocked && predictedPenTeam && (
+        <p className="mt-1 text-center text-xs text-muted-foreground">
+          {t.penaltyWinner}{" "}
+          <span className="font-medium text-foreground">
+            {predictedPenTeam.name}
+          </span>
         </p>
       )}
 
