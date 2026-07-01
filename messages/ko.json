@@ -233,7 +233,7 @@
       "colThird": "3위",
       "colOffPodium": "시상대 외",
       "resultsPdfTitle": "팀별 시상대 결과",
-      "currentButton": "현재 예측 (Excel)",
+      "currentButton": "현재 예측 (PDF)",
       "currentFileName": "현재-라운드-예측",
       "noCurrentRound": "진행 중인 경기가 있는 현재 라운드가 없습니다.",
       "noPredictionShort": "—",
@@ -243,7 +243,10 @@
       "vs": "vs",
       "statusScheduled": "예정",
       "statusInProgress": "진행 중",
-      "statusFinished": "종료"
+      "statusFinished": "종료",
+      "currentPdfTitle": "현재 라운드 예측",
+      "podioListButton": "시상대 예측 (PDF)",
+      "podioListPdfTitle": "플레이어별 시상대 예측"
     }
   },
   "profile": {

@@ -4,14 +4,17 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  getCurrentRoundPredictionsFile,
+  getCurrentRoundPredictionsMatrix,
   getNextRoundParticipation,
   getPodioParticipation,
+  getPodioPredictionsList,
   getPodioResults,
   type ParticipationReport,
+  type PredictionsMatrixReport,
   type PodioParticipationReport,
+  type PodioPredictionsListReport,
+  type PodioTeamRef,
   type PodioResultsReport,
-  type PodioResultRow,
   type PodioStatus,
 } from "@/lib/actions/admin";
 
@@ -58,7 +61,11 @@ export function ParticipationSection() {
   const tRounds = useTranslations("rounds");
   const locale = useLocale();
 
-  function teamName(r: PodioResultRow): string {
+  function teamName(r: {
+    nameEn: string;
+    nameEs: string;
+    nameKo: string;
+  }): string {
     if (locale === "ko") return r.nameKo;
     if (locale === "en") return r.nameEn;
     return r.nameEs;
@@ -85,6 +92,9 @@ export function ParticipationSection() {
 
   const [fileError, setFileError] = useState<string | null>(null);
   const [isFilePending, startFileTransition] = useTransition();
+
+  const [podioListError, setPodioListError] = useState<string | null>(null);
+  const [isPodioListPending, startPodioListTransition] = useTransition();
 
   function roundLabel(nameKey: string): string {
     const key = nameKey.replace("rounds.", "") as Parameters<typeof tRounds>[0];
@@ -142,20 +152,7 @@ export function ParticipationSection() {
   function handleExportCurrent() {
     setFileError(null);
     startFileTransition(async () => {
-      const result = await getCurrentRoundPredictionsFile(locale, {
-        player: t("colUser"),
-        noPrediction: t("noPredictionShort"),
-        penaltyWinner: t("penaltyWinner"),
-        kickoff: t("kickoff"),
-        venue: t("venue"),
-        statusValues: {
-          scheduled: t("statusScheduled"),
-          in_progress: t("statusInProgress"),
-          finished: t("statusFinished"),
-        },
-        vs: t("vs"),
-        fileBaseName: t("currentFileName"),
-      });
+      const result = await getCurrentRoundPredictionsMatrix(locale);
 
       if (!result.ok) {
         setFileError(
@@ -164,22 +161,214 @@ export function ParticipationSection() {
         return;
       }
 
-      const { filename, base64 } = result.data!;
-      const bytes = atob(base64);
-      const buf = new Uint8Array(bytes.length);
-      for (let i = 0; i < bytes.length; i++) buf[i] = bytes.charCodeAt(i);
-      const blob = new Blob([buf], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      renderCurrentPredictionsPdf(result.data!);
     });
+  }
+
+  function renderCurrentPredictionsPdf(data: PredictionsMatrixReport) {
+    const title = t("currentPdfTitle");
+    const roundName = roundLabel(data.roundNameKey);
+    const generatedStr = new Date().toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const lockStr = data.lockTime
+      ? new Date(data.lockTime).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "—";
+
+    const users = [...data.users].sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    );
+
+    const headCells = data.matches
+      .map(
+        (m, i) => `<th class="match">
+          <div class="mnum">${i + 1}</div>
+          <div class="mteams">${escapeHtml(m.homeCode)}<span>v</span>${escapeHtml(m.awayCode)}</div>
+        </th>`
+      )
+      .join("");
+
+    const bodyRows = users
+      .map((u, i) => {
+        const cells = data.matches
+          .map((m) => {
+            const cell = u.cells[m.id];
+            if (!cell) return `<td class="empty">—</td>`;
+            const pen = cell.pen
+              ? `<span class="pen">P:${escapeHtml(cell.pen)}</span>`
+              : "";
+            return `<td><span class="score">${escapeHtml(cell.score)}</span>${pen}</td>`;
+          })
+          .join("");
+        return `<tr class="${i % 2 === 1 ? "alt" : ""}">
+          <td class="player">${escapeHtml(u.displayName)}</td>
+          ${cells}
+        </tr>`;
+      })
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>${escapeHtml(title)} — ${escapeHtml(roundName)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111; margin: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #1A2855; }
+  .meta { font-size: 12px; color: #555; margin-bottom: 16px; }
+  .meta div { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+  th, td { padding: 4px 3px; text-align: center; border: 1px solid #e5e7eb; }
+  thead th { background: #1A2855; color: #fff; font-weight: 600; }
+  th.player, td.player { text-align: left; width: 130px; padding-left: 8px; }
+  thead th.player { background: #1A2855; }
+  th.match .mnum { font-size: 8px; opacity: .7; font-weight: 500; }
+  th.match .mteams { font-weight: 700; white-space: nowrap; }
+  th.match .mteams span { opacity: .55; font-weight: 400; margin: 0 2px; }
+  td.player { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  td .score { font-variant-numeric: tabular-nums; font-weight: 600; }
+  td .pen { display: block; font-size: 7px; color: #E91E8C; font-weight: 700; }
+  td.empty { color: #9CA3AF; }
+  tr.alt td { background: #F3F4F6; }
+  tr.alt td.player { background: #E9EBF0; }
+  @page { size: landscape; margin: 10mm; }
+  @media print {
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    tr td, thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+  <h1>${escapeHtml(title)}</h1>
+  <div class="meta">
+    <div><strong>${escapeHtml(t("pdfRound"))}:</strong> ${escapeHtml(roundName)} · ${escapeHtml(t("totalMatchesLabel", { count: data.matches.length }))}</div>
+    <div><strong>${escapeHtml(t("pdfDeadline"))}:</strong> ${escapeHtml(lockStr)}</div>
+    <div><strong>${escapeHtml(t("pdfGenerated"))}:</strong> ${escapeHtml(generatedStr)}</div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th class="player">${escapeHtml(t("colUser"))}</th>
+        ${headCells}
+      </tr>
+    </thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+  <script>window.onload = function () { window.print(); };</script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }
+
+  function handleExportPodioList() {
+    setPodioListError(null);
+    startPodioListTransition(async () => {
+      const result = await getPodioPredictionsList();
+      if (!result.ok) {
+        setPodioListError(t("errorGeneric"));
+        return;
+      }
+      renderPodioPredictionsPdf(result.data!);
+    });
+  }
+
+  function renderPodioPredictionsPdf(data: PodioPredictionsListReport) {
+    const title = t("podioListPdfTitle");
+    const generatedStr = new Date().toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const lockStr = data.lockTime
+      ? new Date(data.lockTime).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "—";
+
+    const rows = [...data.rows].sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    );
+
+    const teamCell = (team: PodioTeamRef | null): string => {
+      if (!team) return `<td class="empty">—</td>`;
+      const c = teamColor(team.nameEn);
+      return `<td style="background:${c.bg};color:${c.text}">${escapeHtml(teamName(team))}</td>`;
+    };
+
+    const bodyRows = rows
+      .map(
+        (r, i) => `<tr class="${i % 2 === 1 ? "alt" : ""}">
+          <td class="player">${escapeHtml(r.displayName)}</td>
+          ${teamCell(r.champion)}
+          ${teamCell(r.runnerUp)}
+          ${teamCell(r.third)}
+        </tr>`
+      )
+      .join("");
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>${escapeHtml(title)}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111; margin: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #1A2855; }
+  .meta { font-size: 12px; color: #555; margin-bottom: 16px; }
+  .meta div { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 6px 10px; text-align: center; border: 1px solid #e5e7eb; }
+  thead th { background: #1A2855; color: #fff; font-weight: 600; }
+  th.player, td.player { text-align: left; width: 40%; }
+  td.player { font-weight: 600; }
+  td.empty { color: #9CA3AF; }
+  tr.alt td.player { background: #F3F4F6; }
+  @page { margin: 12mm; }
+  @media print {
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    tr td, thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+  <h1>${escapeHtml(title)}</h1>
+  <div class="meta">
+    <div><strong>${escapeHtml(t("pdfDeadline"))}:</strong> ${escapeHtml(lockStr)}</div>
+    <div><strong>${escapeHtml(t("pdfGenerated"))}:</strong> ${escapeHtml(generatedStr)}</div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th class="player">${escapeHtml(t("colUser"))}</th>
+        <th>${escapeHtml(t("colFirst"))}</th>
+        <th>${escapeHtml(t("colSecond"))}</th>
+        <th>${escapeHtml(t("colThird"))}</th>
+      </tr>
+    </thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+  <script>window.onload = function () { window.print(); };</script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
   }
 
   function handleExportPdf() {
@@ -471,9 +660,19 @@ export function ParticipationSection() {
         >
           {isFilePending ? t("loading") : t("currentButton")}
         </Button>
+        <Button
+          variant="outline"
+          onClick={handleExportPodioList}
+          disabled={isPodioListPending}
+        >
+          {isPodioListPending ? t("loading") : t("podioListButton")}
+        </Button>
       </div>
 
       {fileError && <p className="text-sm text-destructive">{fileError}</p>}
+      {podioListError && (
+        <p className="text-sm text-destructive">{podioListError}</p>
+      )}
 
       {activeView === "matches" && error && (
         <p className="text-sm text-destructive">{error}</p>

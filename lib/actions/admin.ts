@@ -611,36 +611,45 @@ export async function getPodioResults(): Promise<ActionResult<PodioResultsReport
   return { ok: true, data: { totalSubmissions, rows } };
 }
 
-// ── Current-round predictions workbook (Excel) ──────────────────────────────────
+// ── Current-round predictions matrix (PDF) ──────────────────────────────────────
 
-export interface CurrentPredictionsFile {
-  filename: string;
-  /** base64-encoded .xlsx payload. */
-  base64: string;
+export interface PredictionsMatrixMatch {
+  id: string;
+  homeCode: string;
+  awayCode: string;
+  homeName: string;
+  awayName: string;
+  kickoff: string | null;
 }
 
-export interface PredictionsFileLabels {
-  player: string;
-  noPrediction: string;
-  penaltyWinner: string;
-  kickoff: string;
-  venue: string;
-  /** Raw status value → display label. */
-  statusValues: Record<string, string>;
-  vs: string;
-  fileBaseName: string;
+export interface PredictionsMatrixUser {
+  userId: string;
+  displayName: string;
+  /**
+   * Prediction per match, keyed by match id. `score` is "h-a" (or null if the
+   * player has no prediction for that match); `pen` is the penalty winner's team
+   * code for knockout matches, or null.
+   */
+  cells: Record<string, { score: string; pen: string | null } | null>;
+}
+
+export interface PredictionsMatrixReport {
+  roundNameKey: string;
+  lockTime: string | null;
+  isKnockout: boolean;
+  matches: PredictionsMatrixMatch[];
+  users: PredictionsMatrixUser[];
 }
 
 /**
- * Builds an Excel workbook of every player's predictions for the current round's
- * matches that are NOT yet finished — one sheet per match, players alphabetical.
- * "Current round" is the first non-podio round (by order_index) that still has
- * any unfinished match. Returns the file base64-encoded for the client to save.
+ * Every player's predictions for the current round, shaped as a matrix: one row
+ * per player (alphabetical) and one column per match. "Current round" is the
+ * first non-podio round (by order_index) that still has any unfinished match.
+ * The client renders this into a single printable PDF.
  */
-export async function getCurrentRoundPredictionsFile(
-  locale: string,
-  labels: PredictionsFileLabels
-): Promise<ActionResult<CurrentPredictionsFile>> {
+export async function getCurrentRoundPredictionsMatrix(
+  locale: string
+): Promise<ActionResult<PredictionsMatrixReport>> {
   const guard = await requireAdmin();
   if (guard) return guard;
 
@@ -649,9 +658,9 @@ export async function getCurrentRoundPredictionsFile(
   const { data: rounds } = await admin
     .from("rounds")
     .select(
-      `id, name_key, order_index, stage,
+      `id, name_key, order_index, stage, lock_time,
        matches (
-         id, kickoff_at, venue, status,
+         id, kickoff_at, status,
          home_team:home_team_id ( id, name_en, name_es, name_ko, code ),
          away_team:away_team_id ( id, name_en, name_es, name_ko, code )
        )`
@@ -679,23 +688,56 @@ export async function getCurrentRoundPredictionsFile(
 
   const isKnockout = currentRound.stage !== "group";
 
-  const matches = (currentRound.matches ?? [])
-    .filter((m: { status: string }) => m.status !== "finished")
+  const rawMatches = (currentRound.matches ?? [])
+    .slice()
     .sort((a: { kickoff_at: string | null }, b: { kickoff_at: string | null }) =>
       String(a.kickoff_at ?? "").localeCompare(String(b.kickoff_at ?? ""))
     );
 
-  if (matches.length === 0) return { ok: false, error: "noCurrentRound" };
+  if (rawMatches.length === 0) return { ok: false, error: "noCurrentRound" };
 
-  const matchIds = matches.map((m: { id: string }) => m.id);
+  // Resolve team refs once; keep the ids around to map penalty winners to codes.
+  const matchMeta = rawMatches.map(
+    (m: {
+      id: string;
+      kickoff_at: string | null;
+      home_team: unknown;
+      away_team: unknown;
+    }) => {
+      const home = one(m.home_team) as {
+        id: string;
+        name_en: string;
+        name_es: string;
+        name_ko: string;
+        code: string;
+      } | null;
+      const away = one(m.away_team) as typeof home;
+      return { id: m.id, kickoff: m.kickoff_at, home, away };
+    }
+  );
+
+  const matches: PredictionsMatrixMatch[] = matchMeta.map((m) => ({
+    id: m.id,
+    homeCode: m.home?.code ?? "?",
+    awayCode: m.away?.code ?? "?",
+    homeName: teamName(m.home),
+    awayName: teamName(m.away),
+    kickoff: m.kickoff,
+  }));
+
+  const matchIds = matchMeta.map((m) => m.id);
+  const homeIdByMatch = new Map(matchMeta.map((m) => [m.id, m.home?.id ?? null]));
+  const awayIdByMatch = new Map(matchMeta.map((m) => [m.id, m.away?.id ?? null]));
+  const homeCodeByMatch = new Map(matches.map((m) => [m.id, m.homeCode]));
+  const awayCodeByMatch = new Map(matches.map((m) => [m.id, m.awayCode]));
 
   const { data: profiles } = await admin
     .from("profiles")
     .select("id, display_name")
     .order("display_name", { ascending: true });
 
-  // Predictions for these matches, tallied per match → user. 62 players × 24
-  // matches exceeds the 1000-row PostgREST cap, so paginate (see participation).
+  // Predictions for these matches, keyed match → user. 60+ players × 16 matches
+  // can exceed the 1000-row PostgREST cap, so paginate (see participation).
   const PAGE_SIZE = 1000;
   const byMatch = new Map<
     string,
@@ -728,158 +770,128 @@ export async function getCurrentRoundPredictionsFile(
     }
   }
 
-  // ── Build the workbook ───────────────────────────────────────────────────────
-  const ExcelJS = (await import("exceljs")).default;
-  const wb = new ExcelJS.Workbook();
-  wb.created = new Date();
-
-  const NAVY = "FF1A2855";
-  const PINK = "FFE91E8C";
-  const STRIPE = "FFF3F4F6";
-  const MUTED = "FF9CA3AF";
-
-  const usedNames = new Set<string>();
-  function sheetName(raw: string, idx: number): string {
-    const cleaned = raw.replace(/[\\/?*[\]:]/g, " ").trim();
-    let candidate = `${idx + 1}. ${cleaned}`.slice(0, 31);
-    let n = 2;
-    while (usedNames.has(candidate)) {
-      candidate = `${idx + 1}.${n++} ${cleaned}`.slice(0, 31);
+  const users: PredictionsMatrixUser[] = (profiles ?? []).map((prof) => {
+    const cells: PredictionsMatrixUser["cells"] = {};
+    for (const id of matchIds) {
+      const pred = byMatch.get(id)?.get(prof.id);
+      if (!pred) {
+        cells[id] = null;
+        continue;
+      }
+      let pen: string | null = null;
+      if (isKnockout && pred.pen) {
+        if (pred.pen === homeIdByMatch.get(id)) pen = homeCodeByMatch.get(id) ?? null;
+        else if (pred.pen === awayIdByMatch.get(id)) pen = awayCodeByMatch.get(id) ?? null;
+      }
+      cells[id] = { score: `${pred.h}-${pred.a}`, pen };
     }
-    usedNames.add(candidate);
-    return candidate;
+    return { userId: prof.id, displayName: prof.display_name, cells };
+  });
+
+  return {
+    ok: true,
+    data: {
+      roundNameKey: currentRound.name_key,
+      lockTime: currentRound.lock_time ?? null,
+      isKnockout,
+      matches,
+      users,
+    },
+  };
+}
+
+// ── Podio predictions per player (PDF) ──────────────────────────────────────────
+
+export interface PodioTeamRef {
+  nameEn: string;
+  nameEs: string;
+  nameKo: string;
+}
+
+export interface PodioPredictionRow {
+  userId: string;
+  displayName: string;
+  champion: PodioTeamRef | null;
+  runnerUp: PodioTeamRef | null;
+  third: PodioTeamRef | null;
+}
+
+export interface PodioPredictionsListReport {
+  lockTime: string | null;
+  rows: PodioPredictionRow[];
+}
+
+/**
+ * Every player's podium pick, one row per player (alphabetical) with their
+ * champion / runner-up / third-place teams. The admin client bypasses RLS so
+ * this reads every player's row regardless of lock state. The client renders it
+ * into a single printable PDF (parallel to the current-round predictions PDF).
+ */
+export async function getPodioPredictionsList(): Promise<
+  ActionResult<PodioPredictionsListReport>
+> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const admin = createAdminClient();
+
+  // Deadline for the podium pick (single stage="podio" round). Optional.
+  const { data: podioRound } = await admin
+    .from("rounds")
+    .select("lock_time")
+    .eq("stage", "podio")
+    .maybeSingle();
+
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, display_name")
+    .order("display_name", { ascending: true });
+
+  const { data: teams } = await admin
+    .from("teams")
+    .select("id, name_en, name_es, name_ko");
+
+  const teamById = new Map<string, PodioTeamRef>();
+  for (const t of teams ?? []) {
+    teamById.set(t.id, { nameEn: t.name_en, nameEs: t.name_es, nameKo: t.name_ko });
   }
 
-  matches.forEach(
-    (
-      m: {
-        id: string;
-        kickoff_at: string | null;
-        venue: string | null;
-        status: string;
-        home_team: unknown;
-        away_team: unknown;
-      },
-      idx: number
-    ) => {
-      const home = one(m.home_team) as {
-        id: string;
-        name_en: string;
-        name_es: string;
-        name_ko: string;
-        code: string;
-      } | null;
-      const away = one(m.away_team) as typeof home;
-      const homeName = teamName(home);
-      const awayName = teamName(away);
+  // One podio row per user (upsert on user_id) — well under the 1000-row cap.
+  const { data: preds } = await admin
+    .from("podio_predictions")
+    .select("user_id, champion_team_id, runner_up_team_id, third_place_team_id");
 
-      const colCount = isKnockout ? 4 : 3;
-      const ws = wb.addWorksheet(
-        sheetName(`${home?.code ?? "?"} vs ${away?.code ?? "?"}`, idx),
-        { views: [{ state: "frozen", ySplit: 4 }] }
-      );
+  const predByUser = new Map<
+    string,
+    { champion: string | null; runnerUp: string | null; third: string | null }
+  >();
+  for (const p of preds ?? []) {
+    predByUser.set(p.user_id, {
+      champion: p.champion_team_id,
+      runnerUp: p.runner_up_team_id,
+      third: p.third_place_team_id,
+    });
+  }
 
-      ws.getColumn(1).width = 30;
-      ws.getColumn(2).width = Math.max(14, homeName.length + 4);
-      ws.getColumn(3).width = Math.max(14, awayName.length + 4);
-      if (isKnockout) ws.getColumn(4).width = 22;
+  const teamRef = (id: string | null | undefined): PodioTeamRef | null =>
+    id ? (teamById.get(id) ?? null) : null;
 
-      // Title row.
-      ws.mergeCells(1, 1, 1, colCount);
-      const title = ws.getCell(1, 1);
-      title.value = `${homeName} ${labels.vs} ${awayName}`;
-      title.font = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
-      title.alignment = { horizontal: "center", vertical: "middle" };
-      title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: NAVY } };
-      ws.getRow(1).height = 26;
+  const rows: PodioPredictionRow[] = (profiles ?? []).map((p) => {
+    const pick = predByUser.get(p.id);
+    return {
+      userId: p.id,
+      displayName: p.display_name,
+      champion: teamRef(pick?.champion),
+      runnerUp: teamRef(pick?.runnerUp),
+      third: teamRef(pick?.third),
+    };
+  });
 
-      // Subtitle: kickoff · venue · status.
-      ws.mergeCells(2, 1, 2, colCount);
-      const subtitleParts: string[] = [];
-      if (m.kickoff_at) {
-        subtitleParts.push(
-          `${labels.kickoff}: ${new Date(m.kickoff_at).toLocaleString(locale, {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })}`
-        );
-      }
-      if (m.venue) subtitleParts.push(`${labels.venue}: ${m.venue}`);
-      subtitleParts.push(labels.statusValues[m.status] ?? m.status);
-      const subtitle = ws.getCell(2, 1);
-      subtitle.value = subtitleParts.join("   ·   ");
-      subtitle.font = { italic: true, size: 10, color: { argb: MUTED } };
-      subtitle.alignment = { horizontal: "center" };
-
-      // Header row (row 4).
-      const headers = isKnockout
-        ? [labels.player, homeName, awayName, labels.penaltyWinner]
-        : [labels.player, homeName, awayName];
-      const headerRow = ws.getRow(4);
-      headers.forEach((h, i) => {
-        const cell = headerRow.getCell(i + 1);
-        cell.value = h;
-        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: PINK } };
-        cell.alignment = {
-          horizontal: i === 0 ? "left" : "center",
-          vertical: "middle",
-        };
-        cell.border = { bottom: { style: "thin", color: { argb: NAVY } } };
-      });
-      headerRow.height = 20;
-
-      // Data rows (one per player, alphabetical).
-      (profiles ?? []).forEach((prof, i) => {
-        const pred = byMatch.get(m.id)?.get(prof.id);
-        const row = ws.getRow(5 + i);
-        const nameCell = row.getCell(1);
-        nameCell.value = prof.display_name;
-        nameCell.alignment = { horizontal: "left" };
-
-        if (pred) {
-          row.getCell(2).value = pred.h;
-          row.getCell(3).value = pred.a;
-          if (isKnockout) {
-            const penName = !pred.pen
-              ? "—"
-              : pred.pen === home?.id
-                ? homeName
-                : pred.pen === away?.id
-                  ? awayName
-                  : "—";
-            row.getCell(4).value = penName;
-          }
-        } else {
-          row.getCell(2).value = "—";
-          row.getCell(3).value = "—";
-          if (isKnockout) row.getCell(4).value = "—";
-          nameCell.font = { color: { argb: MUTED } };
-        }
-
-        for (let c = 2; c <= colCount; c++) {
-          row.getCell(c).alignment = { horizontal: "center" };
-          if (!pred) row.getCell(c).font = { color: { argb: MUTED } };
-        }
-
-        // Zebra striping for readability.
-        if (i % 2 === 1) {
-          for (let c = 1; c <= colCount; c++) {
-            row.getCell(c).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: STRIPE },
-            };
-          }
-        }
-      });
-    }
-  );
-
-  const buffer = await wb.xlsx.writeBuffer();
-  const base64 = Buffer.from(buffer).toString("base64");
-  const datePart = new Date().toISOString().slice(0, 10);
-  const filename = `${labels.fileBaseName}-${datePart}.xlsx`;
-
-  return { ok: true, data: { filename, base64 } };
+  return {
+    ok: true,
+    data: {
+      lockTime: podioRound?.lock_time ?? null,
+      rows,
+    },
+  };
 }
