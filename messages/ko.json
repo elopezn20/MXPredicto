@@ -167,7 +167,13 @@
       "rescoreDescription": "완료된 경기의 모든 예측 점수를 재계산합니다. 여러 번 실행해도 안전합니다.",
       "rescoreButton": "전체 재채점",
       "rescoring": "재채점 중…",
-      "rescoreSuccess": "재채점 완료: {updated}개 예측 업데이트됨."
+      "rescoreSuccess": "재채점 완료: {updated}개 예측 업데이트됨.",
+      "latestTitle": "최신 경기 채점",
+      "latestDescription": "가장 최근에 완료된 경기의 예측만 채점합니다. 방금 끝난 경기를 순위표에 빠르게 반영하는 방법입니다.",
+      "latestButton": "최신 경기 채점",
+      "latestRunning": "채점 중…",
+      "latestSuccess": "최신 경기 채점 완료: {updated}개 예측 업데이트됨.",
+      "latestNoMatch": "아직 완료된 경기가 없습니다."
     },
     "audit": {
       "title": "경기 변경사항",

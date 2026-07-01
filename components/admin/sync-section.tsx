@@ -3,7 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { syncFromFootballData, rescoreAll } from "@/lib/actions/admin";
+import {
+  syncFromFootballData,
+  rescoreAll,
+  rescoreLatestMatch,
+} from "@/lib/actions/admin";
 
 export function SyncSection() {
   const t = useTranslations("admin.sync");
@@ -15,6 +19,10 @@ export function SyncSection() {
   const [rescoreMsg, setRescoreMsg] = useState<string | null>(null);
   const [rescoreErr, setRescoreErr] = useState<string | null>(null);
   const [isRescoring, startRescore] = useTransition();
+
+  const [latestMsg, setLatestMsg] = useState<string | null>(null);
+  const [latestErr, setLatestErr] = useState<string | null>(null);
+  const [isLatest, startLatest] = useTransition();
 
   function handleSync() {
     setSyncMsg(null);
@@ -40,6 +48,22 @@ export function SyncSection() {
         setRescoreMsg(t("rescoreSuccess", { updated }));
       } else {
         setRescoreErr(result.error);
+      }
+    });
+  }
+
+  function handleLatest() {
+    setLatestMsg(null);
+    setLatestErr(null);
+    startLatest(async () => {
+      const result = await rescoreLatestMatch();
+      if (result.ok) {
+        const { updated, hasMatch } = result.data!;
+        setLatestMsg(
+          hasMatch ? t("latestSuccess", { updated }) : t("latestNoMatch")
+        );
+      } else {
+        setLatestErr(result.error);
       }
     });
   }
@@ -82,6 +106,26 @@ export function SyncSection() {
         )}
         {rescoreErr && (
           <p className="mt-2 text-sm text-destructive">{rescoreErr}</p>
+        )}
+      </div>
+
+      {/* Score latest finished game */}
+      <div className="rounded-lg border p-4">
+        <h2 className="font-semibold">{t("latestTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("latestDescription")}</p>
+        <Button
+          className="mt-3"
+          variant="outline"
+          onClick={handleLatest}
+          disabled={isLatest}
+        >
+          {isLatest ? t("latestRunning") : t("latestButton")}
+        </Button>
+        {latestMsg && (
+          <p className="mt-2 text-sm text-green-600">{latestMsg}</p>
+        )}
+        {latestErr && (
+          <p className="mt-2 text-sm text-destructive">{latestErr}</p>
         )}
       </div>
     </div>

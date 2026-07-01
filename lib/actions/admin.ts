@@ -105,64 +105,78 @@ export async function updateMatchResult(
   return { ok: true, data: { matchId } };
 }
 
-// ── Rescore all finished matches ───────────────────────────────────────────────
+// ── Scoring helpers (shared by rescoreAll / rescoreLatestMatch) ─────────────────
 
-export async function rescoreAll(): Promise<ActionResult<{ updated: number }>> {
-  const guard = await requireAdmin();
-  if (guard) return guard;
+/** Columns needed to score a match's predictions, including its round stage. */
+const MATCH_SCORING_SELECT =
+  "id, home_score, away_score, penalty_winner_team_id, advancing_team_id, home_team_id, away_team_id, kickoff_at, rounds(stage)";
 
-  const admin = createAdminClient();
+type ScorableMatch = {
+  id: string;
+  home_score: number | null;
+  away_score: number | null;
+  penalty_winner_team_id: string | null;
+  advancing_team_id: string | null;
+  home_team_id: string | null;
+  away_team_id: string | null;
+  rounds: { stage: string } | { stage: string }[] | null;
+};
 
-  // Fetch all finished matches with their round stage
-  const { data: matches, error: matchErr } = await admin
-    .from("matches")
-    .select("id, home_score, away_score, penalty_winner_team_id, advancing_team_id, home_team_id, away_team_id, rounds(stage)")
-    .eq("status", "finished");
+/**
+ * Recomputes `points_awarded` for every prediction on a single finished match.
+ * Returns how many prediction rows were updated.
+ */
+async function scoreMatchPredictions(
+  admin: ReturnType<typeof createAdminClient>,
+  match: ScorableMatch
+): Promise<number> {
+  const roundData = Array.isArray(match.rounds) ? match.rounds[0] : match.rounds;
+  const stage = roundData?.stage === "group" ? "group" : "knockout";
 
-  if (matchErr) return { ok: false, error: matchErr.message };
-  if (!matches?.length) return { ok: true, data: { updated: 0 } };
+  const { data: preds } = await admin
+    .from("predictions")
+    .select("id, home_score_pred, away_score_pred, penalty_winner_team_id")
+    .eq("match_id", match.id);
+
+  if (!preds?.length) return 0;
 
   let updated = 0;
+  for (const pred of preds) {
+    const breakdown = scorePrediction(
+      {
+        home_score_pred: pred.home_score_pred,
+        away_score_pred: pred.away_score_pred,
+        penalty_winner_team_id: pred.penalty_winner_team_id,
+      },
+      {
+        home_score: match.home_score,
+        away_score: match.away_score,
+        penalty_winner_team_id: match.penalty_winner_team_id,
+        advancing_team_id: match.advancing_team_id,
+        home_team_id: match.home_team_id,
+        away_team_id: match.away_team_id,
+      },
+      stage
+    );
 
-  for (const match of matches) {
-    const roundData = Array.isArray(match.rounds) ? match.rounds[0] : match.rounds;
-    const stage = roundData?.stage === "group" ? "group" : "knockout";
-
-    const { data: preds } = await admin
+    await admin
       .from("predictions")
-      .select("id, home_score_pred, away_score_pred, penalty_winner_team_id")
-      .eq("match_id", match.id);
+      .update({ points_awarded: breakdown.total })
+      .eq("id", pred.id);
 
-    if (!preds?.length) continue;
-
-    for (const pred of preds) {
-      const breakdown = scorePrediction(
-        {
-          home_score_pred: pred.home_score_pred,
-          away_score_pred: pred.away_score_pred,
-          penalty_winner_team_id: pred.penalty_winner_team_id,
-        },
-        {
-          home_score: match.home_score,
-          away_score: match.away_score,
-          penalty_winner_team_id: match.penalty_winner_team_id,
-          advancing_team_id: match.advancing_team_id,
-          home_team_id: match.home_team_id,
-          away_team_id: match.away_team_id,
-        },
-        stage
-      );
-
-      await admin
-        .from("predictions")
-        .update({ points_awarded: breakdown.total })
-        .eq("id", pred.id);
-
-      updated++;
-    }
+    updated++;
   }
+  return updated;
+}
 
-  // Score podio predictions if Final and 3rd Place matches are finished
+/**
+ * Scores every podio prediction once both the Final and 3rd-Place matches are
+ * finished; a no-op otherwise. Shared so any rescore path picks up the podium as
+ * soon as the deciding match lands.
+ */
+async function scorePodioIfComplete(
+  admin: ReturnType<typeof createAdminClient>
+): Promise<void> {
   const { data: finalRound } = await admin
     .from("rounds")
     .select("id")
@@ -222,8 +236,66 @@ export async function rescoreAll(): Promise<ActionResult<{ updated: number }>> {
       }
     }
   }
+}
+
+// ── Rescore all finished matches ───────────────────────────────────────────────
+
+export async function rescoreAll(): Promise<ActionResult<{ updated: number }>> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const admin = createAdminClient();
+
+  // Fetch all finished matches with their round stage
+  const { data: matches, error: matchErr } = await admin
+    .from("matches")
+    .select(MATCH_SCORING_SELECT)
+    .eq("status", "finished");
+
+  if (matchErr) return { ok: false, error: matchErr.message };
+  if (!matches?.length) return { ok: true, data: { updated: 0 } };
+
+  let updated = 0;
+  for (const match of matches) {
+    updated += await scoreMatchPredictions(admin, match as ScorableMatch);
+  }
+
+  await scorePodioIfComplete(admin);
 
   return { ok: true, data: { updated } };
+}
+
+// ── Rescore only the most recent finished match ─────────────────────────────────
+
+/**
+ * Scores just the latest finished match — the finished match with the most
+ * recent kickoff. Much cheaper than {@link rescoreAll} for the common case of
+ * "a game just ended, add it to the scoreboard". Still re-checks the podium so
+ * finishing the Final (or 3rd-place) match settles the podio picks too.
+ */
+export async function rescoreLatestMatch(): Promise<
+  ActionResult<{ updated: number; hasMatch: boolean }>
+> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+
+  const admin = createAdminClient();
+
+  const { data: match, error: matchErr } = await admin
+    .from("matches")
+    .select(MATCH_SCORING_SELECT)
+    .eq("status", "finished")
+    .order("kickoff_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (matchErr) return { ok: false, error: matchErr.message };
+  if (!match) return { ok: true, data: { updated: 0, hasMatch: false } };
+
+  const updated = await scoreMatchPredictions(admin, match as ScorableMatch);
+  await scorePodioIfComplete(admin);
+
+  return { ok: true, data: { updated, hasMatch: true } };
 }
 
 // ── Update user display name ───────────────────────────────────────────────────
