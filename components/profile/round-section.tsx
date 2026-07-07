@@ -9,12 +9,19 @@ interface Props {
   header: ReactNode;
   /** Locked rounds are collapsible and start collapsed. */
   collapsible: boolean;
+  /** Override the initial state — e.g. the most recently locked round starts open. */
+  defaultCollapsed?: boolean;
   children: ReactNode;
 }
 
-export function RoundSection({ header, collapsible, children }: Props) {
+export function RoundSection({
+  header,
+  collapsible,
+  defaultCollapsed,
+  children,
+}: Props) {
   // Previous (locked) rounds start collapsed so the page leads with what's current.
-  const [collapsed, setCollapsed] = useState(collapsible);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed ?? collapsible);
 
   return (
     <section className="space-y-2">
