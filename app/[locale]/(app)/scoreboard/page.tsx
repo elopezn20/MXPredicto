@@ -174,6 +174,21 @@ export default async function ScoreboardPage({ params }: Props) {
     }))
   );
 
+  // Players who picked each exact scoreline, keyed the same way as
+  // computeNextMatchStats' Scoreline.label ("home-away"), for the "who picked
+  // this?" popover on the scoreboard's popular-predictions list.
+  const displayNameById = new Map(users.map((u) => [u.id, u.displayName]));
+  const usersByScorelineMap = new Map<string, string[]>();
+  for (const p of nextPreds ?? []) {
+    const label = `${p.home_score_pred}-${p.away_score_pred}`;
+    const name = displayNameById.get(p.user_id) ?? "—";
+    const existing = usersByScorelineMap.get(label);
+    if (existing) existing.push(name);
+    else usersByScorelineMap.set(label, [name]);
+  }
+  for (const names of usersByScorelineMap.values()) names.sort();
+  const usersByScoreline = Object.fromEntries(usersByScorelineMap);
+
   const nextHomeTeam = nextMatch
     ? Array.isArray(nextMatch.home_team)
       ? nextMatch.home_team[0]
@@ -284,6 +299,7 @@ export default async function ScoreboardPage({ params }: Props) {
               />
             }
             stats={nextStats}
+            usersByScoreline={usersByScoreline}
             labels={{
               heading: t("nextMatch"),
               modeTitle: t("mode"),
@@ -295,6 +311,7 @@ export default async function ScoreboardPage({ params }: Props) {
                 ? t("noPredictions")
                 : t("picksLocked"),
               highVariety: t("highVariety"),
+              pickedBy: t("pickedBy"),
             }}
           />
         </div>

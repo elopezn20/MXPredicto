@@ -97,6 +97,7 @@
     "nextPick": "Pronóstico",
     "noPredictions": "Aún no hay pronósticos.",
     "picksLocked": "Los pronósticos se revelan cuando cierra la fecha.",
+    "pickedBy": "Resultado pronosticado por",
     "highVariety": "¡Partido de alto riesgo! Sin favorito claro — los pronósticos están divididos sobre el resultado.",
     "exportPdf": "Exportar PDF",
     "rankUp": "Subió {count} desde el último partido",
