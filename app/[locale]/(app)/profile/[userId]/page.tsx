@@ -13,6 +13,7 @@ import {
   type SimMatch,
   type RankedPlayer,
 } from "@/lib/scoring/pick-similarity";
+import { computeEliminatedTeams } from "@/lib/scoring/eliminated";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
 import { SimilarityHeatmap } from "@/components/progress/similarity-heatmap";
@@ -87,6 +88,7 @@ export default async function ProfilePage({ params }: Props) {
     .from("matches")
     .select(
       `id, round_id, kickoff_at, status, home_score, away_score,
+       home_team_id, away_team_id, penalty_winner_team_id, advancing_team_id,
        rounds ( stage ),
        home_team:home_team_id ( id, code, name_en, name_es, name_ko ),
        away_team:away_team_id ( id, code, name_en, name_es, name_ko )`
@@ -134,9 +136,9 @@ export default async function ProfilePage({ params }: Props) {
     .from("podio_predictions")
     .select(
       `points_awarded,
-       champion:teams!champion_team_id ( code, name_en, name_es, name_ko ),
-       runner_up:teams!runner_up_team_id ( code, name_en, name_es, name_ko ),
-       third_place:teams!third_place_team_id ( code, name_en, name_es, name_ko )`
+       champion:teams!champion_team_id ( id, code, name_en, name_es, name_ko ),
+       runner_up:teams!runner_up_team_id ( id, code, name_en, name_es, name_ko ),
+       third_place:teams!third_place_team_id ( id, code, name_en, name_es, name_ko )`
     )
     .eq("user_id", userId)
     .maybeSingle();
@@ -333,12 +335,29 @@ export default async function ProfilePage({ params }: Props) {
     },
   ];
 
+  // Teams already out of the tournament — their podium cards render faded.
+  const eliminatedTeams = computeEliminatedTeams(
+    allMatches.map((m) => ({
+      stage: one(m.rounds)?.stage ?? "group",
+      status: m.status,
+      homeTeamId: m.home_team_id,
+      awayTeamId: m.away_team_id,
+      homeScore: m.home_score,
+      awayScore: m.away_score,
+      advancingTeamId: m.advancing_team_id,
+      penaltyWinnerTeamId: m.penalty_winner_team_id,
+    }))
+  );
+
   const podiumRows = podioPred
     ? ([
         { label: t("champion"), team: one(podioPred.champion), top: true },
         { label: t("runnerUp"), team: one(podioPred.runner_up), top: false },
         { label: t("thirdPlace"), team: one(podioPred.third_place), top: false },
-      ] as const)
+      ] as const).map((row) => ({
+        ...row,
+        out: row.team != null && eliminatedTeams.has(row.team.id),
+      }))
     : null;
 
   const predictionsTab = (
@@ -351,17 +370,42 @@ export default async function ProfilePage({ params }: Props) {
         ) : podiumRows ? (
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {podiumRows.map(({ label, team, top }) => (
+              {podiumRows.map(({ label, team, top, out }) => (
                 <div
                   key={label}
                   className={
-                    top
-                      ? "rounded-lg border border-primary/40 bg-primary/5 px-3 py-2"
+                    out
+                      ? "rounded-lg border border-dashed bg-muted/40 px-3 py-2 opacity-70"
+                      : top
+                      ? "rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-2"
                       : "rounded-lg border px-3 py-2"
                   }
                 >
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="font-medium">{teamName(team ?? null, locale)}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p
+                      className={
+                        !out && top
+                          ? "text-xs text-amber-700 dark:text-amber-500"
+                          : "text-xs text-muted-foreground"
+                      }
+                    >
+                      {label}
+                    </p>
+                    {out && (
+                      <span className="rounded-full border px-1.5 py-px text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {t("eliminated")}
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={
+                      out
+                        ? "font-medium text-muted-foreground line-through decoration-1"
+                        : "font-medium"
+                    }
+                  >
+                    {teamName(team ?? null, locale)}
+                  </p>
                 </div>
               ))}
             </div>

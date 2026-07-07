@@ -271,6 +271,7 @@
   "profile": {
     "tabPredictions": "Predictions",
     "tabProgress": "Progress",
+    "eliminated": "Eliminated",
     "podiumSection": "Bonus Podium",
     "podiumOpen": "Podium window still open — picks can be changed until the Round of 32 begins.",
     "podiumNone": "No podium prediction submitted.",
