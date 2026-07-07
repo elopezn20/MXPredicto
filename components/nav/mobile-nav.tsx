@@ -53,7 +53,9 @@ export function MobileNav({ locale, isAdmin, profileUserId, t }: MobileNavProps)
               <MobileLink href={`/${locale}/scoreboard`} onClick={close}>
                 {t.scoreboard}
               </MobileLink>
-              {/* Progress tab temporarily disabled */}
+              <MobileLink href={`/${locale}/progress`} onClick={close}>
+                {t.progress}
+              </MobileLink>
             </>
           )}
           <MobileLink href={`/${locale}/rules`} onClick={close}>
