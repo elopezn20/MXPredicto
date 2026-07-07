@@ -1,8 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import type {
   NextMatchStats,
   OutcomeBucket,
   Scoreline,
 } from "@/lib/scoring/next-match-stats";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export interface NextMatchStatsLabels {
   heading: string; // "Next match"
@@ -13,6 +22,7 @@ export interface NextMatchStatsLabels {
   drawsWord: string; // "Draws"
   noPredictions: string; // shown when nobody has predicted
   highVariety: string; // tiny alert when predictions are very scattered
+  pickedBy: string; // "Picked by" — popover heading
 }
 
 interface Props {
@@ -21,6 +31,8 @@ interface Props {
   kickoff: React.ReactNode;
   stats: NextMatchStats;
   labels: NextMatchStatsLabels;
+  /** Display names of the players who picked each scoreline, keyed by "home-away". */
+  usersByScoreline: Record<string, string[]>;
 }
 
 type Tone = "home" | "draw" | "away";
@@ -46,14 +58,39 @@ const TONE: Record<
   },
 };
 
-function ScorelineRow({ line }: { line: Scoreline }) {
+function ScorelineRow({
+  line,
+  users,
+  pickedByLabel,
+}: {
+  line: Scoreline;
+  users: string[];
+  pickedByLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2">
-      <span className="font-medium tabular-nums">
-        {line.home}–{line.away}
-      </span>
-      <span className="text-xs text-muted-foreground">×{line.count}</span>
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        type="button"
+        className="flex w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-left transition-colors hover:bg-muted/50"
+      >
+        <span className="font-medium tabular-nums">
+          {line.home}–{line.away}
+        </span>
+        <span className="text-xs text-muted-foreground">×{line.count}</span>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="max-h-64 w-56 overflow-y-auto">
+        <PopoverTitle className="font-bold">{pickedByLabel}</PopoverTitle>
+        <ul className="space-y-1">
+          {users.map((name, i) => (
+            <li key={`${name}-${i}`} className="truncate text-sm">
+              {name}
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -62,11 +99,15 @@ function OutcomeColumn({
   bucket,
   tone,
   emptyLabel,
+  usersByScoreline,
+  pickedByLabel,
 }: {
   title: string;
   bucket: OutcomeBucket;
   tone: Tone;
   emptyLabel: string;
+  usersByScoreline: Record<string, string[]>;
+  pickedByLabel: string;
 }) {
   const t = TONE[tone];
   return (
@@ -88,7 +129,14 @@ function OutcomeColumn({
             {emptyLabel}
           </p>
         ) : (
-          bucket.top.map((line) => <ScorelineRow key={line.label} line={line} />)
+          bucket.top.map((line) => (
+            <ScorelineRow
+              key={line.label}
+              line={line}
+              users={usersByScoreline[line.label] ?? []}
+              pickedByLabel={pickedByLabel}
+            />
+          ))
         )}
       </div>
     </div>
@@ -101,6 +149,7 @@ export function NextMatchStatsPanel({
   kickoff,
   stats,
   labels,
+  usersByScoreline,
 }: Props) {
   const hasData = stats.total > 0;
 
@@ -171,18 +220,24 @@ export function NextMatchStatsPanel({
               bucket={stats.homeWins}
               tone="home"
               emptyLabel="—"
+              usersByScoreline={usersByScoreline}
+              pickedByLabel={labels.pickedBy}
             />
             <OutcomeColumn
               title={labels.drawsWord}
               bucket={stats.draws}
               tone="draw"
               emptyLabel="—"
+              usersByScoreline={usersByScoreline}
+              pickedByLabel={labels.pickedBy}
             />
             <OutcomeColumn
               title={`${labels.topPrefix} ${awayName} ${labels.winsWord}`}
               bucket={stats.awayWins}
               tone="away"
               emptyLabel="—"
+              usersByScoreline={usersByScoreline}
+              pickedByLabel={labels.pickedBy}
             />
           </div>
         </div>
