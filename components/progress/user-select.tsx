@@ -12,15 +12,23 @@ interface Props {
   users: Option[];
   selectedId: string;
   label: string;
+  /** When set, selecting navigates to `${basePath}/<id>` instead of `?user=<id>`. */
+  basePath?: string;
 }
 
-export function UserSelect({ users, selectedId, label }: Props) {
+export function UserSelect({ users, selectedId, label, basePath }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (basePath) {
+      startTransition(() => {
+        router.push(`${basePath}/${e.target.value}`);
+      });
+      return;
+    }
     const params = new URLSearchParams(searchParams.toString());
     params.set("user", e.target.value);
     startTransition(() => {
