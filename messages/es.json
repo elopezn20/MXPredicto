@@ -101,7 +101,19 @@
     "highVariety": "¡Partido de alto riesgo! Sin favorito claro — los pronósticos están divididos sobre el resultado.",
     "exportPdf": "Exportar PDF",
     "rankUp": "Subió {count} desde el último partido",
-    "rankDown": "Bajó {count} desde el último partido"
+    "rankDown": "Bajó {count} desde el último partido",
+    "whatIf": "¿Y si…?",
+    "whatIfHint": "Elige un resultado para el próximo partido y mira cómo cambiaría la tabla.",
+    "whatIfTitle": "Modo ¿y si…?",
+    "whatIfBanner": "Tabla hipotética — no se guarda nada. Ajusta el resultado del próximo partido abajo.",
+    "backToReal": "Volver a la tabla real",
+    "whatIfLockedHint": "¿Y si…? se activa cuando se cierren los pronósticos del próximo partido.",
+    "penaltyWinner": "Avanza en penales",
+    "whatIfUp": "Subiría {count}",
+    "whatIfDown": "Bajaría {count}",
+    "whatIfGain": "Puntos que ganaría con este pronóstico",
+    "increaseGoals": "Sumar un gol a {team}",
+    "decreaseGoals": "Restar un gol a {team}"
   },
   "admin": {
     "title": "Panel de administración",
