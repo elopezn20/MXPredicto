@@ -1,13 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { computeLeaderboard } from "@/lib/scoring/scoring";
+import { computeLeaderboard, type Stage } from "@/lib/scoring/scoring";
 import { computeNextMatchStats } from "@/lib/scoring/next-match-stats";
 import { NextMatchStatsPanel } from "@/components/scoreboard/next-match-stats";
 import { KickoffTime } from "@/components/scoreboard/kickoff-time";
-import { MovementIndicator } from "@/components/scoreboard/movement-indicator";
 import { ExportPdfButton } from "@/components/scoreboard/export-pdf-button";
-import { cn } from "@/lib/utils";
+import {
+  LeaderboardTable,
+  type WhatIfConfig,
+} from "@/components/scoreboard/leaderboard-table";
 
 function teamName(
   team: { code: string; name_en: string; name_es: string; name_ko: string } | null,
@@ -138,7 +140,7 @@ export default async function ScoreboardPage({ params }: Props) {
     .from("matches")
     .select(
       `id, kickoff_at, status,
-       rounds ( lock_time ),
+       rounds ( lock_time, stage ),
        home_team:home_team_id ( id, code, name_en, name_es, name_ko ),
        away_team:away_team_id ( id, code, name_en, name_es, name_ko )`
     )
@@ -250,27 +252,46 @@ export default async function ScoreboardPage({ params }: Props) {
       ? `${nextHomeTeam.code}–${nextAwayTeam.code}`
       : null;
 
+  // ── What-if mode inputs ────────────────────────────────────────────────────
+  // Only offered once the next match's picks have locked: before lock RLS hides
+  // other players' predictions, so a hypothetical result couldn't be scored.
+  const nextStage: Stage = nextRound?.stage === "group" ? "group" : "knockout";
+  const whatIf: WhatIfConfig | null =
+    nextMatch && nextMatchLocked && nextHomeTeam && nextAwayTeam
+      ? {
+          stage: nextStage,
+          homeTeam: {
+            id: nextHomeTeam.id,
+            code: nextHomeTeam.code,
+            name: nextHomeName,
+          },
+          awayTeam: {
+            id: nextAwayTeam.id,
+            code: nextAwayTeam.code,
+            name: nextAwayName,
+          },
+          predictions: (nextPreds ?? []).map((p) => ({
+            userId: p.user_id,
+            homeScore: p.home_score_pred,
+            awayScore: p.away_score_pred,
+            penaltyWinnerTeamId: p.penalty_winner_team_id ?? null,
+          })),
+        }
+      : null;
+  const whatIfPendingLock = !!nextMatch && !nextMatchLocked;
+
+  const rowData = rows.map((row) => ({
+    ...row,
+    move: moveByUser.get(row.userId) ?? 0,
+    nextPick: pickByUser.get(row.userId) ?? null,
+    isMe: row.userId === user?.id,
+  }));
+
   // Print-only generation timestamp.
   const generatedLabel = new Intl.DateTimeFormat(
     locale === "es" ? "es-CL" : locale === "ko" ? "ko-KR" : "en-US",
     { dateStyle: "long", timeStyle: "short" }
   ).format(new Date());
-
-  // Tied ranks split the combined pot for the positions they occupy.
-  // E.g. three players tied at rank 1 share prizes for positions 1, 2 and 3.
-  const prizeByRank = new Map<number, number>();
-  for (let i = 0; i < rows.length; ) {
-    const rank = rows[i]!.rank;
-    let j = i;
-    while (j < rows.length && rows[j]!.rank === rank) j++;
-    const groupSize = j - i;
-    let pot = 0;
-    for (let k = 0; k < groupSize; k++) {
-      pot += PRIZES_CLP[rank - 1 + k] ?? 0;
-    }
-    if (pot > 0) prizeByRank.set(rank, Math.round(pot / groupSize));
-    i = j;
-  }
 
   return (
     <div id="scoreboard-print" className="space-y-4">
@@ -334,160 +355,15 @@ export default async function ScoreboardPage({ params }: Props) {
       {rows.length === 0 ? (
         <p className="text-muted-foreground">{t("noData")}</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                  {t("rank")}
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                  {t("player")}
-                </th>
-                {showNextPick && (
-                  <th className="px-3 py-2 text-center font-medium text-muted-foreground">
-                    <span>{t("nextPick")}</span>
-                    {nextMatchCodes && (
-                      <span className="block text-[11px] font-semibold tracking-wide text-foreground/70">
-                        {nextMatchCodes}
-                      </span>
-                    )}
-                  </th>
-                )}
-                <th className="px-3 py-2 text-right font-medium text-muted-foreground">
-                  {t("points")}
-                </th>
-                <th className="hidden px-3 py-2 text-right font-medium text-muted-foreground sm:table-cell">
-                  {t("hits")}
-                </th>
-                <th className="hidden px-3 py-2 text-right font-medium text-muted-foreground sm:table-cell">
-                  {t("zeros")}
-                </th>
-                <th className="hidden px-3 py-2 text-right font-medium text-muted-foreground md:table-cell">
-                  {t("gap")}
-                </th>
-                <th className="px-3 py-2 text-right font-medium text-muted-foreground">
-                  {t("prize")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {rows.map((row) => {
-                const isMe = row.userId === user?.id;
-                const isFirst = row.rank === 1;
-                const move = moveByUser.get(row.userId) ?? 0;
-                const prizeAmount = prizeByRank.get(row.rank);
-                const prize =
-                  prizeAmount !== undefined ? formatCLP(locale, prizeAmount) : "—";
-                return (
-                  <tr
-                    key={row.userId}
-                    className={cn(
-                      "transition-colors hover:bg-muted/30",
-                      isFirst &&
-                        "bg-highlight/15 ring-1 ring-inset ring-highlight/40 hover:bg-highlight/20",
-                      isMe && !isFirst && "bg-highlight/10 font-semibold"
-                    )}
-                  >
-                    <td
-                      className={cn(
-                        "px-3 text-muted-foreground",
-                        isFirst ? "py-4" : "py-2.5"
-                      )}
-                    >
-                      <span className={cn(isFirst && "text-3xl")}>
-                        {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : row.rank}
-                      </span>
-                    </td>
-                    <td className={cn("px-3", isFirst ? "py-4" : "py-2.5")}>
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="flex w-7 shrink-0 justify-end">
-                          {move !== 0 && (
-                            <MovementIndicator
-                              delta={move}
-                              title={t(move > 0 ? "rankUp" : "rankDown", {
-                                count: Math.abs(move),
-                              })}
-                            />
-                          )}
-                        </span>
-                        <Link
-                          href={`/${locale}/profile/${row.userId}`}
-                          className={cn(
-                            "hover:underline",
-                            isFirst && "text-lg font-bold text-foreground"
-                          )}
-                        >
-                          {row.displayName}
-                        </Link>
-                        {isMe && (
-                          <span className="text-xs text-muted-foreground">
-                            {t("you")}
-                          </span>
-                        )}
-                      </span>
-                    </td>
-                    {showNextPick && (
-                      <td
-                        className={cn(
-                          "px-3 text-center tabular-nums text-muted-foreground",
-                          isFirst ? "py-4" : "py-2.5"
-                        )}
-                      >
-                        {pickByUser.get(row.userId) ?? "—"}
-                      </td>
-                    )}
-                    <td
-                      className={cn(
-                        "px-3 text-right font-bold text-primary",
-                        isFirst ? "py-4 text-xl" : "py-2.5"
-                      )}
-                    >
-                      {row.totalPoints}
-                    </td>
-                    <td
-                      className={cn(
-                        "hidden px-3 text-right text-muted-foreground sm:table-cell",
-                        isFirst ? "py-4" : "py-2.5"
-                      )}
-                    >
-                      {row.matchesHit}
-                    </td>
-                    <td
-                      className={cn(
-                        "hidden px-3 text-right text-muted-foreground sm:table-cell",
-                        isFirst ? "py-4" : "py-2.5"
-                      )}
-                    >
-                      {row.zeroMatches}
-                    </td>
-                    <td
-                      className={cn(
-                        "hidden px-3 text-right text-muted-foreground md:table-cell",
-                        isFirst ? "py-4" : "py-2.5"
-                      )}
-                    >
-                      {row.deltaFromLeader < 0
-                        ? `${row.deltaFromLeader}`
-                        : "—"}
-                    </td>
-                    <td
-                      className={cn(
-                        "px-3 text-right whitespace-nowrap",
-                        isFirst ? "py-4" : "py-2.5",
-                        prizeAmount !== undefined
-                          ? "font-medium text-foreground"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {prize}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <LeaderboardTable
+          rows={rowData}
+          whatIf={whatIf}
+          whatIfPendingLock={whatIfPendingLock}
+          showNextPick={showNextPick}
+          nextMatchCodes={nextMatchCodes}
+          locale={locale}
+          prizes={[...PRIZES_CLP]}
+        />
       )}
     </div>
   );

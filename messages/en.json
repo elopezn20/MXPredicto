@@ -101,7 +101,19 @@
     "highVariety": "High-risk game! No clear favourite — the pool is split on the result.",
     "exportPdf": "Export PDF",
     "rankUp": "Up {count} since last match",
-    "rankDown": "Down {count} since last match"
+    "rankDown": "Down {count} since last match",
+    "whatIf": "What if…?",
+    "whatIfHint": "Pick a result for the next match and see how the standings would change.",
+    "whatIfTitle": "What-if mode",
+    "whatIfBanner": "Hypothetical standings — nothing is saved. Set a result for the next match below.",
+    "backToReal": "Back to real scoreboard",
+    "whatIfLockedHint": "What if…? unlocks once picks close for the next match.",
+    "penaltyWinner": "Advances on penalties",
+    "whatIfUp": "Would climb {count}",
+    "whatIfDown": "Would drop {count}",
+    "whatIfGain": "Points this pick would earn",
+    "increaseGoals": "Add a goal for {team}",
+    "decreaseGoals": "Remove a goal for {team}"
   },
   "admin": {
     "title": "Admin Panel",

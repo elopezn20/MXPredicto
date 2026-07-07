@@ -101,7 +101,19 @@
     "highVariety": "고위험 경기! 뚜렷한 우세가 없습니다 — 결과 예측이 갈립니다.",
     "exportPdf": "PDF 내보내기",
     "rankUp": "지난 경기 대비 {count}계단 상승",
-    "rankDown": "지난 경기 대비 {count}계단 하락"
+    "rankDown": "지난 경기 대비 {count}계단 하락",
+    "whatIf": "만약에…?",
+    "whatIfHint": "다음 경기 결과를 골라 순위가 어떻게 바뀌는지 확인해 보세요.",
+    "whatIfTitle": "만약에 모드",
+    "whatIfBanner": "가상의 순위표입니다 — 저장되지 않아요. 아래에서 다음 경기 결과를 정해 보세요.",
+    "backToReal": "실제 순위표로 돌아가기",
+    "whatIfLockedHint": "만약에…? 기능은 다음 경기 예측이 마감되면 열려요.",
+    "penaltyWinner": "승부차기 승리 팀",
+    "whatIfUp": "{count}계단 상승 예상",
+    "whatIfDown": "{count}계단 하락 예상",
+    "whatIfGain": "이 결과로 얻을 점수",
+    "increaseGoals": "{team} 골 추가",
+    "decreaseGoals": "{team} 골 빼기"
   },
   "admin": {
     "title": "관리자 패널",
