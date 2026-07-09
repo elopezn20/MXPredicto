@@ -195,9 +195,9 @@ export function ParticipationSection() {
         : "";
 
     // ── Per-match aggregates ─────────────────────────────────────────────
-    // For every match: average predicted score, each player's distance to
-    // that average (|Δhome| + |Δaway|), advance votes (outright win, or a
-    // draw plus that team as penalty pick), draw share, and the mode score.
+    // For every match: average predicted score, advance votes (outright win,
+    // or a draw plus that team as penalty pick), draw share, and the mode
+    // score.
     const statsByMatch = data.matches.map((m) => {
       const preds = users.flatMap((u) => {
         const c = u.cells[m.id];
@@ -207,17 +207,6 @@ export function ParticipationSection() {
       const count = preds.length;
       const avgH = count ? preds.reduce((s, p) => s + p.h, 0) / count : 0;
       const avgA = count ? preds.reduce((s, p) => s + p.a, 0) / count : 0;
-
-      const withDist = preds.map((p) => ({
-        ...p,
-        dist: Math.abs(p.h - avgH) + Math.abs(p.a - avgA),
-      }));
-      const closest = [...withDist]
-        .sort((x, y) => x.dist - y.dist || x.name.localeCompare(y.name))
-        .slice(0, 5);
-      const farthest = [...withDist]
-        .sort((x, y) => y.dist - x.dist || x.name.localeCompare(y.name))
-        .slice(0, 5);
 
       let homeVotes = 0;
       let awayVotes = 0;
@@ -244,8 +233,6 @@ export function ParticipationSection() {
         count,
         avgH,
         avgA,
-        closest,
-        farthest,
         homeVotes,
         awayVotes,
         draws,
@@ -254,12 +241,6 @@ export function ParticipationSection() {
     });
 
     // ── Section 1: average score cards ───────────────────────────────────
-    const playerLi = (
-      p: { name: string; h: number; a: number; dist: number },
-      accent: "gold" | "pink"
-    ) =>
-      `<li><span class="pname">${escapeHtml(p.name)}</span><span class="pscore">${p.h}-${p.a}</span><span class="pdist ${accent}">Δ ${fmt1(p.dist)}</span></li>`;
-
     const matchCards = statsByMatch
       .map((s) => {
         const m = s.match;
@@ -283,104 +264,48 @@ export function ParticipationSection() {
             <div class="tteam right"><span>${escapeHtml(m.awayName)}</span>${flagImg(m.awayFlagUrl, "lg")}</div>
           </div>
           <div class="mmeta">${escapeHtml(t("predictionsCountLabel", { count: s.count }))}${topScoreStr}</div>
-          <div class="pcols">
-            <div class="pcol">
-              <h4>${escapeHtml(t("closestTitle"))}</h4>
-              <ol>${s.closest.map((p) => playerLi(p, "gold")).join("")}</ol>
-            </div>
-            <div class="pcol">
-              <h4>${escapeHtml(t("farthestTitle"))}</h4>
-              <ol>${s.farthest.map((p) => playerLi(p, "pink")).join("")}</ol>
-            </div>
-          </div>
         </div>`;
       })
       .join("");
 
-    // ── Section 2: advance-consensus line chart ──────────────────────────
-    const chartPoints = statsByMatch
+    // ── Section 3: advance-consensus horizontal bars ─────────────────────
+    // One bar per match, favored team on the left, sorted by strongest
+    // consensus first.
+    const barData = statsByMatch
       .filter((s) => s.homeVotes + s.awayVotes > 0)
       .map((s) => {
         const denom = s.homeVotes + s.awayVotes;
         const homeFav = s.homeVotes >= s.awayVotes;
         const m = s.match;
+        const pct = Math.round((Math.max(s.homeVotes, s.awayVotes) / denom) * 100);
         return {
-          pct: Math.round((Math.max(s.homeVotes, s.awayVotes) / denom) * 100),
-          homePct: Math.round((s.homeVotes / denom) * 100),
+          pct,
+          otherPct: 100 - pct,
           favCode: homeFav ? m.homeCode : m.awayCode,
           favFlag: homeFav ? m.homeFlagUrl : m.awayFlagUrl,
-          homeCode: m.homeCode,
-          awayCode: m.awayCode,
+          otherCode: homeFav ? m.awayCode : m.homeCode,
+          otherFlag: homeFav ? m.awayFlagUrl : m.homeFlagUrl,
           denom,
         };
       })
       .sort((a, b) => b.pct - a.pct);
 
-    let chartSvg = "";
-    if (chartPoints.length > 0) {
-      const W = 1000;
-      const H = 330;
-      const padL = 56;
-      const padR = 36;
-      const padT = 56;
-      const padB = 56;
-      const innerW = W - padL - padR;
-      const innerH = H - padT - padB;
-      const yMin = Math.min(
-        50,
-        Math.floor(Math.min(...chartPoints.map((p) => p.pct)) / 10) * 10
-      );
-      const x = (i: number) =>
-        chartPoints.length === 1
-          ? padL + innerW / 2
-          : padL + (i * innerW) / (chartPoints.length - 1);
-      const y = (pct: number) =>
-        padT + ((100 - pct) / (100 - yMin)) * innerH;
-
-      const grid: string[] = [];
-      for (let g = yMin; g <= 100; g += 10) {
-        grid.push(
-          `<line x1="${padL}" y1="${y(g)}" x2="${W - padR}" y2="${y(g)}" stroke="#D9CFBE" stroke-width="1" />`,
-          `<text x="${padL - 10}" y="${y(g) + 4}" text-anchor="end" font-size="11" fill="#5B6478">${g}%</text>`
-        );
-      }
-
-      const linePath = chartPoints
-        .map((p, i) => `${i === 0 ? "M" : "L"} ${x(i)} ${y(p.pct)}`)
-        .join(" ");
-
-      const dots = chartPoints
-        .map((p, i) => {
-          const cx = x(i);
-          const cy = y(p.pct);
-          const flag = p.favFlag
-            ? `<image href="${escapeHtml(p.favFlag)}" x="${cx - 12}" y="${cy - 40}" width="24" height="16" />`
-            : "";
-          return `${flag}
-            <text x="${cx}" y="${cy - 46}" text-anchor="middle" font-size="14" font-weight="800" fill="#1A2855">${p.pct}%</text>
-            <circle cx="${cx}" cy="${cy}" r="5.5" fill="#1A2855" stroke="#F4C430" stroke-width="2.5" />
-            <text x="${cx}" y="${cy - 20}" text-anchor="middle" font-size="11" font-weight="700" fill="#1A2855">${escapeHtml(p.favCode)}</text>
-            <text x="${cx}" y="${H - padB + 22}" text-anchor="middle" font-size="11" font-weight="600" fill="#5B6478">${escapeHtml(p.homeCode)} · ${escapeHtml(p.awayCode)}</text>`;
-        })
-        .join("");
-
-      chartSvg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="chart">
-        ${grid.join("")}
-        <path d="${linePath}" fill="none" stroke="#F4C430" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
-        ${dots}
-      </svg>`;
-    }
-
-    const chartLegend = chartPoints
+    const barRows = barData
       .map(
-        (p) =>
-          `<div class="lgrow"><span class="lgfav">${escapeHtml(p.homeCode)} ${p.homePct}%</span><span class="lgsep">·</span><span>${escapeHtml(p.awayCode)} ${100 - p.homePct}%</span></div>`
+        (b) => `<div class="brow">
+          <div class="bteam">${flagImg(b.favFlag, "lg")}<span>${escapeHtml(b.favCode)}</span></div>
+          <div class="btrack">
+            <div class="bfill" style="width:${b.pct}%">${b.pct >= 12 ? `<span>${b.pct}%</span>` : ""}</div>
+            ${b.otherPct > 0 ? `<div class="brest" style="width:${b.otherPct}%">${b.otherPct >= 12 ? `<span>${b.otherPct}%</span>` : ""}</div>` : ""}
+          </div>
+          <div class="bteam right"><span>${escapeHtml(b.otherCode)}</span>${flagImg(b.otherFlag, "lg")}</div>
+        </div>`
       )
       .join("");
 
-    // ── Section 3: fun stats ─────────────────────────────────────────────
-    // A player qualifies once they predicted at least half the matches.
-    const minMatches = Math.max(1, Math.ceil(data.matches.length / 2));
+    // ── Section 2: crowd-alignment ranking ───────────────────────────────
+    // Every player's average distance to the crowd's average score across
+    // the matches they predicted (Δ = |Δhome| + |Δaway| per match).
     const playerAgg = users
       .map((u) => {
         let n = 0;
@@ -400,16 +325,36 @@ export function ParticipationSection() {
           avgDist: n ? dist / n : 0,
         };
       })
-      .filter((p) => p.n >= minMatches);
+      .filter((p) => p.n > 0);
+
+    const fmt2 = (n: number) =>
+      n.toLocaleString(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+    const rankingRows = [...playerAgg]
+      .sort((a, b) => a.avgDist - b.avgDist || a.name.localeCompare(b.name))
+      .map(
+        (p, i) => `<div class="rrow ${i < 3 ? "top" : ""}">
+          <span class="rrank">${i + 1}</span>
+          <span class="rname">${escapeHtml(p.name)}</span>
+          <span class="rmeta">Δ ${fmt2(p.avgDist)} · ${p.n}/${data.matches.length}</span>
+        </div>`
+      )
+      .join("");
+
+    // ── Section 4: fun stats ─────────────────────────────────────────────
+    // A player qualifies once they predicted at least half the matches.
+    const minMatches = Math.max(1, Math.ceil(data.matches.length / 2));
+    const qualified = playerAgg.filter((p) => p.n >= minMatches);
 
     const maxBy = <T,>(arr: T[], f: (v: T) => number): T | null =>
       arr.length
         ? arr.reduce((best, v) => (f(v) > f(best) ? v : best))
         : null;
-    const goalFest = maxBy(playerAgg, (p) => p.avgGoals);
-    const cautious = maxBy(playerAgg, (p) => -p.avgGoals);
-    const boldest = maxBy(playerAgg, (p) => p.avgDist);
-    const crowdMind = maxBy(playerAgg, (p) => -p.avgDist);
+    const goalFest = maxBy(qualified, (p) => p.avgGoals);
+    const cautious = maxBy(qualified, (p) => -p.avgGoals);
 
     const totalPreds = statsByMatch.reduce((s, m) => s + m.count, 0);
     const totalDraws = statsByMatch.reduce((s, m) => s + m.draws, 0);
@@ -457,20 +402,6 @@ export function ParticipationSection() {
           t("statCautious"),
           cautious.name,
           t("statGoalFestDetail", { avg: fmt1(cautious.avgGoals) })
-        ),
-      boldest &&
-        statCard(
-          "🎲",
-          t("statBoldest"),
-          boldest.name,
-          t("statBoldestDetail", { avg: fmt1(boldest.avgDist) })
-        ),
-      crowdMind &&
-        statCard(
-          "🤝",
-          t("statCrowdMind"),
-          crowdMind.name,
-          t("statBoldestDetail", { avg: fmt1(crowdMind.avgDist) })
         ),
       totalPreds > 0 &&
         statCard(
@@ -622,33 +553,72 @@ export function ParticipationSection() {
   .avgscore { font-size: 24px; font-weight: 800; color: var(--navy); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .avgscore .dash { color: var(--gold); margin: 0 6px; }
   .avgscore.muted { color: var(--muted); }
-  .mmeta { font-size: 10.5px; color: var(--muted); margin: 6px 0 8px; text-align: center; }
-  .pcols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
-  .pcol h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 4px; }
-  .pcol ol { margin: 0; padding-left: 18px; font-size: 10.5px; }
-  .pcol li { margin: 2px 0; }
-  .pname { font-weight: 600; }
-  .pscore { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--navy); margin-left: 6px; }
-  .pdist { margin-left: 6px; font-size: 9.5px; font-weight: 700; }
-  .pdist.gold { color: #8A6D00; }
-  .pdist.pink { color: var(--pink); }
+  .mmeta { font-size: 10.5px; color: var(--muted); margin: 6px 0 0; text-align: center; }
 
-  /* Advance chart */
-  .chart-wrap {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--cream);
-    padding: 12px 14px;
+  /* Crowd-alignment ranking */
+  .rank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 20px; }
+  .rrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    border-bottom: 1px solid var(--line);
+    padding: 3px 0;
     page-break-inside: avoid;
   }
-  .chart { width: 100%; height: auto; }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; justify-content: center; }
-  .lgrow { font-size: 11px; color: var(--muted); }
-  .lgrow .lgfav { font-weight: 700; color: var(--navy); }
-  .lgrow .lgsep { margin: 0 4px; color: var(--line); }
+  .rrank {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: var(--cream);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 10px;
+  }
+  .rrow.top .rrank { background: var(--gold); }
+  .rname { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rmeta { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 10px; }
+
+  /* Advance-consensus bars */
+  .bars { display: flex; flex-direction: column; gap: 10px; }
+  .brow { display: flex; align-items: center; gap: 12px; page-break-inside: avoid; }
+  .bteam { display: flex; align-items: center; gap: 7px; width: 96px; font-weight: 800; font-size: 13px; color: var(--navy); }
+  .bteam.right { justify-content: flex-end; }
+  .btrack {
+    flex: 1;
+    display: flex;
+    height: 24px;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .bfill {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: var(--navy);
+    color: var(--gold);
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 0 8px;
+  }
+  .brest {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: var(--cream);
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 0 8px;
+  }
 
   /* Fun stats */
-  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .stat {
     border: 1px solid var(--line);
     border-left: 4px solid var(--gold);
@@ -706,23 +676,33 @@ export function ParticipationSection() {
     <div class="match-grid">${matchCards}</div>
   </section>
 
-  <section class="page-break">
-    <h2><span class="chip">2</span>${escapeHtml(t("advanceSectionTitle"))}</h2>
-    <p class="caption">${escapeHtml(t("advanceCaption"))}</p>
+  <section>
+    <h2><span class="chip">2</span>${escapeHtml(t("rankingSectionTitle"))}</h2>
+    <p class="caption">${escapeHtml(t("rankingCaption"))}</p>
     ${
-      chartSvg
-        ? `<div class="chart-wrap">${chartSvg}<div class="legend">${chartLegend}</div></div>`
+      rankingRows
+        ? `<div class="rank-grid">${rankingRows}</div>`
         : `<p class="caption">${escapeHtml(t("noPredictionsYet"))}</p>`
     }
   </section>
 
   <section>
-    <h2><span class="chip">3</span>${escapeHtml(t("funStatsTitle"))}</h2>
+    <h2><span class="chip">3</span>${escapeHtml(t("advanceSectionTitle"))}</h2>
+    <p class="caption">${escapeHtml(t("advanceCaption"))}</p>
+    ${
+      barRows
+        ? `<div class="bars">${barRows}</div>`
+        : `<p class="caption">${escapeHtml(t("noPredictionsYet"))}</p>`
+    }
+  </section>
+
+  <section>
+    <h2><span class="chip">4</span>${escapeHtml(t("funStatsTitle"))}</h2>
     <div class="stat-grid">${statCards}</div>
   </section>
 
   <section class="page-break">
-    <h2><span class="chip">4</span>${escapeHtml(t("matrixSectionTitle"))}</h2>
+    <h2><span class="chip">5</span>${escapeHtml(t("matrixSectionTitle"))}</h2>
     <table>
       <thead>
         <tr>
