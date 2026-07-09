@@ -691,6 +691,8 @@ export interface PredictionsMatrixMatch {
   awayCode: string;
   homeName: string;
   awayName: string;
+  homeFlagUrl: string | null;
+  awayFlagUrl: string | null;
   kickoff: string | null;
 }
 
@@ -699,10 +701,14 @@ export interface PredictionsMatrixUser {
   displayName: string;
   /**
    * Prediction per match, keyed by match id. `score` is "h-a" (or null if the
-   * player has no prediction for that match); `pen` is the penalty winner's team
+   * player has no prediction for that match); `h`/`a` are the same values as
+   * numbers so the client can aggregate; `pen` is the penalty winner's team
    * code for knockout matches, or null.
    */
-  cells: Record<string, { score: string; pen: string | null } | null>;
+  cells: Record<
+    string,
+    { score: string; h: number; a: number; pen: string | null } | null
+  >;
 }
 
 export interface PredictionsMatrixReport {
@@ -733,8 +739,8 @@ export async function getCurrentRoundPredictionsMatrix(
       `id, name_key, order_index, stage, lock_time,
        matches (
          id, kickoff_at, status,
-         home_team:home_team_id ( id, name_en, name_es, name_ko, code ),
-         away_team:away_team_id ( id, name_en, name_es, name_ko, code )
+         home_team:home_team_id ( id, name_en, name_es, name_ko, code, flag_url ),
+         away_team:away_team_id ( id, name_en, name_es, name_ko, code, flag_url )
        )`
     )
     .neq("stage", "podio")
@@ -782,6 +788,7 @@ export async function getCurrentRoundPredictionsMatrix(
         name_es: string;
         name_ko: string;
         code: string;
+        flag_url: string | null;
       } | null;
       const away = one(m.away_team) as typeof home;
       return { id: m.id, kickoff: m.kickoff_at, home, away };
@@ -794,6 +801,8 @@ export async function getCurrentRoundPredictionsMatrix(
     awayCode: m.away?.code ?? "?",
     homeName: teamName(m.home),
     awayName: teamName(m.away),
+    homeFlagUrl: m.home?.flag_url ?? null,
+    awayFlagUrl: m.away?.flag_url ?? null,
     kickoff: m.kickoff,
   }));
 
@@ -855,7 +864,7 @@ export async function getCurrentRoundPredictionsMatrix(
         if (pred.pen === homeIdByMatch.get(id)) pen = homeCodeByMatch.get(id) ?? null;
         else if (pred.pen === awayIdByMatch.get(id)) pen = awayCodeByMatch.get(id) ?? null;
       }
-      cells[id] = { score: `${pred.h}-${pred.a}`, pen };
+      cells[id] = { score: `${pred.h}-${pred.a}`, h: pred.h, a: pred.a, pen };
     }
     return { userId: prof.id, displayName: prof.display_name, cells };
   });
