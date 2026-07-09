@@ -272,7 +272,9 @@
       "matrixSectionTitle": "Todas las predicciones por jugador",
       "noPredictionsYet": "Aún no hay predicciones.",
       "rankingSectionTitle": "Ranking de cercanía al promedio",
-      "rankingCaption": "Jugadores ordenados por su distancia promedio (Δ goles) al marcador promedio del grupo en todos los partidos — menor Δ significa más cerca del consenso. n/N = partidos predichos."
+      "rankingCaption": "Distancia promedio (Δ goles) al marcador promedio del grupo en todos los partidos — menor Δ significa más cerca del consenso. n/N = partidos predichos.",
+      "closestTitle": "Top 5 más cerca del promedio",
+      "farthestTitle": "Top 5 más lejos del promedio"
     }
   },
   "profile": {

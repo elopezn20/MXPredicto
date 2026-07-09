@@ -333,16 +333,40 @@ export function ParticipationSection() {
         maximumFractionDigits: 2,
       });
 
-    const rankingRows = [...playerAgg]
+    const rankRow = (
+      p: { name: string; n: number; avgDist: number },
+      i: number,
+      accent: "gold" | "pink"
+    ) => `<div class="rrow ${accent}">
+      <span class="rrank">${i + 1}</span>
+      <span class="rname">${escapeHtml(p.name)}</span>
+      <span class="rmeta">Δ ${fmt2(p.avgDist)} · ${p.n}/${data.matches.length}</span>
+    </div>`;
+
+    const closestRows = [...playerAgg]
       .sort((a, b) => a.avgDist - b.avgDist || a.name.localeCompare(b.name))
-      .map(
-        (p, i) => `<div class="rrow ${i < 3 ? "top" : ""}">
-          <span class="rrank">${i + 1}</span>
-          <span class="rname">${escapeHtml(p.name)}</span>
-          <span class="rmeta">Δ ${fmt2(p.avgDist)} · ${p.n}/${data.matches.length}</span>
-        </div>`
-      )
+      .slice(0, 5)
+      .map((p, i) => rankRow(p, i, "gold"))
       .join("");
+    const farthestRows = [...playerAgg]
+      .sort((a, b) => b.avgDist - a.avgDist || a.name.localeCompare(b.name))
+      .slice(0, 5)
+      .map((p, i) => rankRow(p, i, "pink"))
+      .join("");
+
+    const rankingCols =
+      playerAgg.length > 0
+        ? `<div class="rank-cols">
+            <div class="rank-col">
+              <h3>${escapeHtml(t("closestTitle"))}</h3>
+              ${closestRows}
+            </div>
+            <div class="rank-col">
+              <h3>${escapeHtml(t("farthestTitle"))}</h3>
+              ${farthestRows}
+            </div>
+          </div>`
+        : "";
 
     // ── Section 4: fun stats ─────────────────────────────────────────────
     // A player qualifies once they predicted at least half the matches.
@@ -556,16 +580,31 @@ export function ParticipationSection() {
   .mmeta { font-size: 10.5px; color: var(--muted); margin: 6px 0 0; text-align: center; }
 
   /* Crowd-alignment ranking */
-  .rank-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 20px; }
+  .rank-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rank-col {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    padding: 10px 14px;
+    page-break-inside: avoid;
+  }
+  .rank-col h3 {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
   .rrow {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
+    font-size: 11.5px;
     border-bottom: 1px solid var(--line);
-    padding: 3px 0;
+    padding: 4px 0;
     page-break-inside: avoid;
   }
+  .rrow:last-child { border-bottom: none; }
   .rrank {
     flex: none;
     display: inline-flex;
@@ -574,12 +613,12 @@ export function ParticipationSection() {
     width: 20px;
     height: 20px;
     border-radius: 6px;
-    background: var(--cream);
     color: var(--navy);
     font-weight: 800;
     font-size: 10px;
   }
-  .rrow.top .rrank { background: var(--gold); }
+  .rrow.gold .rrank { background: var(--gold); }
+  .rrow.pink .rrank { background: var(--pink); color: #fff; }
   .rname { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rmeta { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 10px; }
 
@@ -679,11 +718,7 @@ export function ParticipationSection() {
   <section>
     <h2><span class="chip">2</span>${escapeHtml(t("rankingSectionTitle"))}</h2>
     <p class="caption">${escapeHtml(t("rankingCaption"))}</p>
-    ${
-      rankingRows
-        ? `<div class="rank-grid">${rankingRows}</div>`
-        : `<p class="caption">${escapeHtml(t("noPredictionsYet"))}</p>`
-    }
+    ${rankingCols || `<p class="caption">${escapeHtml(t("noPredictionsYet"))}</p>`}
   </section>
 
   <section>

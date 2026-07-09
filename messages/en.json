@@ -272,7 +272,9 @@
       "matrixSectionTitle": "All predictions by player",
       "noPredictionsYet": "No predictions yet.",
       "rankingSectionTitle": "Crowd alignment ranking",
-      "rankingCaption": "Players ranked by their average distance (Δ goals) from the crowd's average score across all matches — a lower Δ means closer to the group consensus. n/N = matches predicted."
+      "rankingCaption": "Average distance (Δ goals) from the crowd's average score across all matches — a lower Δ means closer to the group consensus. n/N = matches predicted.",
+      "closestTitle": "Top 5 closest to the average",
+      "farthestTitle": "Top 5 furthest from the average"
     }
   },
   "profile": {
