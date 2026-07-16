@@ -13,7 +13,7 @@ import {
   type SimMatch,
   type RankedPlayer,
 } from "@/lib/scoring/pick-similarity";
-import { computeEliminatedTeams } from "@/lib/scoring/eliminated";
+import { computePodiumOutlook } from "@/lib/scoring/podium-outlook";
 import { UserSelect } from "@/components/progress/user-select";
 import { RankChart, type ChartPoint } from "@/components/progress/rank-chart";
 import { SimilarityHeatmap } from "@/components/progress/similarity-heatmap";
@@ -89,7 +89,7 @@ export default async function ProfilePage({ params }: Props) {
     .select(
       `id, round_id, kickoff_at, status, home_score, away_score,
        home_team_id, away_team_id, penalty_winner_team_id, advancing_team_id,
-       rounds ( stage ),
+       rounds ( stage, name_key ),
        home_team:home_team_id ( id, code, name_en, name_es, name_ko ),
        away_team:away_team_id ( id, code, name_en, name_es, name_ko )`
     )
@@ -335,10 +335,13 @@ export default async function ProfilePage({ params }: Props) {
     },
   ];
 
-  // Teams already out of the tournament — their podium cards render faded.
-  const eliminatedTeams = computeEliminatedTeams(
+  // Picks that can no longer score render faded: a card is "out" once its
+  // team can't finish in that exact position anymore (e.g. a finalist picked
+  // as 3rd), not just when the team is eliminated outright.
+  const podiumOutlook = computePodiumOutlook(
     allMatches.map((m) => ({
       stage: one(m.rounds)?.stage ?? "group",
+      nameKey: one(m.rounds)?.name_key ?? null,
       status: m.status,
       homeTeamId: m.home_team_id,
       awayTeamId: m.away_team_id,
@@ -351,12 +354,27 @@ export default async function ProfilePage({ params }: Props) {
 
   const podiumRows = podioPred
     ? ([
-        { label: t("champion"), team: one(podioPred.champion), top: true },
-        { label: t("runnerUp"), team: one(podioPred.runner_up), top: false },
-        { label: t("thirdPlace"), team: one(podioPred.third_place), top: false },
-      ] as const).map((row) => ({
+        {
+          label: t("champion"),
+          team: one(podioPred.champion),
+          top: true,
+          canReach: podiumOutlook.canBeChampion,
+        },
+        {
+          label: t("runnerUp"),
+          team: one(podioPred.runner_up),
+          top: false,
+          canReach: podiumOutlook.canBeRunnerUp,
+        },
+        {
+          label: t("thirdPlace"),
+          team: one(podioPred.third_place),
+          top: false,
+          canReach: podiumOutlook.canBeThird,
+        },
+      ] as const).map(({ canReach, ...row }) => ({
         ...row,
-        out: row.team != null && eliminatedTeams.has(row.team.id),
+        out: row.team != null && !canReach(row.team.id),
       }))
     : null;
 
@@ -393,7 +411,7 @@ export default async function ProfilePage({ params }: Props) {
                     </p>
                     {out && (
                       <span className="rounded-full border px-1.5 py-px text-[10px] uppercase tracking-wide text-muted-foreground">
-                        {t("eliminated")}
+                        {tScoreboard("podiumEliminated")}
                       </span>
                     )}
                   </div>

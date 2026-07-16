@@ -19,11 +19,21 @@ import { MovementIndicator } from "@/components/scoreboard/movement-indicator";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+export interface PodiumPick {
+  code: string;
+  name: string;
+  flagUrl: string | null;
+  /** False once the team can no longer finish in the picked position. */
+  alive: boolean;
+}
+
 export interface ScoreboardRowData extends LeaderboardRow {
   /** Real rank movement since the previous game (0 = no change). */
   move: number;
   /** Formatted pick for the next match, e.g. "1–1 (BRA)". */
   nextPick: string | null;
+  /** Podio prediction in 1-2-3 order; null slots for unpicked positions. */
+  podium: Array<PodiumPick | null> | null;
   isMe: boolean;
 }
 
@@ -47,6 +57,8 @@ interface Props {
   whatIf: WhatIfConfig | null;
   /** True when a next match exists but its picks haven't locked yet. */
   whatIfPendingLock: boolean;
+  /** True once Podio picks are locked and there's at least one to show. */
+  showPodium: boolean;
   showNextPick: boolean;
   nextMatchCodes: string | null;
   locale: string;
@@ -130,10 +142,64 @@ function ScoreStepper({
   );
 }
 
+function PodiumFlags({
+  podium,
+  eliminatedLabel,
+}: {
+  podium: Array<PodiumPick | null>;
+  eliminatedLabel: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      {podium.map((pick, i) =>
+        pick ? (
+          <span
+            key={i}
+            title={`${i + 1}. ${pick.name}${pick.alive ? "" : ` — ${eliminatedLabel}`}`}
+            className="relative inline-flex"
+          >
+            {pick.flagUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={pick.flagUrl}
+                alt={`${i + 1}. ${pick.code}`}
+                className={cn(
+                  "h-4 w-6 object-contain",
+                  !pick.alive && "opacity-40 grayscale"
+                )}
+              />
+            ) : (
+              <span
+                className={cn(
+                  "text-[10px] font-semibold",
+                  !pick.alive && "text-muted-foreground/60 line-through"
+                )}
+              >
+                {pick.code}
+              </span>
+            )}
+            {!pick.alive && pick.flagUrl && (
+              <span
+                aria-hidden
+                className="absolute left-1/2 top-1/2 h-0.5 w-[130%] -translate-x-1/2 -translate-y-1/2 -rotate-[24deg] rounded-full bg-red-600/90"
+              />
+            )}
+          </span>
+        ) : (
+          <span key={i} className="w-6 text-center text-muted-foreground">
+            –
+          </span>
+        )
+      )}
+    </span>
+  );
+}
+
 export function LeaderboardTable({
   rows,
   whatIf,
   whatIfPendingLock,
+  showPodium,
   showNextPick,
   nextMatchCodes,
   locale,
@@ -298,6 +364,11 @@ export function LeaderboardTable({
               <th className="px-3 py-2 text-left font-medium text-muted-foreground">
                 {t("player")}
               </th>
+              {showPodium && (
+                <th className="px-3 py-2 text-center font-medium text-muted-foreground">
+                  {t("podium")}
+                </th>
+              )}
               {showNextPick && (
                 <th className="px-3 py-2 text-center font-medium text-muted-foreground">
                   <span>{t("nextPick")}</span>
@@ -401,6 +472,23 @@ export function LeaderboardTable({
                       )}
                     </span>
                   </td>
+                  {showPodium && (
+                    <td
+                      className={cn(
+                        "px-3 text-center",
+                        isFirst ? "py-4" : "py-2.5"
+                      )}
+                    >
+                      {row.podium ? (
+                        <PodiumFlags
+                          podium={row.podium}
+                          eliminatedLabel={t("podiumEliminated")}
+                        />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  )}
                   {showNextPick && (
                     <td
                       className={cn(

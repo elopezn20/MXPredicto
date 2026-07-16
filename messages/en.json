@@ -95,6 +95,8 @@
     "wins": "wins",
     "draws": "Draws",
     "nextPick": "Next pick",
+    "podium": "Podium",
+    "podiumEliminated": "no longer possible",
     "noPredictions": "No predictions yet.",
     "picksLocked": "Picks reveal once the round locks.",
     "pickedBy": "Result picked by",
@@ -292,7 +294,6 @@
   "profile": {
     "tabPredictions": "Predictions",
     "tabProgress": "Progress",
-    "eliminated": "Eliminated",
     "podiumSection": "Bonus Podium",
     "podiumOpen": "Podium window still open — picks can be changed until the Round of 32 begins.",
     "podiumNone": "No podium prediction submitted.",
