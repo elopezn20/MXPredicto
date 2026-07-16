@@ -95,6 +95,8 @@
     "wins": "승",
     "draws": "무승부",
     "nextPick": "예측",
+    "podium": "포디움",
+    "podiumEliminated": "더 이상 불가능",
     "noPredictions": "아직 예측이 없습니다.",
     "picksLocked": "라운드가 잠기면 예측이 공개됩니다.",
     "pickedBy": "이 결과를 예측한 사람",

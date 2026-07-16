@@ -95,6 +95,8 @@
     "wins": "wins",
     "draws": "Draws",
     "nextPick": "Next pick",
+    "podium": "Podium",
+    "podiumEliminated": "no longer possible",
     "noPredictions": "No predictions yet.",
     "picksLocked": "Picks reveal once the round locks.",
     "pickedBy": "Result picked by",

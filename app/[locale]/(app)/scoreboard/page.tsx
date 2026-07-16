@@ -8,8 +8,10 @@ import { KickoffTime } from "@/components/scoreboard/kickoff-time";
 import { ExportPdfButton } from "@/components/scoreboard/export-pdf-button";
 import {
   LeaderboardTable,
+  type PodiumPick,
   type WhatIfConfig,
 } from "@/components/scoreboard/leaderboard-table";
+import { computePodiumOutlook } from "@/lib/scoring/podium-outlook";
 
 function teamName(
   team: { code: string; name_en: string; name_es: string; name_ko: string } | null,
@@ -53,19 +55,26 @@ export default async function ScoreboardPage({ params }: Props) {
     .from("profiles")
     .select("id, display_name");
 
-  // Finished matches with stage (group/knockout) for perfect-match hit detection.
-  // kickoff_at lets us identify the most-recent game for rank-movement arrows.
-  const { data: finishedMatches } = await supabase
+  // All matches with stage/name_key, teams and scores. Finished ones feed the
+  // leaderboard (stage decides perfect-match points; kickoff_at identifies the
+  // most-recent game for rank-movement arrows); the full set feeds the podium
+  // outlook (which teams can still finish 1st/2nd/3rd).
+  const { data: allMatches } = await supabase
     .from("matches")
-    .select("id, kickoff_at, rounds(stage)")
-    .eq("status", "finished");
+    .select(
+      `id, kickoff_at, status, home_score, away_score,
+       home_team_id, away_team_id, penalty_winner_team_id, advancing_team_id,
+       rounds(stage, name_key)`
+    );
 
-  const finishedWithStage = (finishedMatches ?? []).flatMap((m) => {
-    const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
-    const stage: "group" | "knockout" =
-      roundData?.stage === "group" ? "group" : "knockout";
-    return [{ id: m.id, stage, kickoff: m.kickoff_at as string }];
-  });
+  const finishedWithStage = (allMatches ?? [])
+    .filter((m) => m.status === "finished")
+    .flatMap((m) => {
+      const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
+      const stage: "group" | "knockout" =
+        roundData?.stage === "group" ? "group" : "knockout";
+      return [{ id: m.id, stage, kickoff: m.kickoff_at as string }];
+    });
   const finishedIds = finishedWithStage.map((m) => m.id);
 
   // All predictions for finished matches (RLS allows seeing others' in locked
@@ -280,10 +289,81 @@ export default async function ScoreboardPage({ params }: Props) {
       : null;
   const whatIfPendingLock = !!nextMatch && !nextMatchLocked;
 
+  // ── Podium picks column ────────────────────────────────────────────────────
+  // Everyone's Podio prediction as flags in 1-2-3 order (RLS exposes others'
+  // rows once the Podio window locks). A flag is crossed out when that team
+  // can no longer finish in the picked position, per the bracket.
+  const { data: podioRound } = await supabase
+    .from("rounds")
+    .select("lock_time")
+    .eq("stage", "podio")
+    .maybeSingle();
+  const podioLocked = !!podioRound && podioRound.lock_time <= nowIso;
+
+  const { data: podioPreds } = podioLocked
+    ? await supabase.from("podio_predictions").select(
+        `user_id,
+         champion:champion_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
+         runner_up:runner_up_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
+         third_place:third_place_team_id ( id, code, name_en, name_es, name_ko, flag_url )`
+      )
+    : { data: [] };
+
+  const outlook = computePodiumOutlook(
+    (allMatches ?? []).map((m) => {
+      const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;
+      return {
+        stage: roundData?.stage ?? "group",
+        nameKey: roundData?.name_key ?? null,
+        status: m.status,
+        homeTeamId: m.home_team_id,
+        awayTeamId: m.away_team_id,
+        homeScore: m.home_score,
+        awayScore: m.away_score,
+        advancingTeamId: m.advancing_team_id,
+        penaltyWinnerTeamId: m.penalty_winner_team_id,
+      };
+    })
+  );
+
+  type PodioTeam = {
+    id: string;
+    code: string;
+    name_en: string;
+    name_es: string;
+    name_ko: string;
+    flag_url: string | null;
+  };
+  const one = (v: PodioTeam | PodioTeam[] | null): PodioTeam | null =>
+    Array.isArray(v) ? (v[0] ?? null) : v;
+
+  const podiumByUser = new Map<string, Array<PodiumPick | null>>();
+  for (const p of podioPreds ?? []) {
+    const slots: Array<[PodioTeam | null, (id: string) => boolean]> = [
+      [one(p.champion), outlook.canBeChampion],
+      [one(p.runner_up), outlook.canBeRunnerUp],
+      [one(p.third_place), outlook.canBeThird],
+    ];
+    podiumByUser.set(
+      p.user_id,
+      slots.map(([team, canReach]) =>
+        team
+          ? {
+              code: team.code,
+              name: teamName(team, locale),
+              flagUrl: team.flag_url,
+              alive: canReach(team.id),
+            }
+          : null
+      )
+    );
+  }
+
   const rowData = rows.map((row) => ({
     ...row,
     move: moveByUser.get(row.userId) ?? 0,
     nextPick: pickByUser.get(row.userId) ?? null,
+    podium: podiumByUser.get(row.userId) ?? null,
     isMe: row.userId === user?.id,
   }));
 
@@ -359,6 +439,7 @@ export default async function ScoreboardPage({ params }: Props) {
           rows={rowData}
           whatIf={whatIf}
           whatIfPendingLock={whatIfPendingLock}
+          showPodium={podioLocked && podiumByUser.size > 0}
           showNextPick={showNextPick}
           nextMatchCodes={nextMatchCodes}
           locale={locale}

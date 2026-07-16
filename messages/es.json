@@ -95,6 +95,8 @@
     "wins": "gana",
     "draws": "Empates",
     "nextPick": "Pronóstico",
+    "podium": "Podio",
+    "podiumEliminated": "ya no es posible",
     "noPredictions": "Aún no hay pronósticos.",
     "picksLocked": "Los pronósticos se revelan cuando cierra la fecha.",
     "pickedBy": "Resultado pronosticado por",
