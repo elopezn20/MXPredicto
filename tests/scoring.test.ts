@@ -628,4 +628,37 @@ describe("computeLeaderboard", () => {
     expect(rows[0]!.totalPoints).toBe(0);
     expect(rows[0]!.zeroMatches).toBe(1);
   });
+
+  it("bonus points add to totals and can reorder the ranking", () => {
+    // Bob trails on matches (6 vs 10) but a 15-pt podio bonus puts him ahead.
+    const predictions = [
+      { userId: "alice", matchId: M1, pointsAwarded: 10 },
+      { userId: "bob", matchId: M1, pointsAwarded: 6 },
+    ];
+    const bonus = new Map([["bob", 15]]);
+    const rows = computeLeaderboard([alice, bob], [grp(M1)], predictions, bonus);
+    expect(rows[0]!.userId).toBe("bob");
+    expect(rows[0]!.totalPoints).toBe(21);
+    expect(rows[1]!.totalPoints).toBe(10);
+    expect(rows[1]!.deltaFromLeader).toBe(-11);
+  });
+
+  it("bonus points don't affect hit/zero tiebreaker counters", () => {
+    const predictions = [
+      { userId: "alice", matchId: M1, pointsAwarded: 10 },
+    ];
+    const bonus = new Map([["alice", 50]]);
+    const rows = computeLeaderboard([alice], [grp(M1)], predictions, bonus);
+    expect(rows[0]!.totalPoints).toBe(60);
+    expect(rows[0]!.matchesHit).toBe(1);
+    expect(rows[0]!.zeroMatches).toBe(0);
+  });
+
+  it("bonus for a user with no match predictions still counts", () => {
+    const bonus = new Map([["carol", 25]]);
+    const rows = computeLeaderboard([alice, carol], [grp(M1)], [], bonus);
+    expect(rows[0]!.userId).toBe("carol");
+    expect(rows[0]!.totalPoints).toBe(25);
+    expect(rows[0]!.zeroMatches).toBe(1);
+  });
 });
