@@ -116,7 +116,40 @@ export default async function ScoreboardPage({ params }: Props) {
     pointsAwarded: p.points_awarded,
   }));
 
-  const rows = computeLeaderboard(users, finishedWithStage, predictions);
+  // ── Podio picks + settled bonus points ────────────────────────────────────
+  // Everyone's Podio prediction (RLS exposes others' rows once the Podio
+  // window locks). Fetched before the leaderboard because settled Podio
+  // points (points_awarded, written by the admin settle action at tournament
+  // end) count toward each player's total — same rule as the profile page.
+  const nowIso = new Date().toISOString();
+  const { data: podioRound } = await supabase
+    .from("rounds")
+    .select("lock_time")
+    .eq("stage", "podio")
+    .maybeSingle();
+  const podioLocked = !!podioRound && podioRound.lock_time <= nowIso;
+
+  const { data: podioPreds } = podioLocked
+    ? await supabase.from("podio_predictions").select(
+        `user_id, points_awarded,
+         champion:champion_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
+         runner_up:runner_up_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
+         third_place:third_place_team_id ( id, code, name_en, name_es, name_ko, flag_url )`
+      )
+    : { data: [] };
+
+  const podioBonusByUser = new Map<string, number>(
+    (podioPreds ?? [])
+      .filter((p) => p.points_awarded != null)
+      .map((p) => [p.user_id, p.points_awarded as number])
+  );
+
+  const rows = computeLeaderboard(
+    users,
+    finishedWithStage,
+    predictions,
+    podioBonusByUser
+  );
 
   // ── Rank movement vs the previous game ────────────────────────────────────────
   // "Previous game" = the single most-recently-played finished match (latest
@@ -131,7 +164,14 @@ export default async function ScoreboardPage({ params }: Props) {
     );
     const before = finishedWithStage.filter((m) => m.kickoff < latestKickoff);
     if (before.length > 0) {
-      const prevRows = computeLeaderboard(users, before, predictions);
+      // Podio bonus applies to both sides of the diff so the arrows keep
+      // reflecting only the latest match, not the one-time bonus settle.
+      const prevRows = computeLeaderboard(
+        users,
+        before,
+        predictions,
+        podioBonusByUser
+      );
       const prevRankByUser = new Map(prevRows.map((r) => [r.userId, r.rank]));
       for (const row of rows) {
         const prevRank = prevRankByUser.get(row.userId);
@@ -144,7 +184,6 @@ export default async function ScoreboardPage({ params }: Props) {
   // The next not-yet-finished match, earliest first. Other players' predictions
   // for it are only visible (per RLS) once its round has locked, so we only
   // surface aggregate stats / picks when lock_time has passed.
-  const nowIso = new Date().toISOString();
   const { data: nextMatch } = await supabase
     .from("matches")
     .select(
@@ -290,25 +329,9 @@ export default async function ScoreboardPage({ params }: Props) {
   const whatIfPendingLock = !!nextMatch && !nextMatchLocked;
 
   // ── Podium picks column ────────────────────────────────────────────────────
-  // Everyone's Podio prediction as flags in 1-2-3 order (RLS exposes others'
-  // rows once the Podio window locks). A flag is crossed out when that team
-  // can no longer finish in the picked position, per the bracket.
-  const { data: podioRound } = await supabase
-    .from("rounds")
-    .select("lock_time")
-    .eq("stage", "podio")
-    .maybeSingle();
-  const podioLocked = !!podioRound && podioRound.lock_time <= nowIso;
-
-  const { data: podioPreds } = podioLocked
-    ? await supabase.from("podio_predictions").select(
-        `user_id,
-         champion:champion_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
-         runner_up:runner_up_team_id ( id, code, name_en, name_es, name_ko, flag_url ),
-         third_place:third_place_team_id ( id, code, name_en, name_es, name_ko, flag_url )`
-      )
-    : { data: [] };
-
+  // Everyone's Podio prediction (fetched above) as flags in 1-2-3 order. A
+  // flag is crossed out when that team can no longer finish in the picked
+  // position, per the bracket.
   const outlook = computePodiumOutlook(
     (allMatches ?? []).map((m) => {
       const roundData = Array.isArray(m.rounds) ? m.rounds[0] : m.rounds;

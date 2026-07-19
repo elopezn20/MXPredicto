@@ -190,9 +190,14 @@ export function scorePodio(
  * (>0 but <max) count as neither a hit nor a zero. Unsubmitted predictions
  * and 0-pt predictions on finished matches both count as zero-matches.
  *
+ * Bonus points (the settled Podio prediction) are added to each player's
+ * total and therefore to the primary ranking criterion, but they are not a
+ * match, so they don't touch the hit/zero tie-breakers.
+ *
  * @param users           All participating users.
  * @param finishedMatches IDs and stages of matches that have been fully scored.
  * @param predictions     All scored predictions (only finished matches matter).
+ * @param bonusByUser     Per-user bonus points (e.g. settled Podio points).
  */
 export function computeLeaderboard(
   users: LeaderboardUser[],
@@ -201,7 +206,8 @@ export function computeLeaderboard(
     userId: string;
     matchId: string;
     pointsAwarded: number | null;
-  }>
+  }>,
+  bonusByUser?: ReadonlyMap<string, number>
 ): LeaderboardRow[] {
   const maxByMatch = new Map<string, number>();
   for (const m of finishedMatches) {
@@ -219,7 +225,7 @@ export function computeLeaderboard(
   const agg = new Map<string, UserAgg>();
 
   for (const user of users) {
-    let total = 0;
+    let total = bonusByUser?.get(user.id) ?? 0;
     let hit = 0;
     let zero = 0;
     for (const m of finishedMatches) {
